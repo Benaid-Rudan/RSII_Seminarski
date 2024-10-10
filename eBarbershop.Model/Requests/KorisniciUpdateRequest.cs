@@ -4,18 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace eBarbershop.Model
+namespace eBarbershop.Model.Requests
 {
-    public class Korisnik
+    public class KorisniciUpdateRequest
     {
-        public int KorisnikId { get; set; }
         public string Ime { get; set; }
         public string Prezime { get; set; }
         public string Email { get; set; }
-        public string Username { get; set; }
 
         public int GradId { get; set; }
-
     }
-    
 }
