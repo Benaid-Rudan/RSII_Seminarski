@@ -1,3 +1,4 @@
+using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services;
 using eBarbershop.Services.Database;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddTransient<IProizvodiService, ProizvodiService>();
 builder.Services.AddTransient<IKorisniciService, KorisniciService>();
+builder.Services.AddTransient<IGradService, GradService>();
+builder.Services.AddTransient<IService<eBarbershop.Model.Drzava,BaseSearchObject>, BaseService<eBarbershop.Model.Drzava, eBarbershop.Services.Database.Drzava, BaseSearchObject>>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -14,6 +14,12 @@ namespace eBarbershop.Services
             CreateMap<Model.Requests.KorisniciInsertRequest, Database.Korisnik>();
             CreateMap<Model.Requests.KorisniciUpdateRequest, Database.Korisnik>();
 
+            CreateMap<Database.Proizvod,Model.Proizvod>();
+
+            CreateMap<Database.Grad, Model.Grad>();
+            CreateMap<Database.Drzava, Model.Drzava>();
+
+
         }
     }
 }

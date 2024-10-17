@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using eBarbershop.Model.Requests;
 using eBarbershop.Services.Database;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,24 +20,11 @@ namespace eBarbershop.Services
             _mapper = mapper;
         }
 
-        public List<Model.Korisnik> Get()
+        public async Task<List<Model.Korisnik>> Get()
         {
-            var entityList = _context.Korisniks.ToList();
+            var entityList = await _context.Korisniks.ToListAsync();
 
-            //var list = new List<Model.Korisnik>();
-            //foreach (var item in entityList)
-            //{
-            //    list.Add(new Model.Korisnik()
-            //    {
-            //        Email=item.Email,
-            //        Ime=item.Ime,
-            //        Username=item.Username,
-            //        Prezime=item.Prezime,
-            //        KorisnikId=item.KorisnikId,
-
-            //    });
-            //}
-            //return list;
+            
             return _mapper.Map<List<Model.Korisnik>>(entityList);
         }
 
