@@ -9,14 +9,12 @@ namespace eBarbershop.Model
     public class Grad
     {
         public int GradId { get; set; }
+
         public string Naziv { get; set; }
 
         // Veza sa drzavom
-        public int DrzavaId { get; set; }
-        public Drzava Drzava { get; set; }
+        //public Drzava Drzava { get; set; }
 
-        // Veza sa korisnicima
-        public ICollection<Korisnik> Korisnici { get; set; }
     }
 
 }

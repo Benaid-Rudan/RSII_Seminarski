@@ -20,9 +20,9 @@ namespace eBarbershop.Controllers
         }
 
         [HttpGet()]
-        public IEnumerable<Model.Korisnik> Get()
+        public async Task<List<Model.Korisnik>> Get()
         {
-            return _service.Get();
+            return await _service.Get();
         }
         [HttpPost()]
         public Model.Korisnik Insert(KorisniciInsertRequest request)

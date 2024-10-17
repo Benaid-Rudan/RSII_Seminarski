@@ -9,7 +9,7 @@ namespace eBarbershop.Services
 {
     public interface  IKorisniciService
     {
-        List<Model.Korisnik> Get();
+        Task<List<Model.Korisnik>> Get();
         Model.Korisnik Insert(KorisniciInsertRequest request);
         Model.Korisnik Update(int id, KorisniciUpdateRequest request);
 
