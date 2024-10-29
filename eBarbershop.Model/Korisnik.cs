@@ -15,7 +15,7 @@ namespace eBarbershop.Model
         public string Username { get; set; }
 
         public int GradId { get; set; }
-
+        public virtual ICollection<KorisnikUloga> KorisnikUlogas { get; set; } = new List<KorisnikUloga>();
     }
     
 }

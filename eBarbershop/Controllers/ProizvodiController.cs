@@ -4,24 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eBarbershop.Controllers
 {
-    //[ApiController]
-    //[Route("[controller]")]
-    //public class ProizvodiController : ControllerBase
-    //{
-    //    private readonly IProizvodiService _proizvodiService;
+    [ApiController]
+    [Route("[controller]")]
+    public class ProizvodiController : BaseCRUDController<Model.Proizvod, Model.SearchObjects.ProizvodiSearchObject, Model.Requests.ProizvodiInsertRequest, Model.Requests.ProizvodiUpdateRequest>
+    {
 
-    //    private readonly ILogger<WeatherForecastController> _logger;
+        public ProizvodiController(ILogger<BaseController<Proizvod, Model.SearchObjects.ProizvodiSearchObject>> logger, IProizvodiService service) : base(logger, service)
+        {
 
-    //    public ProizvodiController(IProizvodiService proizvodiService)
-    //    {
-    //        //_logger = logger;
-    //        _proizvodiService = proizvodiService;
-    //    }
+        }
 
-    //    [HttpGet()]
-    //    public IEnumerable<Proizvod> Get()
-    //    {
-    //        return _proizvodiService.Get();
-    //    }
-    //}
+    }
 }

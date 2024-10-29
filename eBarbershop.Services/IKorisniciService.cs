@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public interface  IKorisniciService
+    public interface  IKorisniciService : ICRUDService<Model.Korisnik,Model.SearchObjects.KorisnikSearchObject,Model.Requests.KorisniciInsertRequest,Model.Requests.KorisniciUpdateRequest>
     {
-        Task<List<Model.Korisnik>> Get();
-        Model.Korisnik Insert(KorisniciInsertRequest request);
-        Model.Korisnik Update(int id, KorisniciUpdateRequest request);
 
     }
 }
