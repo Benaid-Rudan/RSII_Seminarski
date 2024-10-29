@@ -1,4 +1,7 @@
-﻿using eBarbershop.Model;
+﻿using AutoMapper;
+using eBarbershop.Model;
+using eBarbershop.Model.Requests;
+using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services.Database;
 using System;
 using System.Collections.Generic;
@@ -8,25 +11,11 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public class ProizvodiService : IProizvodiService
+    public class ProizvodiService : BaseCRUDService<Model.Proizvod, Database.Proizvod, ProizvodiSearchObject, ProizvodiInsertRequest, ProizvodiUpdateRequest>, IProizvodiService
     {
-        EBarbershop1Context _context;
-        public ProizvodiService(EBarbershop1Context context)
+        public ProizvodiService(EBarbershop1Context context, IMapper mapper) : base(context, mapper)
         {
-            _context = context;
-        }
-        List<Model.Proizvod> proizvodis = new List<Model.Proizvod>()
-        {
-            new Model.Proizvod()
-            {
-                ProizvodId = 1,
-                Naziv = "Krema za kosu"
-            }
-        };
-        public IList<Model.Proizvod> Get()
-        {
-            //var list = _context.Proizvods.ToList();
-            return proizvodis;
+
         }
     }
 }

@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace eBarbershop.Model
+namespace eBarbershop.Model.SearchObjects
 {
-    public class Uloga
+    public class ProizvodiSearchObject : BaseSearchObject
     {
-        public int UlogaId { get; set; }
-        public string Naziv { get; set; }
 
     }
-
 }

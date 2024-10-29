@@ -7,31 +7,13 @@ namespace eBarbershop.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class KorisniciController : ControllerBase
+    public class KorisniciController : BaseCRUDController<Model.Korisnik, Model.SearchObjects.KorisnikSearchObject, Model.Requests.KorisniciInsertRequest,Model.Requests.KorisniciUpdateRequest>
     {
-        private readonly IKorisniciService _service;
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public KorisniciController(IKorisniciService service)
+       
+        public KorisniciController(ILogger<BaseController<Korisnik,Model.SearchObjects.KorisnikSearchObject>> logger,IKorisniciService service) : base(logger,service)
         {
-            //_logger = logger;
-            _service = service;
+            
         }
 
-        [HttpGet()]
-        public async Task<List<Model.Korisnik>> Get()
-        {
-            return await _service.Get();
-        }
-        [HttpPost()]
-        public Model.Korisnik Insert(KorisniciInsertRequest request)
-        {
-            return _service.Insert(request);
-        }
-        [HttpPut("{id}")]
-        public Model.Korisnik Update(int id,KorisniciUpdateRequest request) {
-            return _service.Update(id, request);
-        }
     }
 }
