@@ -10,11 +10,9 @@ namespace eBarbershop.Controllers
     {
         protected readonly IService<T, TSearch> _service;
 
-        protected readonly ILogger<BaseController<T, TSearch>> _logger;
 
-        public BaseController(ILogger<BaseController<T, TSearch>> logger, IService<T, TSearch> service)
+        public BaseController(IService<T, TSearch> service)
         {
-            _logger = logger;
             _service = service;
         }
 

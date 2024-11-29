@@ -8,11 +8,9 @@ namespace eBarbershop.Controllers
     {
         protected readonly ICRUDService<T, TSearch,TInsert,TUpdate> _service;
 
-        protected readonly ILogger<BaseController<T, TSearch>> _logger;
 
-        public BaseCRUDController(ILogger<BaseController<T, TSearch>> logger, ICRUDService<T, TSearch, TInsert, TUpdate> service) : base(logger,service)
+        public BaseCRUDController( ICRUDService<T, TSearch, TInsert, TUpdate> service) : base(service)
         {
-            _logger = logger;
             _service = service;
         }
         [HttpPost]

@@ -1,4 +1,5 @@
-﻿using eBarbershop.Model.Requests;
+﻿using eBarbershop.Model;
+using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public interface IGradService : ICRUDService<Model.Grad, GradSearchObject, GradInsertRequest,GradUpdateRequest>
+    public interface IProizvodService : ICRUDService<Proizvod,ProizvodSearchObject,ProizvodInsertRequest,ProizvodUpdateRequest>
     {
     }
 }

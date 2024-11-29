@@ -8,10 +8,10 @@ namespace eBarbershop.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class DrzavaController : BaseCRUDController<Model.Drzava, Model.SearchObjects.DrzavaSearchObject, Model.Requests.DrzavaInsertRequest, Model.Requests.DrzavaUpdateRequest>
+    public class SlikaController : BaseCRUDController<Model.Slika, Model.SearchObjects.SlikaSearchObject, Model.Requests.SlikaInsertRequest, Model.Requests.SlikaUpdateRequest>
     {
 
-        public DrzavaController(IDrzavaService service) : base(service)
+        public SlikaController(ISlikaService service) : base(service)
         {
 
         }

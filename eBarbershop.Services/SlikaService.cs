@@ -3,6 +3,7 @@ using eBarbershop.Model;
 using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services.Database;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,14 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public class ProizvodiService : BaseCRUDService<Model.Proizvod, Database.Proizvod, ProizvodiSearchObject, ProizvodiInsertRequest, ProizvodiUpdateRequest>, IProizvodiService
+    public class SlikaService : BaseCRUDService<Model.Slika, Database.Slika, SlikaSearchObject, SlikaInsertRequest, SlikaUpdateRequest>, ISlikaService
     {
-        public ProizvodiService(EBarbershop1Context context, IMapper mapper) : base(context, mapper)
-        {
-
+        
+        public SlikaService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
+           
         }
+
+       
+        
     }
 }

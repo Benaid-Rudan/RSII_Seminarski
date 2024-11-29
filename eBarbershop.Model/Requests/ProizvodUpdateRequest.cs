@@ -4,19 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace eBarbershop.Model
+namespace eBarbershop.Model.Requests
 {
-    public class Proizvod
+    public class ProizvodUpdateRequest
     {
-        public int ProizvodId { get; set; }
         public string Naziv { get; set; }
         public string Opis { get; set; }
         public decimal Cijena { get; set; }
         public int Zalihe { get; set; }
 
-        // Veza sa vrstom proizvoda
-        public int VrstaProizvodaId { get; set; }
-        public virtual VrstaProizvoda VrstaProizvoda { get; set; }
     }
-
 }
