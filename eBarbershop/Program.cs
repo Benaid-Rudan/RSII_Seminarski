@@ -10,10 +10,22 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddTransient<IProizvodiService, ProizvodiService>();
+builder.Services.AddTransient<IProizvodService, ProizvodService>();
 builder.Services.AddTransient<IKorisniciService, KorisniciService>();
 builder.Services.AddTransient<IGradService, GradService>();
-builder.Services.AddTransient<IService<eBarbershop.Model.Drzava,BaseSearchObject>, BaseService<eBarbershop.Model.Drzava, eBarbershop.Services.Database.Drzava, BaseSearchObject>>();
+builder.Services.AddTransient<IDrzavaService, DrzavaService>();
+builder.Services.AddTransient<IVrstaProizvodaService, VrstaProizvodaService>();
+builder.Services.AddTransient<IUslugaService, UslugaService>();
+builder.Services.AddTransient<IUplataService, UplataService>();
+builder.Services.AddTransient<IUlogaService, UlogaService>();
+builder.Services.AddTransient<ITerminService, TerminService>();
+builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
+builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
+builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
+builder.Services.AddTransient<INovostService, NovostService>();
+
+
+//builder.Services.AddTransient<IService<eBarbershop.Model.Drzava,BaseSearchObject>, BaseService<eBarbershop.Model.Drzava, eBarbershop.Services.Database.Drzava, BaseSearchObject>>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

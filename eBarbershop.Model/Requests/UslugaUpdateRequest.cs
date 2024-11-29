@@ -7,16 +7,11 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Model.Requests
 {
-    public class ProizvodiInsertRequest
+    public class UslugaUpdateRequest
     {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Naziv ne smije ostati prazno polje")]
+        [Required(AllowEmptyStrings =false,ErrorMessage ="Naziv je obavezno polje")]
         public string Naziv { get; set; }
         public string Opis { get; set; }
-        [Required]
         public decimal Cijena { get; set; }
-
-        public int Zalihe { get; set; }
-        public int VrstaProizvodaId { get; set; }
-
     }
 }

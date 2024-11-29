@@ -10,7 +10,7 @@ namespace eBarbershop.Controllers
     public class KorisniciController : BaseCRUDController<Model.Korisnik, Model.SearchObjects.KorisnikSearchObject, Model.Requests.KorisniciInsertRequest,Model.Requests.KorisniciUpdateRequest>
     {
        
-        public KorisniciController(ILogger<BaseController<Korisnik,Model.SearchObjects.KorisnikSearchObject>> logger,IKorisniciService service) : base(logger,service)
+        public KorisniciController(IKorisniciService service) : base(service)
         {
             
         }

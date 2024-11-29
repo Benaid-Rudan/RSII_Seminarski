@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using eBarbershop.Model;
+using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services.Database;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public class GradService : BaseService<Model.Grad, Database.Grad, GradSearchObject>, IGradService 
+    public class GradService : BaseCRUDService<Model.Grad, Database.Grad, GradSearchObject, GradInsertRequest,GradUpdateRequest>, IGradService 
     {
         
         public GradService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public interface IProizvodiService : ICRUDService<Proizvod,ProizvodiSearchObject,ProizvodiInsertRequest,ProizvodiUpdateRequest>
+    public interface INarudzbaService : ICRUDService<Narudzba,NarudzbaSearchObject,NarudzbaInsertRequest,NarudzbaUpdateRequest>
     {
     }
 }

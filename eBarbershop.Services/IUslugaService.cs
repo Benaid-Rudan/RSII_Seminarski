@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public interface IGradService : ICRUDService<Model.Grad, GradSearchObject, GradInsertRequest,GradUpdateRequest>
+    public interface IUslugaService : ICRUDService<Model.Usluga, UslugaSearchObject, UslugaInsertRequest,UslugaUpdateRequest>
     {
     }
 }

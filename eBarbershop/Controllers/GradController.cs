@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace eBarbershop.Controllers
 {
     [ApiController]
-    public class GradController : BaseController<Model.Grad, Model.SearchObjects.GradSearchObject>
+    public class GradController : BaseCRUDController<Model.Grad, Model.SearchObjects.GradSearchObject, Model.Requests.GradInsertRequest, Model.Requests.GradUpdateRequest>
     {
-        public GradController(ILogger<BaseController<Grad, Model.SearchObjects.GradSearchObject>> logger, IGradService service) : base(logger, service)
+        public GradController(IGradService service) : base(service)
         {
         }
     }

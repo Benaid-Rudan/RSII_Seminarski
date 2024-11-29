@@ -4,15 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace eBarbershop.Model
+namespace eBarbershop.Model.Requests
 {
-    public class Usluga
+    public class UslugaInsertRequest
     {
-        public int UslugaId { get; set; }
         public string Naziv { get; set; }
         public string Opis { get; set; }
         public decimal Cijena { get; set; }
-
     }
-
 }
