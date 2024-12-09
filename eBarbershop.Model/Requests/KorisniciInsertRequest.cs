@@ -15,6 +15,7 @@ namespace eBarbershop.Model.Requests
 
         public string Password { get; set; }
         public string PasswordPotvrda { get; set; }
+        public string Slika { get; set; }
 
         public int GradId { get; set; }
     }

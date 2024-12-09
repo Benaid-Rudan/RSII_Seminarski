@@ -35,7 +35,6 @@ public partial class EBarbershop1Context : DbContext
 
     public virtual DbSet<Rezervacija> Rezervacijas { get; set; }
 
-    public virtual DbSet<Slika> Slikas { get; set; }
 
     public virtual DbSet<Termin> Termins { get; set; }
 
@@ -49,7 +48,7 @@ public partial class EBarbershop1Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=eBarbershop1;Integrated Security=True;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=eBarbershop2;Integrated Security=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -188,13 +187,7 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Recenzija__Koris__4316F928");
 
-            entity.HasOne(d => d.Proizvod).WithMany(p => p.Recenzijas)
-                .HasForeignKey(d => d.ProizvodId)
-                .HasConstraintName("FK__Recenzija__Proiz__44FF419A");
-
-            entity.HasOne(d => d.Usluga).WithMany(p => p.Recenzijas)
-                .HasForeignKey(d => d.UslugaId)
-                .HasConstraintName("FK__Recenzija__Uslug__440B1D61");
+            
         });
 
         modelBuilder.Entity<Rezervacija>(entity =>
@@ -217,22 +210,7 @@ public partial class EBarbershop1Context : DbContext
                 .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
         });
 
-        modelBuilder.Entity<Slika>(entity =>
-        {
-            entity.HasKey(e => e.SlikaId).HasName("PK__Slika__FFAE2D664EF3C962");
-
-            entity.ToTable("Slika");
-
-            entity.Property(e => e.Url).HasMaxLength(255);
-
-            entity.HasOne(d => d.Novost).WithMany(p => p.Slikas)
-                .HasForeignKey(d => d.NovostId)
-                .HasConstraintName("FK__Slika__NovostId__4AB81AF0");
-
-            entity.HasOne(d => d.Proizvod).WithMany(p => p.Slikas)
-                .HasForeignKey(d => d.ProizvodId)
-                .HasConstraintName("FK__Slika__ProizvodI__49C3F6B7");
-        });
+        
 
         modelBuilder.Entity<Termin>(entity =>
         {

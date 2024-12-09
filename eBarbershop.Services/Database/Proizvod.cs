@@ -19,9 +19,8 @@ public  class Proizvod
 
     public virtual ICollection<NarudzbaProizvodi> NarudzbaProizvodis { get; set; } = new List<NarudzbaProizvodi>();
 
-    public virtual ICollection<Recenzija> Recenzijas { get; set; } = new List<Recenzija>();
+    public string Slika { get; set; }
 
-    public virtual ICollection<Slika> Slikas { get; set; } = new List<Slika>();
 
     public virtual VrstaProizvodum VrstaProizvoda { get; set; } = null!;
 }

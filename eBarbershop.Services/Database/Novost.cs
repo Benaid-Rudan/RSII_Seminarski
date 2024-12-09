@@ -13,5 +13,5 @@ public  class Novost
 
     public DateTime DatumObjave { get; set; }
 
-    public virtual ICollection<Slika> Slikas { get; set; } = new List<Slika>();
+    public string Slika { get; set; }
 }

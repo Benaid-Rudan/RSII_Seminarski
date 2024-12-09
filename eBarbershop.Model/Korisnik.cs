@@ -13,6 +13,7 @@ namespace eBarbershop.Model
         public string Prezime { get; set; }
         public string Email { get; set; }
         public string Username { get; set; }
+        public string Slika { get; set; }
 
         public int GradId { get; set; }
         public virtual ICollection<KorisnikUloga> KorisnikUlogas { get; set; } = new List<KorisnikUloga>();
