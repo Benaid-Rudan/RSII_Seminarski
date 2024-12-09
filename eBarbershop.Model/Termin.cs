@@ -8,6 +8,8 @@ namespace eBarbershop.Model
 {
     public class Termin
     {
+        public int TerminId { get; set; }
+
         public DateTime Vrijeme { get; set; }
 
         public int RezervacijaId { get; set; }

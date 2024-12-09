@@ -14,9 +14,7 @@ namespace eBarbershop.Model
 
         // Veza sa korisnikom
         public int KorisnikId { get; set; }
-        public Korisnik Korisnik { get; set; }
 
-        // Veza sa proizvodima
         public ICollection<NarudzbaProizvodi> NarudzbaProizvodi { get; set; }
     }
 

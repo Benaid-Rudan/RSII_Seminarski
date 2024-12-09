@@ -11,11 +11,13 @@ namespace eBarbershop.Model.Requests
     {
         [Required(AllowEmptyStrings = false, ErrorMessage = "Naziv ne smije ostati prazno polje")]
         public string Naziv { get; set; }
-        public string Opis { get; set; }
         [Required]
+        public string Opis { get; set; }
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Opis ne smije ostati prazno polje")]
         public decimal Cijena { get; set; }
-
+        [Required]
         public int Zalihe { get; set; }
+        [Required]
         public int VrstaProizvodaId { get; set; }
 
     }

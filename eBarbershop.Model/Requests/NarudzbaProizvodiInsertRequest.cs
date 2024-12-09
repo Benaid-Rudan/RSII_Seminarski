@@ -7,12 +7,9 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Model.Requests
 {
-    public class TerminUpdateRequest
+    public class NarudzbaProizvodiInsertRequest
     {
-        [Required]
-        public DateTime Vrijeme { get; set; }
-
-        public int RezervacijaId { get; set; }
-
+        public int ProizvodID { get; set; }
+        public int Kolicina { get; set; }
     }
 }

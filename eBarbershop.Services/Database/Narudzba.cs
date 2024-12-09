@@ -3,8 +3,12 @@ using System.Collections.Generic;
 
 namespace eBarbershop.Services.Database;
 
-public partial class Narudzba
+public  class Narudzba
 {
+    public Narudzba()
+    {
+        NarudzbaProizvodis = new HashSet<NarudzbaProizvodi>();
+    }
     public int NarudzbaId { get; set; }
 
     public DateTime Datum { get; set; }

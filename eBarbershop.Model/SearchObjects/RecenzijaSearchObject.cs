@@ -8,9 +8,10 @@ namespace eBarbershop.Model.SearchObjects
 {
     public class RecenzijaSearchObject : BaseSearchObject
     {
-        public int? UslugaId { get; set; }
+        public bool? IncludeKorisnik { get; set; }
+        //public int? UslugaId { get; set; }
 
-        public int? ProizvodId { get; set; }
+        //public int? ProizvodId { get; set; }
     }
 }
 
