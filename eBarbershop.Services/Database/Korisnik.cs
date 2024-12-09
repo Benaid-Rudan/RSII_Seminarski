@@ -20,6 +20,7 @@ public  class Korisnik
     public string PasswordSalt { get; set; } = null!;
 
     public int GradId { get; set; }
+    public string Slika { get; set; }
 
     public virtual Grad Grad { get; set; } = null!;
 

@@ -15,13 +15,7 @@ public  class Recenzija
 
     public int KorisnikId { get; set; }
 
-    public int? UslugaId { get; set; }
-
-    public int? ProizvodId { get; set; }
-
     public virtual Korisnik Korisnik { get; set; } = null!;
 
-    public virtual Proizvod? Proizvod { get; set; }
-
-    public virtual Usluga? Usluga { get; set; }
+    
 }
