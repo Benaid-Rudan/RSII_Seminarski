@@ -16,7 +16,7 @@ namespace eBarbershop.Model
 
         // Veza sa vrstom proizvoda
         public int VrstaProizvodaId { get; set; }
-        public virtual VrstaProizvoda VrstaProizvoda { get; set; }
+        //public virtual VrstaProizvoda VrstaProizvoda { get; set; }
     }
 
 }

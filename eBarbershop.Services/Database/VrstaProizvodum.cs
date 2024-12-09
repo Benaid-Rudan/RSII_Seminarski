@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace eBarbershop.Services.Database;
 
-public partial class VrstaProizvodum
+public  class VrstaProizvodum
 {
     public int VrstaProizvodaId { get; set; }
 

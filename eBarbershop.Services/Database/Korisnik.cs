@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace eBarbershop.Services.Database;
 
-public partial class Korisnik
+public  class Korisnik
 {
     public int KorisnikId { get; set; }
 

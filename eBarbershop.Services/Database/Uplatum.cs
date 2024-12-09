@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace eBarbershop.Services.Database;
 
-public partial class Uplatum
+public  class Uplatum
 {
     public int UplataId { get; set; }
 

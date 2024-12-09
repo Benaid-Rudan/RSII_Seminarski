@@ -16,7 +16,7 @@ namespace eBarbershop.Model.Requests
 
         public int KorisnikId { get; set; }
 
-        public int? UslugaId { get; set; }
+        //public int? UslugaId { get; set; }
 
         //public int? ProizvodId { get; set; }
 
