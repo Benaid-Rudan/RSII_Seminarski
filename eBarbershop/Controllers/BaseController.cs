@@ -19,7 +19,8 @@ namespace eBarbershop.Controllers
         [HttpGet()]
         public async Task<IEnumerable<T>> Get([FromQuery]TSearch search = null)
         {
-            return await _service.Get(search);
+            var a = await _service.Get(search);
+            return a;
         }
         [HttpGet("{id}")]
         public async Task<T> GetById(int id)

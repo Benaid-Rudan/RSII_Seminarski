@@ -39,5 +39,17 @@ namespace eBarbershop.Services
             await _context.SaveChangesAsync();
             return _mapper.Map<T>(entity);
         }
+        public async Task<T> Delete(int id)
+        {
+            var set = _context.Set<TDb>();
+            var entity = await set.FindAsync(id);
+            var temp = entity;
+
+            if (entity != null)
+                _context.Remove(entity);
+
+            await _context.SaveChangesAsync();
+            return _mapper.Map<T>(temp);
+        }
     }
 }

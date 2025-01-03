@@ -8,6 +8,9 @@ namespace eBarbershop.Model.SearchObjects
 {
     public class KorisnikSearchObject : BaseSearchObject
     {
+        public string? Ime { get; set; }
+        public string? Prezime { get; set; }
+        public string? Username { get; set; }
         public bool? IsUlogeIncluded { get; set; }
     }
 }

@@ -18,5 +18,7 @@ namespace eBarbershop.Model.Requests
         public string Slika { get; set; }
 
         public int GradId { get; set; }
+
+        public List<int> UlogeID { get; set; } = new List<int>();
     }
 }

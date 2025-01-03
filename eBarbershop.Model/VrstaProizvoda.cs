@@ -12,7 +12,7 @@ namespace eBarbershop.Model
         public string Naziv { get; set; }
         //public List<Proizvod> Proizvodi { get; set; } = new List<Proizvod>();
         // Veza sa proizvodima
-        public ICollection<Proizvod> Proizvodi { get; set; }
+        public ICollection<Proizvod> Proizvods { get; set; }
     }
 
 }

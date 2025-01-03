@@ -6,13 +6,8 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Model.Requests
 {
-    public class KorisniciUpdateRequest
+    public class KorisniciUlogaUpdateRequest
     {
-        public string Ime { get; set; }
-        public string Prezime { get; set; }
-        public string Email { get; set; }
-
-        public int GradId { get; set; }
         public string Uloga { get; set; }
     }
 }

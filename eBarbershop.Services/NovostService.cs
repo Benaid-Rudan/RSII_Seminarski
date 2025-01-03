@@ -19,7 +19,28 @@ namespace eBarbershop.Services
            
         }
 
-       
-        
+        public override IQueryable<Database.Novost> AddInclude(IQueryable<Database.Novost> entity, NovostSearchObject obj)
+        {
+            if (!string.IsNullOrWhiteSpace(obj.Naslov))
+            {
+                entity = entity.Include(x => x.Naslov);
+            }
+            return entity;
+        }
+        public override IQueryable<Database.Novost> AddFilter(IQueryable<Database.Novost> entity, NovostSearchObject obj)
+        {
+
+            if (obj.DatumOd.HasValue)
+            {
+                entity = entity.Where(x => x.DatumObjave.Date >= obj.DatumOd.Value);
+            }
+
+            if (obj.DatumDo.HasValue)
+            {
+                entity = entity.Where(x => x.DatumObjave.Date <= obj.DatumDo.Value);
+            }
+
+            return entity;
+        }
     }
 }

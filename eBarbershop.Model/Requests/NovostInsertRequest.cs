@@ -15,5 +15,7 @@ namespace eBarbershop.Model.Requests
         public string Sadrzaj { get; set; }
         [Required]
         public DateTime DatumObjave { get; set; }
+        public string Slika { get; set; }
+
     }
 }
