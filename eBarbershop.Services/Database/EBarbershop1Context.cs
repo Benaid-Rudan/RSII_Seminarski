@@ -104,12 +104,12 @@ public partial class EBarbershop1Context : DbContext
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.KorisnikUlogas)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__KorisnikU__Koris__2E1BDC42");
 
             entity.HasOne(d => d.Uloga).WithMany(p => p.KorisnikUlogas)
                 .HasForeignKey(d => d.UlogaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__KorisnikU__Uloga__2F10007B");
         });
 
@@ -124,7 +124,7 @@ public partial class EBarbershop1Context : DbContext
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Narudzbas)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Narudzba__Korisn__38996AB5");
         });
 
@@ -184,7 +184,7 @@ public partial class EBarbershop1Context : DbContext
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Recenzijas)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Recenzija__Koris__4316F928");
 
             
@@ -201,7 +201,7 @@ public partial class EBarbershop1Context : DbContext
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Rezervaci__Koris__3F466844");
 
             entity.HasOne(d => d.Usluga).WithMany(p => p.Rezervacijas)
@@ -265,6 +265,7 @@ public partial class EBarbershop1Context : DbContext
             entity.HasKey(e => e.VrstaProizvodaId).HasName("PK__VrstaPro__7DC005E063976FC1");
 
             entity.Property(e => e.Naziv).HasMaxLength(100);
+            //entity.ToTable("VrsteProizvoda");
         });
 
         OnModelCreatingPartial(modelBuilder);

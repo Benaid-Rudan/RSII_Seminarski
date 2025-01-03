@@ -15,14 +15,9 @@ namespace eBarbershop.Model
 
         // Veza sa korisnikom
         public int KorisnikId { get; set; }
-        //public Korisnik Korisnik { get; set; }
+        public Korisnik Korisnik { get; set; }
 
-        //// Veza sa uslugom ili proizvodom
-        //public int? UslugaId { get; set; }
-        //public Usluga Usluga { get; set; }
-
-        //public int? ProizvodId { get; set; }
-        //public Proizvod Proizvod { get; set; }
+    
     }
 
 }

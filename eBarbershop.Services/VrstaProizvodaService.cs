@@ -23,12 +23,12 @@ namespace eBarbershop.Services
            if (search?.IsProizvodiIncluded == true)
                 // Ako je potrebno, uključite proizvode
             {
-                query = query.Include(v => v.Proizvods); // Povezivanje sa proizvodima u entitetu 
+                query = query.Include(x=>x.Proizvods); // Povezivanje sa proizvodima u entitetu 
                                                     }
 
             return base.AddInclude(query, search);
         }
-
+       
 
     }
 }

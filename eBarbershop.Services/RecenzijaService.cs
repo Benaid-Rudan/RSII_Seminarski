@@ -18,8 +18,17 @@ namespace eBarbershop.Services
         public RecenzijaService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
            
         }
+        public override IQueryable<Database.Recenzija> AddInclude(IQueryable<Database.Recenzija> entity, RecenzijaSearchObject? obj = null)
+        {
+            if (obj.IncludeKorisnik == true)
+            {
+                entity = entity.Include(x => x.Korisnik); //
+            }
 
-       
-       
+            return entity;
+        }
+        
+
+
     }
 }
