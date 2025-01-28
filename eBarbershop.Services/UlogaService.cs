@@ -19,7 +19,14 @@ namespace eBarbershop.Services
            
         }
 
-       
-        
+        public override IQueryable<Database.Uloga> AddInclude(IQueryable<Database.Uloga> entity, UlogaSearchObject obj)
+        {
+            if (!string.IsNullOrWhiteSpace(obj.Naziv))
+            {
+                entity = entity.Where(x => x.Naziv.Contains(obj.Naziv));
+            }
+            return entity;
+        }
+
     }
 }

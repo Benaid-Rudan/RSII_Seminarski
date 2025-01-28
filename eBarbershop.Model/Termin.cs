@@ -14,6 +14,8 @@ namespace eBarbershop.Model
 
         public int RezervacijaId { get; set; }
         public Rezervacija Rezervacija { get; set; }
+        public bool isBooked { get; set; }
+
     }
 
 }

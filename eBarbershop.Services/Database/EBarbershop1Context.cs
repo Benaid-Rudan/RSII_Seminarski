@@ -197,7 +197,7 @@ public partial class EBarbershop1Context : DbContext
             entity.ToTable("Rezervacija");
 
             entity.Property(e => e.DatumRezervacije).HasColumnType("datetime");
-            entity.Property(e => e.Termin).HasColumnType("datetime");
+            //entity.Property(e => e.Termin).HasColumnType("datetime");
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.KorisnikId)
@@ -265,7 +265,7 @@ public partial class EBarbershop1Context : DbContext
             entity.HasKey(e => e.VrstaProizvodaId).HasName("PK__VrstaPro__7DC005E063976FC1");
 
             entity.Property(e => e.Naziv).HasMaxLength(100);
-            //entity.ToTable("VrsteProizvoda");
+            
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -8,7 +8,6 @@ namespace eBarbershop.Model.SearchObjects
 {
     public class UplataSearchObject : BaseSearchObject
     {
-        public int? KorisnikId { get; set; }
         public int? UplataId { get; set; }
     }
 }

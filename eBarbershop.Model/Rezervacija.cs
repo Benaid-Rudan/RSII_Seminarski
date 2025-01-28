@@ -10,7 +10,7 @@ namespace eBarbershop.Model
     {
         public int RezervacijaId { get; set; }
         public DateTime DatumRezervacije { get; set; }
-        public DateTime Termin { get; set; }
+        //public DateTime Termin { get; set; }
 
         // Veza sa korisnikom
         public int KorisnikId { get; set; }
