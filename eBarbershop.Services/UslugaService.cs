@@ -18,6 +18,13 @@ namespace eBarbershop.Services
         public UslugaService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
            
         }
-       
+        public override IQueryable<Database.Usluga> AddInclude(IQueryable<Database.Usluga> entity, UslugaSearchObject obj)
+        {
+            if (!string.IsNullOrWhiteSpace(obj.Naziv))
+            {
+                entity = entity.Where(x => x.Naziv.Contains(obj.Naziv));
+            }
+            return entity;
+        }
     }
 }

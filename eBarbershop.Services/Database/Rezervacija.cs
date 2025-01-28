@@ -9,7 +9,6 @@ public  class Rezervacija
 
     public DateTime DatumRezervacije { get; set; }
 
-    public DateTime Termin { get; set; }
 
     public int KorisnikId { get; set; }
 

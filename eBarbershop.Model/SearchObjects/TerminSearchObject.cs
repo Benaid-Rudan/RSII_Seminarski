@@ -9,7 +9,7 @@ namespace eBarbershop.Model.SearchObjects
     public class TerminSearchObject : BaseSearchObject
     {
         public int? KorisnikID { get; set; }
-        public bool? IncludeKorisnik { get; set; }
+       
     }
 }
 

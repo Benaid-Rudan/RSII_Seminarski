@@ -11,8 +11,7 @@ namespace eBarbershop.Model.Requests
     {
         [Required]
         public DateTime DatumRezervacije { get; set; }
-        [Required] 
-        public DateTime Termin { get; set; }
+        
         [Required]
         public int KorisnikId { get; set; }
         [Required] 

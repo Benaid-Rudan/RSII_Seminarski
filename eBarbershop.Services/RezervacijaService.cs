@@ -19,7 +19,50 @@ namespace eBarbershop.Services
            
         }
 
-       
-        
+        public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
+        {
+            var entity = await base.Insert(request);
+            foreach (var termin in _context.Termins)
+            {
+                termin.isBooked = true;
+            }
+            entity.DatumRezervacije = DateTime.Now;
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
+       public override IQueryable<Database.Rezervacija> AddFilter(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
+        {
+
+            if (obj.KorisnikID.HasValue)
+            {
+                entity = entity.Where(x => x.KorisnikId == obj.KorisnikID);
+            }
+            if (obj.DatumOd.HasValue)
+            {
+                entity = entity.Where(x => x.Termins.Any(t => t.Vrijeme.Date >= obj.DatumOd.Value.Date));
+            }
+            if (obj.DatumDo.HasValue)
+            {
+                entity = entity.Where(x => x.Termins.Any(t => t.Vrijeme.Date <= obj.DatumDo.Value.Date));
+            }
+            return entity;
+        }
+
+        public override IQueryable<Database.Rezervacija> AddInclude(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
+        {
+
+            if (obj.IncludeKorisnik == true)
+            {
+                entity = entity.Include(y => y.Korisnik);
+            }
+
+            if (obj.IncludeUsluga == true)
+            {
+                entity = entity.Include(y => y.Usluga);
+            }
+
+            return entity;
+        }
     }
 }

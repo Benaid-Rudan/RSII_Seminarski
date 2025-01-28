@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿    using System;
+    using System.Collections.Generic;
+    using System.Text.Json.Serialization;
 
-namespace eBarbershop.Services.Database;
+    namespace eBarbershop.Services.Database;
 
-public  class VrstaProizvodum
-{
-    public int VrstaProizvodaId { get; set; }
+    public  class VrstaProizvodum
+    {
+        public int VrstaProizvodaId { get; set; }
 
-    public string Naziv { get; set; } = null!;
-    public virtual ICollection<Proizvod> Proizvods { get; set; } = new List<Proizvod>();
-}
+        public string Naziv { get; set; } = null!;
+        public virtual ICollection<Proizvod> Proizvods { get; set; } = new List<Proizvod>();
+    }

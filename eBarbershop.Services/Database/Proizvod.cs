@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace eBarbershop.Services.Database;
 
@@ -20,7 +21,5 @@ public  class Proizvod
     public virtual ICollection<NarudzbaProizvodi> NarudzbaProizvodis { get; set; } = new List<NarudzbaProizvodi>();
 
     public string Slika { get; set; }
-
-
     public virtual VrstaProizvodum VrstaProizvoda { get; set; } = null!;
 }

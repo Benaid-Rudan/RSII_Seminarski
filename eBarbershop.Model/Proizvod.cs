@@ -13,10 +13,9 @@ namespace eBarbershop.Model
         public string Opis { get; set; }
         public decimal Cijena { get; set; }
         public int Zalihe { get; set; }
-
-        // Veza sa vrstom proizvoda
+        public string Slika { get; set; }
         public int VrstaProizvodaId { get; set; }
-        //public virtual VrstaProizvoda VrstaProizvoda { get; set; }
+       
     }
 
 }
