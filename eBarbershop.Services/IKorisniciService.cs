@@ -19,6 +19,5 @@ namespace eBarbershop.Services
         Task<List<Model.Korisnik>> Get(KorisnikSearchObject search = null);
         Task<Model.Korisnik> GetById(int id);
         Task<Model.Korisnik> Delete(int id);
-
     }
 }

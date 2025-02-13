@@ -16,6 +16,8 @@ namespace eBarbershop.Model.Requests
         [Required(AllowEmptyStrings = false, ErrorMessage = "Opis ne smije ostati prazno polje")]
         public decimal Cijena { get; set; }
         [Required]
+        public string Slika { get; set; }
+        [Required]
         public int Zalihe { get; set; }
         [Required]
         public int VrstaProizvodaId { get; set; }

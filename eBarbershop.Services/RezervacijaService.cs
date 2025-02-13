@@ -31,12 +31,22 @@ namespace eBarbershop.Services
             return entity;
         }
 
+
+
        public override IQueryable<Database.Rezervacija> AddFilter(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
         {
 
             if (obj.KorisnikID.HasValue)
             {
                 entity = entity.Where(x => x.KorisnikId == obj.KorisnikID);
+            }
+            if(obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezime))
+            {
+                entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezime || x.Korisnik.Prezime == obj.imePrezime);
+            }
+            if (obj.datumRezervacije.HasValue)
+            {
+                entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
             }
             if (obj.DatumOd.HasValue)
             {

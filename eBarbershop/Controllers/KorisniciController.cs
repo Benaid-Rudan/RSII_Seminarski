@@ -13,10 +13,10 @@ namespace eBarbershop.Controllers
     public class KorisniciController : ControllerBase
     {
         IKorisniciService _service;
-       
-        public KorisniciController(IKorisniciService service) 
+
+        public KorisniciController(IKorisniciService service)
         {
-            _service= service;
+            _service = service;
         }
 
         [HttpPost]
@@ -24,6 +24,13 @@ namespace eBarbershop.Controllers
         public async Task<Korisnik> Insert([FromBody] KorisniciInsertRequest request)
         {
             return await _service.Insert(request);
+        }
+
+        [HttpPut("{id}")]
+        [AllowAnonymous]
+        public async Task<Korisnik> Update(int id, [FromBody] KorisniciUpdateRequest request)
+        {
+            return await _service.Update(id, request);
         }
 
         [HttpPut("{id}/AddUloga")]
