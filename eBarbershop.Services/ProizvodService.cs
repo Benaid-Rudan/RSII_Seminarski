@@ -38,7 +38,10 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.Naziv.ToLower().Contains(obj.Naziv.ToLower()));
             }
-
+            if (!string.IsNullOrWhiteSpace(obj.Opis))
+            {
+                entity = entity.Where(x => x.Opis.ToLower().Contains(obj.Opis.ToLower()));
+            }
             return entity;
         }
     }

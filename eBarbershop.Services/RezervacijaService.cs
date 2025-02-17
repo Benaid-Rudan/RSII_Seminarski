@@ -40,7 +40,12 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.KorisnikId == obj.KorisnikID);
             }
-            if(obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezime))
+            if (!string.IsNullOrWhiteSpace(obj.imePrezime))
+            {
+                entity = entity.Where(x => x.Korisnik.Ime.ToLower().Contains(obj.imePrezime.ToLower()) || x.Korisnik.Prezime.ToLower().Contains(obj.imePrezime.ToLower()));
+            }
+
+            if (obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezime))
             {
                 entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezime || x.Korisnik.Prezime == obj.imePrezime);
             }

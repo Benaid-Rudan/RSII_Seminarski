@@ -1,5 +1,6 @@
 import 'package:ebarbershop_admin/main.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
+import 'package:ebarbershop_admin/screens/novost_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_details.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
@@ -71,6 +72,14 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => RezervacijaListScreen(),
+                ));
+              },
+            ),
+            ListTile(
+              title: Text("Novosti"),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NovostListScreen(),
                 ));
               },
             )
