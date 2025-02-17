@@ -52,8 +52,10 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   controller: _prezimeController)),
           ElevatedButton(
               onPressed: () async {
-                var data = await _korisnikProvider
-                    .get(filter: {'ime': _imeController.text});
+                var data = await _korisnikProvider.get(filter: {
+                  'ime': _imeController.text,
+                  'prezime': _prezimeController.text
+                });
 
                 setState(() {
                   result = data;
@@ -105,6 +107,14 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 ),
               ),
             ),
+            const DataColumn(
+              label: Expanded(
+                child: Text(
+                  'Akcije',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
           ],
           rows: result?.result
                   .map((Korisnik e) => DataRow(
@@ -120,6 +130,64 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                             DataCell(Text(e.korisnikId.toString() ?? "")),
                             DataCell(Text(e.ime ?? "")),
                             DataCell(Text(e.prezime ?? "")),
+                            DataCell(
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  bool? potvrda = await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        AlertDialog(
+                                      title: Text("Potvrda"),
+                                      content: Text(
+                                          "Da li ste sigurni da želite obrisati ovog korisnika?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: Text("Ne"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: Text("Da"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (potvrda == true) {
+                                    try {
+                                      // Brisanje korisnika
+                                      await _korisnikProvider
+                                          .delete(e.korisnikId!);
+
+                                      // Osvežavanje podataka
+                                      var data = await _korisnikProvider.get();
+                                      setState(() {
+                                        result = data;
+                                      });
+                                    } catch (e) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AlertDialog(
+                                          title: Text("Greška"),
+                                          content: Text(e.toString()),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: Text("OK"),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
                           ]))
                   .toList() ??
               [],

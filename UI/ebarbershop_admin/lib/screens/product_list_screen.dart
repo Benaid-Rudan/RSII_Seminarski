@@ -135,6 +135,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             ),
           ),
+          const DataColumn(
+            label: Expanded(
+              child: Text(
+                'Akcije',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
         ],
                 rows: result?.result
                         .map((Product e) => DataRow(
@@ -161,6 +169,66 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                         ? imageFromBase64String(e.slika!)
                                         : Icon(Icons.image),
                                   )),
+                                  DataCell(
+                                    IconButton(
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () async {
+                                        bool? potvrda = await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                            title: Text("Potvrda"),
+                                            content: Text(
+                                                "Da li ste sigurni da želite obrisati ovaj proizvod?"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, false),
+                                                child: Text("Ne"),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, true),
+                                                child: Text("Da"),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+
+                                        if (potvrda == true) {
+                                          try {
+                                            // Brisanje korisnika
+                                            await _productProvider
+                                                .delete(e.proizvodId!);
+
+                                            // Osvežavanje podataka
+                                            var data =
+                                                await _productProvider.get();
+                                            setState(() {
+                                              result = data;
+                                            });
+                                          } catch (e) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) =>
+                                                  AlertDialog(
+                                                title: Text("Greška"),
+                                                content: Text(e.toString()),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                    child: Text("OK"),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
                                 ]))
                         .toList() ??
                     [])));

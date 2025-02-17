@@ -114,7 +114,64 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: Text("Sačuvaj")),
               ),
             ],
-          )
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.product != null)
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      bool? potvrda = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: Text("Potvrda"),
+                          content: Text(
+                              "Da li ste sigurni da želite obrisati ovaj proizvod?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text("Ne"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text("Da"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (potvrda == true) {
+                        try {
+                          await _productProvider
+                              .delete(widget.product!.proizvodId!);
+                          Navigator.pop(
+                              context); // Close the screen after deletion
+                        } catch (e) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text("Greška"),
+                              content: Text(e.toString()),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text("OK"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: Text("Obriši"),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
       title: this.widget.product?.naziv ?? "Product details",

@@ -78,18 +78,26 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
                       print(_formKey.currentState?.value);
 
                       try {
+                        final formData = Map<String, dynamic>.from(
+                            _formKey.currentState!.value);
+
+                        // Convert DateTime to string format
+                        if (formData['datumRezervacije'] is DateTime) {
+                          formData['datumRezervacije'] =
+                              (formData['datumRezervacije'] as DateTime)
+                                  .toIso8601String();
+                        }
+
                         if (widget.rezervacija == null) {
                           await _rezervacijaProvider
-                              .insert(_formKey.currentState?.value);
+                              .insert(formData); // Use modified formData
                         } else {
                           if (widget.rezervacija!.rezervacijaId != null) {
                             await _rezervacijaProvider.update(
-                              widget.rezervacija!.rezervacijaId!,
-                              _formKey.currentState!.value,
-                            );
+                                widget.rezervacija!.rezervacijaId!, formData);
                           }
                         }
-                      } on Exception catch (e) {
+                      } catch (e) {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(

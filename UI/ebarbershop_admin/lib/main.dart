@@ -1,5 +1,6 @@
 import 'package:ebarbershop_admin/providers/grad_provider.dart';
 import 'package:ebarbershop_admin/providers/korisnik_provider.dart';
+import 'package:ebarbershop_admin/providers/novost_provider.dart';
 import 'package:ebarbershop_admin/providers/product_provider.dart';
 import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
@@ -18,6 +19,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => GradProvider()),
       ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
       ChangeNotifierProvider(create: (_) => UslugaProvider()),
+      ChangeNotifierProvider(create: (_) => NovostProvider()),
     ],
     child: const MyMaterialApp(),
   ));
