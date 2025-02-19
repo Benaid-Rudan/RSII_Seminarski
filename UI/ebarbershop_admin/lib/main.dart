@@ -1,8 +1,11 @@
+import 'package:ebarbershop_admin/models/narudzba.dart';
 import 'package:ebarbershop_admin/providers/grad_provider.dart';
 import 'package:ebarbershop_admin/providers/korisnik_provider.dart';
+import 'package:ebarbershop_admin/providers/narudzba_provider.dart';
 import 'package:ebarbershop_admin/providers/novost_provider.dart';
 import 'package:ebarbershop_admin/providers/product_provider.dart';
 import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
+import 'package:ebarbershop_admin/providers/termin_provider.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
 import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
@@ -20,6 +23,8 @@ void main() {
       ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
       ChangeNotifierProvider(create: (_) => UslugaProvider()),
       ChangeNotifierProvider(create: (_) => NovostProvider()),
+      ChangeNotifierProvider(create: (_) => TerminProvider()),
+      ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
     ],
     child: const MyMaterialApp(),
   ));

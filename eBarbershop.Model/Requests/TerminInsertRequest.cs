@@ -11,7 +11,10 @@ namespace eBarbershop.Model.Requests
     {
         [Required]
         public DateTime Vrijeme { get; set; }
-
+        [Required]
         public int RezervacijaId { get; set; }
+        [Required]
+        public int KorisnikID { get; set; }
+
     }
 }

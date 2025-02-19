@@ -13,4 +13,6 @@ public  class Termin
 
     public virtual Rezervacija Rezervacija { get; set; } = null!;
     public bool isBooked { get; set; }
+    public int KorisnikID { get; set; }
+    public virtual Korisnik Korisnik { get; set; } = null!;
 }

@@ -1,43 +1,43 @@
-import 'package:ebarbershop_admin/models/rezervacija.dart';
+import 'package:ebarbershop_admin/models/narudzba.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
-import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
-import 'package:ebarbershop_admin/screens/rezervacija_details.dart';
+import 'package:ebarbershop_admin/providers/narudzba_provider.dart';
+import 'package:ebarbershop_admin/screens/narudzba_details.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class RezervacijaListScreen extends StatefulWidget {
-  RezervacijaListScreen({super.key});
+class NarudzbaListScreen extends StatefulWidget {
+  NarudzbaListScreen({super.key});
 
   @override
-  State<RezervacijaListScreen> createState() => _RezervacijaListScreenState();
+  State<NarudzbaListScreen> createState() => _NarudzbaListScreenState();
 }
 
-class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
-  late RezervacijaProvider _rezervacijaProvider;
-  SearchResult<Rezervacija>? result;
+class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
+  late NarudzbaProvider _narudzbaProvider;
+  SearchResult<Narudzba>? result;
 
-  TextEditingController _imePrezimeController = TextEditingController();
-  TextEditingController _datumRezervacijeController = TextEditingController();
+  TextEditingController _korisnikIdController = TextEditingController();
+  TextEditingController _narudzbaIdController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _rezervacijaProvider = context.read<RezervacijaProvider>();
+    _narudzbaProvider = context.read<NarudzbaProvider>();
   }
 
   Future<void> _loadData() async {
-    // var data = await _rezervacijaProvider.get(filter: {
-    //   "IncludeKorisnik": true,
-    //   "IncludeUsluga": true,
-    //   "imePrezime": _imePrezimeController.text,
-    //   "usluga": _uslugaController.text
-    // });
+    // Učitavanje podataka sa filtrima
+    var data = await _narudzbaProvider.get(filter: {
+      "IncludeNarudzbaProizvodi": true,
+      "KorisnikId": _korisnikIdController.text,
+      "NarudzbaId": _narudzbaIdController.text
+    });
 
-    // setState(() {
-    //   result = data;
-    // });
+    setState(() {
+      result = data;
+    });
   }
 
   @override
@@ -63,29 +63,20 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
         children: [
           Expanded(
             child: TextField(
-              decoration: InputDecoration(labelText: "Ime i prezime"),
-              controller: _imePrezimeController,
+              decoration: InputDecoration(labelText: "Kupac"),
+              controller: _korisnikIdController,
             ),
           ),
           SizedBox(width: 18),
           Expanded(
             child: TextField(
-              decoration: InputDecoration(labelText: "Datum rezervacije"),
-              controller: _datumRezervacijeController,
+              decoration: InputDecoration(labelText: "Narudzba Id"),
+              controller: _narudzbaIdController,
             ),
           ),
           ElevatedButton(
             onPressed: () async {
-              var data = await _rezervacijaProvider.get(filter: {
-                "IncludeKorisnik": true,
-                "IncludeUsluga": true,
-                "imePrezime": _imePrezimeController.text,
-                "datumRezervacije": _datumRezervacijeController.text
-              });
-
-              setState(() {
-                result = data;
-              });
+              await _loadData();
             },
             child: Text("Pretraga"),
           ),
@@ -93,8 +84,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      RezervacijaDetailsScreen(rezervacija: null),
+                  builder: (context) => NarudzbaDetailsScreen(narudzba: null),
                 ),
               );
             },
@@ -113,7 +103,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
             DataColumn(
               label: Expanded(
                 child: Text(
-                  'ID',
+                  'Narudzba Id',
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
@@ -121,7 +111,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
             DataColumn(
               label: Expanded(
                 child: Text(
-                  'Ime i prezime',
+                  'Kupac Id',
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
@@ -129,7 +119,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
             DataColumn(
               label: Expanded(
                 child: Text(
-                  'Datum rezervacije',
+                  'Proizvod',
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
@@ -137,7 +127,15 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
             DataColumn(
               label: Expanded(
                 child: Text(
-                  'Usluga',
+                  'Cijena',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: Expanded(
+                child: Text(
+                  'Datum i vrijeme',
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
@@ -153,25 +151,38 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
           ],
           rows: result?.result
                   .map(
-                    (Rezervacija e) => DataRow(
+                    (Narudzba e) => DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => RezervacijaDetailsScreen(
-                                rezervacija: e,
+                              builder: (context) => NarudzbaDetailsScreen(
+                                narudzba: e,
                               ),
                             ),
                           );
                         }
                       },
                       cells: [
-                        DataCell(Text(e.rezervacijaId.toString() ?? "")),
-                        DataCell(Text(
-                            "${e.korisnik?.ime ?? ''} ${e.korisnik?.prezime ?? ''}")),
+                        DataCell(Text("${e.narudzbaId ?? ''}")),
+                        DataCell(Text("${e.korisnikId ?? ''}")),
                         DataCell(
-                            Text(e.datumRezervacije?.toIso8601String() ?? "")),
-                        DataCell(Text(e.usluga?.naziv ?? "")),
+                          Text(
+                            e.narudzbaProizvodis
+                                    ?.map((np) => np.proizvod?.naziv)
+                                    .join(', ') ??
+                                "",
+                          ),
+                        ),
+                        DataCell(Text(
+                          e.narudzbaProizvodis
+                                  ?.map((np) =>
+                                      np.proizvod?.cijena?.toStringAsFixed(2))
+                                  .join(', ') ??
+                              "",
+                        )),
+                        DataCell(Text(
+                            e.datum != null ? e.datum!.toIso8601String() : "")),
                         DataCell(
                           IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
@@ -181,7 +192,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                                 builder: (BuildContext context) => AlertDialog(
                                   title: Text("Potvrda"),
                                   content: Text(
-                                      "Da li ste sigurni da želite obrisati ovog korisnika?"),
+                                      "Da li ste sigurni da želite obrisati ovu narudžbu?"),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
@@ -199,15 +210,10 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
                               if (potvrda == true) {
                                 try {
-                                  // Brisanje korisnika
-                                  await _rezervacijaProvider
-                                      .delete(e.rezervacijaId!);
+                                  await _narudzbaProvider.delete(e.narudzbaId!);
 
-                                  // Osvežavanje podataka
-                                  var data = await _rezervacijaProvider.get();
-                                  setState(() {
-                                    result = data;
-                                  });
+                                  // Automatski učitajte nove podatke nakon brisanja
+                                  await _loadData();
                                 } catch (e) {
                                   showDialog(
                                     context: context,

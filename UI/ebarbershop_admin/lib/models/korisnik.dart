@@ -23,17 +23,7 @@ class Korisnik {
     this.gradId,
     this.uloge,
   });
-
-  factory Korisnik.fromJson(Map<String, dynamic> json) {
-    return Korisnik(
-      korisnikId: json['korisnikId'],
-      ime: json['ime'],
-      prezime: json['prezime'],
-      email: json['email'],
-      username: json['username'],
-      slika: json['slika'],
-      gradId: json['gradId'],
-      uloge: json['uloge'],
-    );
-  }
+  factory Korisnik.fromJson(Map<String, dynamic> json) =>
+      _$KorisnikFromJson(json);
+  Map<String, dynamic> toJson() => _$KorisnikToJson(this);
 }

@@ -10,10 +10,11 @@ class Grad {
 
   Grad({this.gradId, this.naziv});
 
-  factory Grad.fromJson(Map<String, dynamic> json) {
-    return Grad(
-      gradId: json['gradId'],
-      naziv: json['naziv'],
-    );
-  }
+  // factory Grad.fromJson(Map<String, dynamic> json) {
+  //   return Grad(
+  //     gradId: json['gradId'],
+  //     naziv: json['naziv'],
+  //   );
+  factory Grad.fromJson(Map<String, dynamic> json) => _$GradFromJson(json);
+  Map<String, dynamic> toJson() => _$GradToJson(this);
 }
