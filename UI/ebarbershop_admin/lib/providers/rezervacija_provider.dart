@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:ebarbershop_admin/models/product.dart';
 import 'package:ebarbershop_admin/models/rezervacija.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/providers/base_provider.dart';

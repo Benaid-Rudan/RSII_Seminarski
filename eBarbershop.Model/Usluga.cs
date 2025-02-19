@@ -14,6 +14,7 @@ namespace eBarbershop.Model
         public decimal Cijena { get; set; }
 
 
+
     }
 
 }

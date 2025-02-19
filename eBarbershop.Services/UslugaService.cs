@@ -4,6 +4,7 @@ using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,21 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.Naziv.Contains(obj.Naziv));
             }
+            
+            return entity;
+        }
+        public override IQueryable<Database.Usluga> AddFilter(IQueryable<Database.Usluga> entity, UslugaSearchObject? obj = null)
+        {
+
+            if (!string.IsNullOrWhiteSpace(obj.Naziv))
+            {
+                entity = entity.Where(x => x.Naziv.ToLower().StartsWith(obj.Naziv.ToLower()));
+            }
+            //if (obj.datumRezervacije.HasValue)
+            //{
+            //    entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
+            //}
+            
             return entity;
         }
     }

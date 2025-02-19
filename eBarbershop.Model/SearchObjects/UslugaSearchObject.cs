@@ -9,6 +9,7 @@ namespace eBarbershop.Model.SearchObjects
     public class UslugaSearchObject : BaseSearchObject
     {
         public string? Naziv { get; set; }
+
     }
 }
 

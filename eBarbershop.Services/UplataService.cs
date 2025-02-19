@@ -18,7 +18,7 @@ namespace eBarbershop.Services
         public UplataService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
            
         }
-        public async Task BeforeInsert(UplataInsertRequest insert, Uplata entity)
+        public async Task BeforeInsert(UplataInsertRequest insert, Uplatum entity)
         {
             entity.DatumUplate = DateTime.Now;
         }

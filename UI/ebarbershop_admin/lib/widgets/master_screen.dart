@@ -1,11 +1,13 @@
 import 'package:ebarbershop_admin/main.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
+import 'package:ebarbershop_admin/models/narudzba.dart';
+import 'package:ebarbershop_admin/screens/narudzba_list_screen.dart';
 import 'package:ebarbershop_admin/screens/novost_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_details.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
-import 'package:ebarbershop_admin/screens/rezervacija_details.dart';
 import 'package:ebarbershop_admin/screens/rezervacija_list_screen.dart';
+import 'package:ebarbershop_admin/screens/termin_list_screen.dart';
 
 import 'package:flutter/material.dart';
 
@@ -80,6 +82,22 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => NovostListScreen(),
+                ));
+              },
+            ),
+            ListTile(
+              title: Text("Termini"),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => TerminListScreen(),
+                ));
+              },
+            ),
+            ListTile(
+              title: Text("Narudzbe"),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => NarudzbaListScreen(),
                 ));
               },
             )

@@ -38,7 +38,6 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
   void initState() {
     super.initState();
     _initalValue = {
-      // Convert datumRezervacije to DateTime object if it's not null
       'datumRezervacije': widget.rezervacija?.datumRezervacije != null
           ? DateTime.parse(widget.rezervacija!.datumRezervacije!.toString())
           : null,
@@ -81,7 +80,6 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
                         final formData = Map<String, dynamic>.from(
                             _formKey.currentState!.value);
 
-                        // Convert DateTime to string format
                         if (formData['datumRezervacije'] is DateTime) {
                           formData['datumRezervacije'] =
                               (formData['datumRezervacije'] as DateTime)
@@ -89,8 +87,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
                         }
 
                         if (widget.rezervacija == null) {
-                          await _rezervacijaProvider
-                              .insert(formData); // Use modified formData
+                          await _rezervacijaProvider.insert(formData);
                         } else {
                           if (widget.rezervacija!.rezervacijaId != null) {
                             await _rezervacijaProvider.update(
@@ -117,8 +114,9 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           ),
         ],
       ),
-      title: widget.rezervacija?.datumRezervacije?.toString() ??
-          "Reservation details",
+      title: widget.rezervacija?.korisnik?.ime != null
+          ? 'Rezervacija na ime: ${widget.rezervacija?.korisnik?.ime}'
+          : 'Reservation details',
     );
   }
 

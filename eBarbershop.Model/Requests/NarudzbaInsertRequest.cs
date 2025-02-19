@@ -9,6 +9,7 @@ namespace eBarbershop.Model.Requests
 {
     public class NarudzbaInsertRequest
     {
+        [Required]
         public DateTime Datum { get; set; }
         [Required]
         public decimal UkupnaCijena { get; set; }
