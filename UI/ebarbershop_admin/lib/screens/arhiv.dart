@@ -15,6 +15,7 @@ class ArhivaListScreen extends StatefulWidget {
 class _ArhivaListScreenState extends State<ArhivaListScreen> {
   late RezervacijaProvider _rezervacijaProvider;
   SearchResult<Rezervacija>? result;
+  bool _isLoading = false;
 
   TextEditingController _datumController = TextEditingController();
   TextEditingController _uslugaController = TextEditingController();
@@ -39,18 +40,12 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterScreenWidget(
-      title_widget: Text("Arhiva obavljenih usluga"),
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            _buildSearch(),
-            _buildDataListView(),
-          ],
-        ),
-      ),
-    );
+    return Column(children: [
+      _buildSearch(),
+      _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _buildDataListView()
+    ]);
   }
 
   Widget _buildSearch() {

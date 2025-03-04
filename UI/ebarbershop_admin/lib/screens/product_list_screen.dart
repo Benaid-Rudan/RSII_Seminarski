@@ -148,7 +148,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         .map((Product e) => DataRow(
                                 onSelectChanged: (selected) => {
                                       if (selected == true)
-                                        // {print('Selected: ${e.proizvodId}')}
                                         Navigator.of(context)
                                             .push(MaterialPageRoute(
                                           builder: (context) =>

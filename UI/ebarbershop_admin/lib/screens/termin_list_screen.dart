@@ -15,6 +15,7 @@ class TerminListScreen extends StatefulWidget {
 class _TerminListScreenState extends State<TerminListScreen> {
   late RezervacijaProvider _rezervacijaProvider;
   SearchResult<Rezervacija>? result;
+  bool _isLoading = false;
 
   TextEditingController _imePrezimeController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
@@ -40,18 +41,12 @@ class _TerminListScreenState extends State<TerminListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterScreenWidget(
-      title_widget: Text("Lista termina"),
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            _buildSearch(),
-            _buildDataListView(),
-          ],
-        ),
-      ),
-    );
+    return Column(children: [
+      _buildSearch(),
+      _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _buildDataListView()
+    ]);
   }
 
   Widget _buildSearch() {

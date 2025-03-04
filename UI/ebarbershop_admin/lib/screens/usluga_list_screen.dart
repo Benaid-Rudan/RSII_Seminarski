@@ -11,6 +11,7 @@ class UslugaListScreen extends StatefulWidget {
   String? korisnikId;
   String? uslugaId;
   String? datumRezervacije;
+
   UslugaListScreen(
       {super.key, this.korisnikId, this.uslugaId, this.datumRezervacije});
 
@@ -21,6 +22,7 @@ class UslugaListScreen extends StatefulWidget {
 class _UslugaListScreenState extends State<UslugaListScreen> {
   late UslugaProvider _uslugaProvider;
   SearchResult<Usluga>? result;
+  bool _isLoading = false;
 
   TextEditingController _uslugaController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
@@ -47,18 +49,12 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterScreenWidget(
-      title_widget: Text("Lista usluga"),
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            _buildSearch(),
-            _buildDataListView(),
-          ],
-        ),
-      ),
-    );
+    return Column(children: [
+      _buildSearch(),
+      _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _buildDataListView()
+    ]);
   }
 
   Widget _buildSearch() {

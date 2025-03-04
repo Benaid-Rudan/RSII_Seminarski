@@ -19,6 +19,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
   TextEditingController _imePrezimeController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -41,18 +42,12 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterScreenWidget(
-      title_widget: Text("Lista rezervacija"),
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            _buildSearch(),
-            _buildDataListView(),
-          ],
-        ),
-      ),
-    );
+    return Column(children: [
+      _buildSearch(),
+      _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _buildDataListView()
+    ]);
   }
 
   Widget _buildSearch() {

@@ -17,6 +17,7 @@ class NovostListScreen extends StatefulWidget {
 class _NovostListScreenState extends State<NovostListScreen> {
   late NovostProvider _novostProvider;
   SearchResult<Novost>? result;
+  bool _isLoading = false;
 
   TextEditingController _tekstController = TextEditingController();
 
@@ -38,18 +39,12 @@ class _NovostListScreenState extends State<NovostListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterScreenWidget(
-      title_widget: Text("Lista novosti"),
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            _buildSearch(),
-            _buildDataListView(),
-          ],
-        ),
-      ),
-    );
+    return Column(children: [
+      _buildSearch(),
+      _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _buildDataListView()
+    ]);
   }
 
   Widget _buildSearch() {
