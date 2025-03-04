@@ -1,4 +1,4 @@
-import 'package:ebarbershop_admin/models/korisnik.dart';
+import 'package:ebarbershop_admin/models/rezervacija.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'usluga.g.dart';
@@ -9,8 +9,8 @@ class Usluga {
   String? naziv;
   String? opis;
   double? cijena;
-
-  Usluga(this.uslugaId, this.naziv, this.opis, this.cijena);
+  List<Rezervacija>? rezervacije;
+  Usluga(this.uslugaId, this.naziv, this.opis, this.cijena, this.rezervacije);
 
   factory Usluga.fromJson(Map<String, dynamic> json) => _$UslugaFromJson(json);
   Map<String, dynamic> toJson() => _$UslugaToJson(this);

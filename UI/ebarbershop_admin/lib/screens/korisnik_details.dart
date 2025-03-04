@@ -75,8 +75,6 @@ class _KorisnikDetailsScreenState extends State<KorisnikDetailsScreen> {
                         await _korisnikProvider
                             .insert(_formKey.currentState?.value);
                       } else {
-                        // await _korisnikProvider
-                        //     .insert(_formKey.currentState?.value);
                         await _korisnikProvider.update(
                           widget.korisnik!.korisnikId!,
                           _formKey.currentState!.value,

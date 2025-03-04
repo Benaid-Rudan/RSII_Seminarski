@@ -13,7 +13,20 @@ class UslugaProvider extends BaseProvider<Usluga> {
 
   @override
   Usluga fromJson(data) {
-    // TODO: implement fromJson
     return Usluga.fromJson(data);
+  }
+
+  // Funkcija koja preuzima usluge po datumu
+  Future<http.Response> getUslugeByDate(DateTime datum) async {
+    // Definisanje filtera kao mapa
+    Map<String, dynamic> filter = {
+      "datum": datum.toIso8601String(), // Pretvaranje datuma u string
+    };
+
+    // Pozivanje funkcije iz BaseProvider i prosleđivanje filtera
+    var result =
+        await get(filter as Uri); // Dodajte filter kao pozicioni parametar
+
+    return result;
   }
 }

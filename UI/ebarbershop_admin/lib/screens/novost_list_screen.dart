@@ -26,6 +26,16 @@ class _NovostListScreenState extends State<NovostListScreen> {
     _novostProvider = context.read<NovostProvider>();
   }
 
+  Future<void> _loadData() async {
+    var data = await _novostProvider.get(filter: {
+      "naslov": _tekstController.text,
+    });
+
+    setState(() {
+      result = data;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MasterScreenWidget(
@@ -55,13 +65,7 @@ class _NovostListScreenState extends State<NovostListScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              var data = await _novostProvider.get(filter: {
-                "tekst": _tekstController.text,
-              });
-
-              setState(() {
-                result = data;
-              });
+              await _loadData();
             },
             child: Text("Pretraga"),
           ),

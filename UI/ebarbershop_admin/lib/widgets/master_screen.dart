@@ -1,6 +1,8 @@
 import 'package:ebarbershop_admin/main.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
 import 'package:ebarbershop_admin/models/narudzba.dart';
+import 'package:ebarbershop_admin/screens/arhiv.dart';
+import 'package:ebarbershop_admin/screens/usluga_list_screen.dart';
 import 'package:ebarbershop_admin/screens/narudzba_list_screen.dart';
 import 'package:ebarbershop_admin/screens/novost_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_details.dart';
@@ -100,7 +102,23 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
                   builder: (context) => NarudzbaListScreen(),
                 ));
               },
-            )
+            ),
+            ListTile(
+              title: Text("Usluge"),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => UslugaListScreen(),
+                ));
+              },
+            ),
+            ListTile(
+              title: Text("Arhiva"),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ArhivaListScreen(),
+                ));
+              },
+            ),
           ],
         ),
       ),

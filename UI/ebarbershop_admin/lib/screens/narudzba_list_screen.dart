@@ -63,7 +63,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
         children: [
           Expanded(
             child: TextField(
-              decoration: InputDecoration(labelText: "Kupac"),
+              decoration: InputDecoration(labelText: "Kupac Id"),
               controller: _korisnikIdController,
             ),
           ),
