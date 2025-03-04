@@ -13,5 +13,6 @@ public  class Usluga
 
     public decimal Cijena { get; set; }
 
+
     public virtual ICollection<Rezervacija> Rezervacijas { get; set; } = new List<Rezervacija>();
 }

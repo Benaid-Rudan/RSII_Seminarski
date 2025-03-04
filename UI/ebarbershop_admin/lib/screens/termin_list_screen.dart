@@ -1,8 +1,6 @@
+import 'package:ebarbershop_admin/models/rezervacija.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
-import 'package:ebarbershop_admin/models/termin.dart';
-import 'package:ebarbershop_admin/providers/termin_provider.dart';
-import 'package:ebarbershop_admin/screens/termin_details.dart';
-import 'package:ebarbershop_admin/utils/util.dart';
+import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,8 +13,8 @@ class TerminListScreen extends StatefulWidget {
 }
 
 class _TerminListScreenState extends State<TerminListScreen> {
-  late TerminProvider _terminProvider;
-  SearchResult<Termin>? result;
+  late RezervacijaProvider _rezervacijaProvider;
+  SearchResult<Rezervacija>? result;
 
   TextEditingController _imePrezimeController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
@@ -24,16 +22,15 @@ class _TerminListScreenState extends State<TerminListScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _terminProvider = context.read<TerminProvider>();
+    _rezervacijaProvider = context.read<RezervacijaProvider>();
   }
 
   Future<void> _loadData() async {
     // Učitavanje podataka sa filtrima
-    var data = await _terminProvider.get(filter: {
+    var data = await _rezervacijaProvider.get(filter: {
       "IncludeKorisnik": true,
-      "IncludeRezervacija": true,
       "imePrezime": _imePrezimeController.text,
-      "Datum": _datumRezervacijeController.text
+      "datumRezervacije": _datumRezervacijeController.text
     });
 
     setState(() {
@@ -82,16 +79,6 @@ class _TerminListScreenState extends State<TerminListScreen> {
             },
             child: Text("Pretraga"),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TerminDetailsScreen(termin: null),
-                ),
-              );
-            },
-            child: Text("Dodaj"),
-          ),
         ],
       ),
     );
@@ -137,23 +124,14 @@ class _TerminListScreenState extends State<TerminListScreen> {
           ],
           rows: result?.result
                   .map(
-                    (Termin e) => DataRow(
-                      onSelectChanged: (selected) {
-                        if (selected == true) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => TerminDetailsScreen(
-                                termin: e,
-                              ),
-                            ),
-                          );
-                        }
-                      },
+                    (Rezervacija e) => DataRow(
                       cells: [
-                        DataCell(Text(e.terminId.toString() ?? "")),
+                        DataCell(Text(e.korisnikId?.toString() ?? "")),
                         DataCell(Text(
-                            "${e.korisnik?.ime ?? ''} ${e.korisnik?.prezime ?? ''}")),
-                        DataCell(Text(e.vrijeme?.toIso8601String() ?? "")),
+                          "${e.korisnik?.ime ?? 'Nepoznato'} ${e.korisnik?.prezime ?? ''}",
+                        )),
+                        DataCell(Text(
+                            e.datumRezervacije?.toIso8601String() ?? "N/A")),
                         DataCell(
                           IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
@@ -181,9 +159,10 @@ class _TerminListScreenState extends State<TerminListScreen> {
 
                               if (potvrda == true) {
                                 try {
-                                  if (e.terminId != null) {
+                                  if (e.rezervacijaId != null) {
                                     // Provjera da terminId nije null
-                                    await _terminProvider.delete(e.terminId!);
+                                    await _rezervacijaProvider
+                                        .delete(e.rezervacijaId!);
 
                                     // Osvježavanje podataka
                                     await _loadData(); // Pozivanje metode za ponovno učitavanje podataka

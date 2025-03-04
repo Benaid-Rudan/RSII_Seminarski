@@ -21,19 +21,53 @@ namespace eBarbershop.Services
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
         {
-            var entity = await base.Insert(request);
+            // Kreiraj novu rezervaciju
+            var entity = new Database.Rezervacija
+            {
+                KorisnikId = request.KorisnikId,
+                DatumRezervacije = request.DatumRezervacije, // Možeš koristiti trenutan datum ili onaj poslan u requestu
+                UslugaId = request.UslugaId
+            };
+
+            // Dohvati uslugu koja je povezana s rezervacijom
+            var usluga = await _context.Uslugas
+                                        .FirstOrDefaultAsync(u => u.UslugaId == request.UslugaId);
+
+            if (usluga == null)
+            {
+                throw new Exception("Usluga nije pronađena.");
+            }
+
+            // Poveži uslugu sa rezervacijom
+            entity.Usluga = usluga;
+
+            // Spremi rezervaciju
+            _context.Rezervacijas.Add(entity);
+            await _context.SaveChangesAsync();
+
+            // Postavi isBooked na true za sve termine (ako je potrebno)
             foreach (var termin in _context.Termins)
             {
                 termin.isBooked = true;
             }
-            entity.DatumRezervacije = DateTime.Now;
+
             await _context.SaveChangesAsync();
-            return entity;
+
+            return _mapper.Map<Model.Rezervacija>(entity);
         }
 
 
+        //public async Task<List<Database.Usluga>> GetUslugeForDateAsync(DateTime datumRezervacije)
+        //{
+        //    var usluge = await _context.Uslugas
+        //        .Where(u => u.Datum == datumRezervacije)
+        //        .ToListAsync();
 
-       public override IQueryable<Database.Rezervacija> AddFilter(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
+        //    return usluge;
+        //}
+
+
+        public override IQueryable<Database.Rezervacija> AddFilter(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
         {
 
             if (obj.KorisnikID.HasValue)
@@ -43,6 +77,10 @@ namespace eBarbershop.Services
             if (!string.IsNullOrWhiteSpace(obj.imePrezime))
             {
                 entity = entity.Where(x => x.Korisnik.Ime.ToLower().Contains(obj.imePrezime.ToLower()) || x.Korisnik.Prezime.ToLower().Contains(obj.imePrezime.ToLower()));
+            }
+            if(!string.IsNullOrWhiteSpace(obj.Usluga))
+            {
+                entity = entity.Where(x => x.Usluga.Naziv.ToLower().Contains(obj.Usluga.ToLower()));
             }
 
             if (obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezime))

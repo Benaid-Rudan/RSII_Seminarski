@@ -1,7 +1,6 @@
 import 'package:ebarbershop_admin/models/rezervacija.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
-import 'package:ebarbershop_admin/screens/rezervacija_details.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
@@ -28,16 +27,16 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
   }
 
   Future<void> _loadData() async {
-    // var data = await _rezervacijaProvider.get(filter: {
-    //   "IncludeKorisnik": true,
-    //   "IncludeUsluga": true,
-    //   "imePrezime": _imePrezimeController.text,
-    //   "usluga": _uslugaController.text
-    // });
+    var data = await _rezervacijaProvider.get(filter: {
+      "IncludeKorisnik": true,
+      "IncludeUsluga": true,
+      "imePrezime": _imePrezimeController.text,
+      "datumRezervacije": _datumRezervacijeController.text
+    });
 
-    // setState(() {
-    //   result = data;
-    // });
+    setState(() {
+      result = data;
+    });
   }
 
   @override
@@ -76,29 +75,9 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              var data = await _rezervacijaProvider.get(filter: {
-                "IncludeKorisnik": true,
-                "IncludeUsluga": true,
-                "imePrezime": _imePrezimeController.text,
-                "datumRezervacije": _datumRezervacijeController.text
-              });
-
-              setState(() {
-                result = data;
-              });
+              _loadData();
             },
             child: Text("Pretraga"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      RezervacijaDetailsScreen(rezervacija: null),
-                ),
-              );
-            },
-            child: Text("Dodaj"),
           ),
         ],
       ),
@@ -154,17 +133,6 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
           rows: result?.result
                   .map(
                     (Rezervacija e) => DataRow(
-                      onSelectChanged: (selected) {
-                        if (selected == true) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RezervacijaDetailsScreen(
-                                rezervacija: e,
-                              ),
-                            ),
-                          );
-                        }
-                      },
                       cells: [
                         DataCell(Text(e.rezervacijaId.toString() ?? "")),
                         DataCell(Text(
@@ -204,9 +172,9 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                                       .delete(e.rezervacijaId!);
 
                                   // Osvežavanje podataka
-                                  var data = await _rezervacijaProvider.get();
+                                  _loadData();
                                   setState(() {
-                                    result = data;
+                                    result = result;
                                   });
                                 } catch (e) {
                                   showDialog(

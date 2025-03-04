@@ -7,18 +7,18 @@ part of 'termin.dart';
 // **************************************************************************
 
 Termin _$TerminFromJson(Map<String, dynamic> json) => Termin(
-      (json['terminId'] as num?)?.toInt(),
-      json['terminUposelnik'] as String?,
-      json['vrijeme'] == null
+      terminId: (json['terminId'] as num?)?.toInt(),
+      terminUposelnik: json['terminUposelnik'] as String?,
+      vrijeme: json['vrijeme'] == null
           ? null
           : DateTime.parse(json['vrijeme'] as String),
-      (json['rezervacijaId'] as num?)?.toInt(),
-      json['rezervacija'] == null
+      rezervacijaId: (json['rezervacijaId'] as num?)?.toInt(),
+      rezervacija: json['rezervacija'] == null
           ? null
           : Rezervacija.fromJson(json['rezervacija'] as Map<String, dynamic>),
-      json['isBooked'] as bool?,
-      (json['korisnikID'] as num?)?.toInt(),
-      json['korisnik'] == null
+      isBooked: json['isBooked'] as bool?,
+      korisnikID: (json['korisnikID'] as num?)?.toInt(),
+      korisnik: json['korisnik'] == null
           ? null
           : Korisnik.fromJson(json['korisnik'] as Map<String, dynamic>),
     );

@@ -1,4 +1,5 @@
 import 'package:ebarbershop_admin/models/korisnik.dart';
+import 'package:ebarbershop_admin/models/termin.dart';
 import 'package:ebarbershop_admin/models/usluga.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -12,6 +13,7 @@ class Rezervacija {
   Korisnik? korisnik;
   int? uslugaId;
   Usluga? usluga;
+  List<Termin>? termini;
 
   Rezervacija(this.rezervacijaId, this.datumRezervacije, this.korisnikId,
       this.uslugaId, this.usluga, this.korisnik);
