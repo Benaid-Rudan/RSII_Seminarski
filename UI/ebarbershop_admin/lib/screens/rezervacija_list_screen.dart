@@ -25,9 +25,11 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _rezervacijaProvider = context.read<RezervacijaProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
+    setState(() => _isLoading = true);
     var data = await _rezervacijaProvider.get(filter: {
       "IncludeKorisnik": true,
       "IncludeUsluga": true,
@@ -37,6 +39,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
     setState(() {
       result = data;
+      _isLoading = false;
     });
   }
 
@@ -162,11 +165,9 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
                               if (potvrda == true) {
                                 try {
-                                  // Brisanje korisnika
                                   await _rezervacijaProvider
                                       .delete(e.rezervacijaId!);
 
-                                  // Osvežavanje podataka
                                   _loadData();
                                   setState(() {
                                     result = result;

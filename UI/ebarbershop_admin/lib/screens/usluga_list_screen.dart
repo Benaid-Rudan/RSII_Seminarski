@@ -31,19 +31,20 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _uslugaProvider = context.read<UslugaProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
-    // Učitavanje podataka sa filtrima
+    setState(() => _isLoading = true);
     var data = await _uslugaProvider.get(filter: {
       "naziv": _uslugaController.text,
-      "uslugaId": widget.uslugaId, // Use the passed uslugaId
+      "uslugaId": widget.uslugaId,
       "datumRezervacije": widget.datumRezervacije,
-      // "Datum": _datumRezervacijeController.text
     });
 
     setState(() {
-      result = data; // Ažuriranje stanja sa novim podacima
+      result = data;
+      _isLoading = false;
     });
   }
 

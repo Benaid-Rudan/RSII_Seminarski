@@ -26,10 +26,11 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _narudzbaProvider = context.read<NarudzbaProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
-    // Učitavanje podataka sa filtrima
+    setState(() => _isLoading = true);
     var data = await _narudzbaProvider.get(filter: {
       "IncludeNarudzbaProizvodi": true,
       "KorisnikId": _korisnikIdController.text,
@@ -38,6 +39,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
 
     setState(() {
       result = data;
+      _isLoading = false;
     });
   }
 
@@ -207,7 +209,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                                 try {
                                   await _narudzbaProvider.delete(e.narudzbaId!);
 
-                                  // Automatski učitajte nove podatke nakon brisanja
                                   await _loadData();
                                 } catch (e) {
                                   showDialog(

@@ -11,6 +11,7 @@ import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
+import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,20 +40,16 @@ class MyMaterialApp extends StatelessWidget {
     return MaterialApp(
       title: 'RS II Material app',
       theme: ThemeData(
-        // Define the primary color
         primaryColor: Colors.blue[800],
-        // Define the accent color
         colorScheme: ColorScheme.light(
           primary: Colors.blue[800]!,
           secondary: Colors.blue[600]!,
         ),
-        // AppBar theme
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.blue[800],
           foregroundColor: Colors.white,
           elevation: 4,
         ),
-        // Input decoration theme
         inputDecorationTheme: InputDecorationTheme(
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.blue[800]!, width: 2.0),
@@ -62,7 +59,6 @@ class MyMaterialApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        // Button theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue[800],
@@ -73,7 +69,6 @@ class MyMaterialApp extends StatelessWidget {
             ),
           ),
         ),
-        // Text theme
         textTheme: TextTheme(
           titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16),
@@ -148,7 +143,10 @@ class LoginPage extends StatelessWidget {
                         await _productProvider.get();
 
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => const ProductListScreen(),
+                          builder: (context) => MasterScreenWidget(
+                            title: "Proizvodi",
+                            child: ProductListScreen(),
+                          ),
                         ));
                       } on Exception catch (e) {
                         showDialog(

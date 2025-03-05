@@ -24,9 +24,12 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _rezervacijaProvider = context.read<RezervacijaProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
     var data = await _rezervacijaProvider.get(filter: {
       "IncludeUsluga": true,
       "datumRezervacije": _datumController.text,
@@ -35,6 +38,7 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
 
     setState(() {
       result = data;
+      _isLoading = false;
     });
   }
 

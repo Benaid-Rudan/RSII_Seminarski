@@ -38,23 +38,23 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
     super.didChangeDependencies();
     _korisnikProvider = context.read<KorisnikProvider>();
     _gradProvider = context.read<GradProvider>();
-
+    _refreshData();
     _fetchGradData();
   }
 
   Future<void> _fetchGradData() async {
-    final response = await _gradProvider.get(); // Dohvati podatke
-    print('API Response: ${response.toString()}'); // Provjeri cijeli odgovor
-    gradResult = response; // Dodaj odgovor u gradResult
+    final response = await _gradProvider.get();
+    print('API Response: ${response.toString()}');
+    gradResult = response;
     setState(() {});
   }
 
   Future<void> _refreshData() async {
-    setState(() => _isLoading = true); // Pokrećite indikator učitavanja
-    var data = await _korisnikProvider.get(); // Dohvatite podatke
+    setState(() => _isLoading = true);
+    var data = await _korisnikProvider.get();
     setState(() {
-      result = data; // Ažurirajte rezultat sa novim podacima
-      _isLoading = false; // Isključite indikator učitavanja
+      result = data;
+      _isLoading = false;
     });
     _imeController.clear();
     _prezimeController.clear();
@@ -116,7 +116,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
             SizedBox(width: 16),
             ElevatedButton(
               onPressed: () {
-                _showUserDialog(); // Open dialog for adding new user
+                _showUserDialog();
               },
               child: Text("Dodaj"),
             ),
@@ -174,34 +174,41 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                                 icon: Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
                                   bool confirmDelete = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Potvrdi brisanje"),
-                                        content: Text(
-                                            "Želite li obrisati korisnika?"),
-                                        actions: [
-                                          TextButton(
-                                            child: Text("Odustani"),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: Text("Obriši"),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text("Potvrdi brisanje"),
+                                            content: Text(
+                                                "Želite li obrisati korisnika?"),
+                                            actions: [
+                                              TextButton(
+                                                child: Text("Odustani"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(
+                                                      false); // Vrati false
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: Text("Obriši"),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(true); // Vrati true
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor:
+                                                      Colors.red, // Boja teksta
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ) ??
+                                      false;
 
                                   if (confirmDelete) {
                                     await _korisnikProvider
                                         .delete(e.korisnikId!);
-                                    setState(() {});
+                                    _refreshData();
                                   }
                                 },
                               ),

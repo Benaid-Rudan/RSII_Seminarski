@@ -24,10 +24,12 @@ class _TerminListScreenState extends State<TerminListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _rezervacijaProvider = context.read<RezervacijaProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
-    // Učitavanje podataka sa filtrima
+    setState(() => _isLoading = true);
+
     var data = await _rezervacijaProvider.get(filter: {
       "IncludeKorisnik": true,
       "imePrezime": _imePrezimeController.text,
@@ -35,7 +37,8 @@ class _TerminListScreenState extends State<TerminListScreen> {
     });
 
     setState(() {
-      result = data; // Ažuriranje stanja sa novim podacima
+      result = data;
+      _isLoading = false;
     });
   }
 
@@ -69,8 +72,7 @@ class _TerminListScreenState extends State<TerminListScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // Pokrećemo pretragu
-              await _loadData(); // Pozivamo metodu za učitavanje podataka sa filtrima
+              await _loadData();
             },
             child: Text("Pretraga"),
           ),
@@ -155,12 +157,10 @@ class _TerminListScreenState extends State<TerminListScreen> {
                               if (potvrda == true) {
                                 try {
                                   if (e.rezervacijaId != null) {
-                                    // Provjera da terminId nije null
                                     await _rezervacijaProvider
                                         .delete(e.rezervacijaId!);
 
-                                    // Osvježavanje podataka
-                                    await _loadData(); // Pozivanje metode za ponovno učitavanje podataka
+                                    await _loadData();
                                   } else {
                                     throw Exception("Termin ID je null.");
                                   }

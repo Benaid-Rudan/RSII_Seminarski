@@ -25,15 +25,19 @@ class _NovostListScreenState extends State<NovostListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _novostProvider = context.read<NovostProvider>();
+    _loadData();
   }
 
   Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
     var data = await _novostProvider.get(filter: {
       "naslov": _tekstController.text,
     });
 
     setState(() {
       result = data;
+      _isLoading = false;
     });
   }
 
@@ -166,10 +170,8 @@ class _NovostListScreenState extends State<NovostListScreen> {
 
                               if (potvrda == true) {
                                 try {
-                                  // Brisanje novosti
                                   await _novostProvider.delete(e.novostId!);
 
-                                  // Osvežavanje podataka
                                   var data = await _novostProvider.get();
                                   setState(() {
                                     result = data;

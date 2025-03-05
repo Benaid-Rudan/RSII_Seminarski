@@ -27,13 +27,12 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
     return Scaffold(
       body: Row(
         children: [
-          // FIXIRANI MENI SA STRANE
           Container(
-            width: 250, // Fiksna širina menija
-            color: Colors.blueGrey[900], // Boja menija
+            width: 250,
+            color: Colors.blueGrey[900],
             child: Column(
               children: [
-                const SizedBox(height: 50), // Prostor na vrhu
+                const SizedBox(height: 50),
                 menuItem("Zaposlenici", KorisnikListScreen()),
                 menuItem("Proizvodi", ProductListScreen()),
                 menuItem("Rezervacije", RezervacijaListScreen()),
@@ -45,24 +44,14 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
               ],
             ),
           ),
-
-          // GLAVNI SADRŽAJ
           Expanded(
             child: Column(
               children: [
                 AppBar(
                   title: widget.title_widget ?? Text(widget.title ?? ""),
                   backgroundColor: Colors.blueGrey,
-                  leading: Navigator.canPop(context)
-                      ? IconButton(
-                          icon: Icon(Icons.arrow_back),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        )
-                      : null, // Strelica za nazad samo ako postoji prethodni ekran
                 ),
-                Expanded(child: widget.child ?? Container()), // Sadržaj ekrana
+                Expanded(child: widget.child ?? Container()),
               ],
             ),
           ),
@@ -75,7 +64,7 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
     return ListTile(
       title: Text(title, style: const TextStyle(color: Colors.white)),
       onTap: () {
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => MasterScreenWidget(
               title: title,
