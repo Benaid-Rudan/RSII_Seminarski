@@ -47,55 +47,64 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          _buildSearch(),
-          _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : _buildDataListView(),
-        ],
-      ),
+    return Column(
+      children: [
+        _buildSearch(),
+        _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _buildDataListView(),
+      ],
     );
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Naziv"),
-              controller: _nazivController,
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Naziv",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _nazivController,
+              ),
             ),
-          ),
-          SizedBox(width: 18),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Opis"),
-              controller: _opisController,
+            SizedBox(width: 16),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Opis",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _opisController,
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              setState(() => _isLoading = true);
-              var data = await _productProvider.get(filter: {
-                'naziv': _nazivController.text,
-                'opis': _opisController.text
-              });
-              setState(() {
-                result = data;
-                _isLoading = false;
-              });
-            },
-            child: Text("Pretraga"),
-          ),
-          ElevatedButton(
-            onPressed: () => _showProductDialog(),
-            child: Text("Dodaj"),
-          ),
-        ],
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () async {
+                setState(() => _isLoading = true);
+                var data = await _productProvider.get(filter: {
+                  'naziv': _nazivController.text,
+                  'opis': _opisController.text
+                });
+                setState(() {
+                  result = data;
+                  _isLoading = false;
+                });
+              },
+              child: Text("Pretraga"),
+            ),
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () => _showProductDialog(),
+              child: Text("Dodaj"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,14 +112,27 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget _buildDataListView() {
     return Expanded(
       child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: DataTable(
           columns: [
-            DataColumn(label: Text('ID')),
-            DataColumn(label: Text('Naziv')),
-            DataColumn(label: Text('Opis')),
-            DataColumn(label: Text('Cijena')),
-            DataColumn(label: Text('Slika')),
-            DataColumn(label: Text('Akcije')),
+            DataColumn(
+                label:
+                    Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Naziv',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Opis',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Cijena',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Slika',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Akcije',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
           ],
           rows: result?.result
                   .map((Product e) => DataRow(
@@ -207,111 +229,127 @@ class _ProductListScreenState extends State<ProductListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(product == null ? "Dodaj proizvod" : "Uredi proizvod"),
-        content: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : FormBuilder(
-                key: _formKey,
-                initialValue: initialValues,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FormBuilderTextField(
-                      name: 'naziv',
-                      decoration: InputDecoration(labelText: "Naziv"),
-                    ),
-                    SizedBox(height: 10),
-                    FormBuilderTextField(
-                      name: 'opis',
-                      decoration: InputDecoration(labelText: "Opis"),
-                    ),
-                    SizedBox(height: 10),
-                    FormBuilderTextField(
-                      name: 'cijena',
-                      decoration: InputDecoration(labelText: "Cijena"),
-                      keyboardType: TextInputType.number,
-                    ),
-                    SizedBox(height: 10),
-                    FormBuilderTextField(
-                      name: 'slika',
-                      decoration: InputDecoration(labelText: "Slika"),
-                    ),
-                    SizedBox(height: 10),
-                    FormBuilderTextField(
-                      name: 'zalihe',
-                      decoration: InputDecoration(labelText: "Zalihe"),
-                      keyboardType: TextInputType.number,
-                    ),
-                    SizedBox(height: 10),
-                    FormBuilderDropdown<String>(
-                      name: 'vrstaProizvodaId',
-                      decoration: InputDecoration(labelText: "Vrsta proizvoda"),
-                      items: vrstaProizvodaResult?.result
-                              .map((item) => DropdownMenuItem(
-                                    value: item.vrstaProizvodaId?.toString(),
-                                    child: Text(item.naziv ?? ""),
-                                  ))
-                              .toList() ??
-                          [],
-                    ),
-                  ],
-                ),
+        content: Container(
+          width: 400, // Fiksna širina dijaloga
+          height: 380, // Fiksna visina dijaloga
+          child: SingleChildScrollView(
+            child: FormBuilder(
+              key: _formKey,
+              initialValue: initialValues,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FormBuilderTextField(
+                    name: 'naziv',
+                    decoration: InputDecoration(labelText: "Naziv"),
+                  ),
+                  SizedBox(height: 8), // Smanjen razmak
+                  FormBuilderTextField(
+                    name: 'opis',
+                    decoration: InputDecoration(labelText: "Opis"),
+                  ),
+                  SizedBox(height: 8), // Smanjen razmak
+                  FormBuilderTextField(
+                    name: 'cijena',
+                    decoration: InputDecoration(labelText: "Cijena"),
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: 8), // Smanjen razmak
+                  FormBuilderTextField(
+                    name: 'slika',
+                    decoration: InputDecoration(labelText: "Slika"),
+                  ),
+                  SizedBox(height: 8), // Smanjen razmak
+                  FormBuilderTextField(
+                    name: 'zalihe',
+                    decoration: InputDecoration(labelText: "Zalihe"),
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: 8), // Smanjen razmak
+                  FormBuilderDropdown<String>(
+                    name: 'vrstaProizvodaId',
+                    decoration: InputDecoration(labelText: "Vrsta proizvoda"),
+                    items: vrstaProizvodaResult?.result
+                            .map((item) => DropdownMenuItem(
+                                  value: item.vrstaProizvodaId?.toString(),
+                                  child: Text(item.naziv ?? ""),
+                                ))
+                            .toList() ??
+                        [],
+                  ),
+                  SizedBox(height: 12), // Smanjen razmak prije dugmadi
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Odustani"),
+                      ),
+                      SizedBox(width: 8), // Smanjen razmak između dugmadi
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState?.saveAndValidate() ??
+                              false) {
+                            final formData = _formKey.currentState?.value;
+
+                            try {
+                              if (product == null) {
+                                await _productProvider.insert({
+                                  'naziv': formData?['naziv'],
+                                  'opis': formData?['opis'],
+                                  'cijena': double.tryParse(
+                                      formData?['cijena'] ?? "0"),
+                                  'slika': formData?['slika'],
+                                  'zalihe':
+                                      int.tryParse(formData?['zalihe'] ?? "0"),
+                                  'vrstaProizvodaId':
+                                      formData?['vrstaProizvodaId'],
+                                });
+                              } else {
+                                await _productProvider.update(
+                                  product.proizvodId!,
+                                  {
+                                    'naziv': formData?['naziv'],
+                                    'opis': formData?['opis'],
+                                    'cijena': double.tryParse(
+                                        formData?['cijena'] ?? "0"),
+                                    'slika': formData?['slika'],
+                                    'zalihe': int.tryParse(
+                                        formData?['zalihe'] ?? "0"),
+                                    'vrstaProizvodaId':
+                                        formData?['vrstaProizvodaId'],
+                                  },
+                                );
+                              }
+
+                              await _fetchData();
+                              Navigator.pop(context);
+                            } catch (e) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Greška"),
+                                  content: Text(e.toString()),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("OK"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Text("Sačuvaj"),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Odustani"),
+            ),
           ),
-          TextButton(
-            onPressed: () async {
-              if (_formKey.currentState?.saveAndValidate() ?? false) {
-                final formData = _formKey.currentState?.value;
-
-                try {
-                  if (product == null) {
-                    await _productProvider.insert({
-                      'naziv': formData?['naziv'],
-                      'opis': formData?['opis'],
-                      'cijena': double.tryParse(formData?['cijena'] ?? "0"),
-                      'slika': formData?['slika'],
-                      'zalihe': int.tryParse(formData?['zalihe'] ?? "0"),
-                      'vrstaProizvodaId': formData?['vrstaProizvodaId'],
-                    });
-                  } else {
-                    await _productProvider.update(
-                      product.proizvodId!,
-                      {
-                        'naziv': formData?['naziv'],
-                        'opis': formData?['opis'],
-                        'cijena': double.tryParse(formData?['cijena'] ?? "0"),
-                        'slika': formData?['slika'],
-                        'zalihe': int.tryParse(formData?['zalihe'] ?? "0"),
-                        'vrstaProizvodaId': formData?['vrstaProizvodaId'],
-                      },
-                    );
-                  }
-
-                  await _fetchData();
-                  Navigator.pop(context);
-                } catch (e) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text("Greška"),
-                      content: Text(e.toString()),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("OK"),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              }
-            },
-            child: Text("Sačuvaj"),
-          ),
-        ],
+        ),
       ),
     );
   }

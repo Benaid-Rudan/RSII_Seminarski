@@ -45,39 +45,51 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      _buildSearch(),
-      _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _buildDataListView()
-    ]);
+    return Column(
+      children: [
+        _buildSearch(),
+        _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _buildDataListView(),
+      ],
+    );
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Ime i prezime"),
-              controller: _imePrezimeController,
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Ime i prezime",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _imePrezimeController,
+              ),
             ),
-          ),
-          SizedBox(width: 18),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Datum rezervacije"),
-              controller: _datumRezervacijeController,
+            SizedBox(width: 16),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Datum rezervacije",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _datumRezervacijeController,
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              _loadData();
-            },
-            child: Text("Pretraga"),
-          ),
-        ],
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () async {
+                _loadData();
+              },
+              child: Text("Pretraga"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -85,13 +97,14 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
   Widget _buildDataListView() {
     return Expanded(
       child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: DataTable(
           columns: [
             DataColumn(
               label: Expanded(
                 child: Text(
                   'ID',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -99,7 +112,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
               label: Expanded(
                 child: Text(
                   'Ime i prezime',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -107,7 +120,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
               label: Expanded(
                 child: Text(
                   'Datum rezervacije',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -115,15 +128,15 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
               label: Expanded(
                 child: Text(
                   'Usluga',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            const DataColumn(
+            DataColumn(
               label: Expanded(
                 child: Text(
                   'Akcije',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -147,7 +160,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                                 builder: (BuildContext context) => AlertDialog(
                                   title: Text("Potvrda"),
                                   content: Text(
-                                      "Da li ste sigurni da želite obrisati ovog korisnika?"),
+                                      "Da li ste sigurni da želite obrisati ovu rezervaciju?"),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
@@ -167,11 +180,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                                 try {
                                   await _rezervacijaProvider
                                       .delete(e.rezervacijaId!);
-
                                   _loadData();
-                                  setState(() {
-                                    result = result;
-                                  });
                                 } catch (e) {
                                   showDialog(
                                     context: context,

@@ -53,27 +53,38 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Datum obavljene usluge"),
-              controller: _datumController,
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Datum obavljene usluge",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _datumController,
+              ),
             ),
-          ),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Naziv usluge"),
-              controller: _uslugaController,
+            SizedBox(width: 16),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Naziv usluge",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _uslugaController,
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: _loadData,
-            child: Text("Pretraga"),
-          ),
-        ],
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: _loadData,
+              child: Text("Pretraga"),
+            ),
+          ],
+        ),
       ),
     );
   }

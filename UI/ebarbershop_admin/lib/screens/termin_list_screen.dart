@@ -53,30 +53,40 @@ class _TerminListScreenState extends State<TerminListScreen> {
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Ime i prezime"),
-              controller: _imePrezimeController,
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Ime i prezime",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _imePrezimeController,
+              ),
             ),
-          ),
-          SizedBox(width: 18),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Datum termina"),
-              controller: _datumRezervacijeController,
+            SizedBox(width: 16),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Datum termina",
+                  border: OutlineInputBorder(),
+                ),
+                controller: _datumRezervacijeController,
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await _loadData();
-            },
-            child: Text("Pretraga"),
-          ),
-        ],
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () async {
+                await _loadData();
+              },
+              child: Text("Pretraga"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -87,35 +97,27 @@ class _TerminListScreenState extends State<TerminListScreen> {
         child: DataTable(
           columns: [
             DataColumn(
-              label: Expanded(
-                child: Text(
-                  'ID',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
+              label: Text(
+                'ID',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Frizer',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
+              label: Text(
+                'Frizer',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Datum termina',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
+              label: Text(
+                'Datum termina',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             const DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Akcije',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
+              label: Text(
+                'Akcije',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],

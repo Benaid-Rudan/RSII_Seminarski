@@ -6,6 +6,7 @@ import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 class UslugaListScreen extends StatefulWidget {
   String? korisnikId;
@@ -26,6 +27,11 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
 
   TextEditingController _uslugaController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
+
+  // Controllers for the dialog
+  TextEditingController _nazivController = TextEditingController();
+  TextEditingController _opisController = TextEditingController();
+  TextEditingController _cijenaController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -59,34 +65,37 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(labelText: "Usluga"),
-              controller: _uslugaController,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // Pokrećemo pretragu
-              await _loadData(); // Pozivamo metodu za učitavanje podataka sa filtrima
-            },
-            child: Text("Pretraga"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => UslugaDetailsScreen(usluga: null),
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Usluga",
+                  border: OutlineInputBorder(),
                 ),
-              );
-            },
-            child: Text("Dodaj"),
-          ),
-        ],
+                controller: _uslugaController,
+              ),
+            ),
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () async {
+                await _loadData();
+              },
+              child: Text("Pretraga"),
+            ),
+            SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () {
+                _showUslugaDialog();
+              },
+              child: Text("Dodaj"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -96,145 +105,192 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
       child: SingleChildScrollView(
         child: DataTable(
           columns: [
-            DataColumn(
-              label: Expanded(
-                child: Text(
-                  'ID',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Usluga',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Opis',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Cijena',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            const DataColumn(
-              label: Expanded(
-                child: Text(
-                  'Akcije',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
+            DataColumn(label: Text('ID')),
+            DataColumn(label: Text('Usluga')),
+            DataColumn(label: Text('Opis')),
+            DataColumn(label: Text('Cijena')),
+            DataColumn(label: Text('Akcije')),
           ],
-          rows: result?.result.map(
-                (Usluga e) {
-                  // Da bismo dobili datum termina, moramo koristiti Rezervacija
-                  // String terminDatum = "Nema datuma"; // Defaultna vrednost
-
-                  // if (e.rezervacije != null && e.rezervacije!.isNotEmpty) {
-                  //   // Pretpostavljamo da Rezervacija može imati termine
-                  //   var termin = e.rezervacije!.first.termini?.firstWhere(
-                  //     (t) =>
-                  //         t.isBooked ==
-                  //         true, // Only pick `true` values for `isBooked`
-                  //     orElse: () => Termin(
-                  //       vrijeme:
-                  //           DateTime.now(), // Defaultni termin ako nema termina
-                  //     ),
-                  //   );
-
-                  //   terminDatum =
-                  //       termin?.vrijeme?.toIso8601String() ?? "Nema datuma";
-                  // }
-
-                  return DataRow(
-                    onSelectChanged: (selected) {
-                      if (selected == true) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => UslugaDetailsScreen(
-                              usluga: e,
-                            ),
+          rows: result?.result.map((Usluga e) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(e.uslugaId.toString() ?? "")),
+                    DataCell(Text(e.naziv ?? "")),
+                    DataCell(Text(e.opis ?? "")),
+                    DataCell(Text(e.cijena.toString() ?? "")),
+                    DataCell(
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _showUslugaDialog(usluga: e),
                           ),
-                        );
-                      }
-                    },
-                    cells: [
-                      DataCell(Text(e.uslugaId.toString() ?? "")),
-                      DataCell(Text(e.naziv ?? "")),
-                      DataCell(Text(e.opis ?? "")),
-                      DataCell(Text(e.cijena.toString() ?? "")),
-                      DataCell(
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            bool? potvrda = await showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: Text("Potvrda"),
-                                content: Text(
-                                    "Da li ste sigurni da želite obrisati ovu uslugu?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: Text("Ne"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: Text("Da"),
-                                  ),
-                                ],
-                              ),
-                            );
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              bool? potvrda = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: Text("Potvrda"),
+                                  content: Text(
+                                      "Da li ste sigurni da želite obrisati ovu uslugu?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: Text("Ne"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: Text("Da"),
+                                    ),
+                                  ],
+                                ),
+                              );
 
-                            if (potvrda == true) {
-                              try {
-                                if (e.uslugaId != null) {
-                                  await _uslugaProvider.delete(e.uslugaId!);
-
-                                  await _loadData();
-                                } else {
-                                  throw Exception("Usluga ID je null.");
+                              if (potvrda == true) {
+                                try {
+                                  if (e.uslugaId != null) {
+                                    await _uslugaProvider.delete(e.uslugaId!);
+                                    await _loadData();
+                                  } else {
+                                    throw Exception("Usluga ID je null.");
+                                  }
+                                } catch (e) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        AlertDialog(
+                                      title: Text("Greška"),
+                                      content: Text(e.toString()),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: Text("OK"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 }
-                              } catch (e) {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                    title: Text("Greška"),
-                                    content: Text(e.toString()),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text("OK"),
-                                      ),
-                                    ],
-                                  ),
-                                );
                               }
-                            }
-                          },
-                        ),
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  );
-                },
-              ).toList() ??
+                    ),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
+      ),
+    );
+  }
+
+  void _showUslugaDialog({Usluga? usluga}) {
+    _nazivController.clear();
+    _opisController.clear();
+    _cijenaController.clear();
+
+    if (usluga != null) {
+      _nazivController.text = usluga.naziv ?? "";
+      _opisController.text = usluga.opis ?? "";
+      _cijenaController.text = usluga.cijena.toString() ?? "";
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(usluga == null ? "Dodaj uslugu" : "Uredi uslugu"),
+        content: Container(
+          width: 400,
+          child: SingleChildScrollView(
+            child: FormBuilder(
+              child: Column(
+                children: [
+                  FormBuilderTextField(
+                    name: 'naziv',
+                    controller: _nazivController,
+                    decoration: InputDecoration(labelText: "Naziv usluge"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'opis',
+                    controller: _opisController,
+                    decoration: InputDecoration(labelText: "Opis usluge"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'cijena',
+                    controller: _cijenaController,
+                    decoration: InputDecoration(labelText: "Cijena"),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              if (_nazivController.text.isNotEmpty &&
+                  _opisController.text.isNotEmpty &&
+                  _cijenaController.text.isNotEmpty) {
+                try {
+                  if (usluga == null) {
+                    // Add new usluga
+                    await _uslugaProvider.insert({
+                      'naziv': _nazivController.text,
+                      'opis': _opisController.text,
+                      'cijena': double.parse(_cijenaController.text),
+                    });
+                  } else {
+                    // Update existing usluga
+                    await _uslugaProvider.update(usluga.uslugaId!, {
+                      'naziv': _nazivController.text,
+                      'opis': _opisController.text,
+                      'cijena': double.parse(_cijenaController.text),
+                    });
+                  }
+                  await _loadData();
+                  Navigator.pop(context);
+                } catch (e) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Greška"),
+                      content: Text(e.toString()),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text("Greška"),
+                    content: Text("Sva polja su obavezna."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: Text("Sačuvaj"),
+          ),
+        ],
       ),
     );
   }

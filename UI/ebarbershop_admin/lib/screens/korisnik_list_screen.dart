@@ -126,6 +126,14 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
     );
   }
 
+  String getGradNazivById(String gradId) {
+    final grad = gradResult?.result.firstWhere(
+      (grad) => grad.gradId.toString() == gradId,
+      orElse: () => Grad(gradId: null, naziv: 'Nepoznato'),
+    );
+    return grad?.naziv ?? 'Nepoznato';
+  }
+
   Widget _buildDataListView() {
     return Expanded(
       child: SingleChildScrollView(
@@ -145,6 +153,9 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 label: Text('Korisničko ime',
                     style: TextStyle(fontWeight: FontWeight.bold))),
             DataColumn(
+                label: Text('Grad',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
                 label: Text('Slika',
                     style: TextStyle(fontWeight: FontWeight.bold))),
             DataColumn(
@@ -157,6 +168,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                         DataCell(Text(e.prezime ?? "")),
                         DataCell(Text(e.email ?? "")),
                         DataCell(Text(e.username ?? "")),
+                        DataCell(Text(getGradNazivById(e.gradId.toString()))),
                         DataCell(
                           e.slika != null && e.slika!.isNotEmpty
                               ? Image.network(e.slika!,
@@ -184,19 +196,18 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                                               TextButton(
                                                 child: Text("Odustani"),
                                                 onPressed: () {
-                                                  Navigator.of(context).pop(
-                                                      false); // Vrati false
+                                                  Navigator.of(context)
+                                                      .pop(false);
                                                 },
                                               ),
                                               TextButton(
                                                 child: Text("Obriši"),
                                                 onPressed: () {
                                                   Navigator.of(context)
-                                                      .pop(true); // Vrati true
+                                                      .pop(true);
                                                 },
                                                 style: TextButton.styleFrom(
-                                                  foregroundColor:
-                                                      Colors.red, // Boja teksta
+                                                  foregroundColor: Colors.red,
                                                 ),
                                               ),
                                             ],
@@ -246,70 +257,79 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(korisnik == null ? "Dodaj korisnika" : "Uredi korisnika"),
-        content: FormBuilder(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FormBuilderTextField(
-                name: 'ime',
-                controller: _imeController,
-                decoration: InputDecoration(labelText: "Ime"),
+        content: Container(
+          width: 400,
+          height: 450,
+          child: SingleChildScrollView(
+            child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
+                  FormBuilderTextField(
+                    name: 'ime',
+                    controller: _imeController,
+                    decoration: InputDecoration(labelText: "Ime"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'prezime',
+                    controller: _prezimeController,
+                    decoration: InputDecoration(labelText: "Prezime"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'email',
+                    controller: _emailController,
+                    decoration: InputDecoration(labelText: "Email"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'username',
+                    controller: _usernameController,
+                    decoration: InputDecoration(labelText: "Korisničko ime"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'slika',
+                    controller: _slikaController,
+                    decoration: InputDecoration(labelText: "URL slike"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'password',
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: "Lozinka"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'passwordPotvrda',
+                    controller: _passwordPotvrdaController,
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: "Potvrda lozinke"),
+                  ),
+                  SizedBox(height: 8),
+                  FormBuilderDropdown<String>(
+                    name: 'gradId',
+                    decoration: InputDecoration(labelText: "Grad"),
+                    initialValue: korisnik != null
+                        ? korisnik.gradId?.toString()
+                        : null, // Ovo postavite na gradId korisnika
+                    items: gradResult?.result.isNotEmpty ?? false
+                        ? gradResult!.result
+                            .map((item) => DropdownMenuItem(
+                                  value: item.gradId?.toString(),
+                                  child: Text(item.naziv ?? ""),
+                                ))
+                            .toList()
+                        : [
+                            DropdownMenuItem(
+                                value: "", child: Text('Nema gradova'))
+                          ],
+                  ),
+                ],
               ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'prezime',
-                controller: _prezimeController,
-                decoration: InputDecoration(labelText: "Prezime"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'email',
-                controller: _emailController,
-                decoration: InputDecoration(labelText: "Email"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'username',
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: "Korisničko ime"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'slika',
-                controller: _slikaController,
-                decoration: InputDecoration(labelText: "URL slike"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'password',
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: "Lozinka"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderTextField(
-                name: 'passwordPotvrda',
-                controller: _passwordPotvrdaController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: "Potvrda lozinke"),
-              ),
-              SizedBox(height: 10),
-              FormBuilderDropdown<String>(
-                name: 'gradId',
-                decoration: InputDecoration(labelText: "Grad"),
-                items: gradResult?.result.isNotEmpty ?? false
-                    ? gradResult!.result
-                        .map((item) => DropdownMenuItem(
-                              value: item.gradId?.toString(),
-                              child: Text(item.naziv ?? ""),
-                            ))
-                        .toList()
-                    : [
-                        DropdownMenuItem(value: "", child: Text('Nema gradova'))
-                      ],
-              ),
-            ],
+            ),
           ),
         ),
         actions: [
@@ -319,7 +339,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 final formData = _formKey.currentState?.value;
 
                 if (korisnik == null) {
-                  // Insert new user
                   await _korisnikProvider.insert({
                     'Ime': formData?['ime'],
                     'Prezime': formData?['prezime'],
@@ -332,7 +351,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     'request': 'some_value',
                   });
                 } else {
-                  // Update existing user
                   if (korisnik.korisnikId != null) {
                     await _korisnikProvider.update(
                       korisnik.korisnikId!,
@@ -344,9 +362,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                         'Password': formData?['password'],
                         'PasswordPotvrda': formData?['passwordPotvrda'],
                         'Slika': formData?['slika'],
-                        'GradId': _gradController.text.isNotEmpty
-                            ? int.tryParse(_gradController.text)
-                            : null
+                        'GradId': formData?['gradId']
                       },
                     );
                   }
