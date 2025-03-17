@@ -227,7 +227,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                         style: TextStyle(color: Colors.white))),
                     DataCell(
                       e.slika != null && e.slika!.isNotEmpty
-                          ? (e.slika!.startsWith('http')
+                          ? (e.slika!.startsWith('http') || e.slika!.startsWith('https')
                               ? Image.network(e.slika!,
                                   width: 50, height: 50, fit: BoxFit.cover)
                               : Image.memory(base64Decode(e.slika!),
@@ -412,7 +412,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                                 )
                               : (korisnik?.slika != null &&
                                       korisnik!.slika!.isNotEmpty
-                                  ? (korisnik!.slika!.startsWith('http')
+                                  ? (korisnik!.slika!.startsWith('http') || korisnik!.slika!.startsWith('https')
                                       ? Image.network(
                                           korisnik!.slika!,
                                           width: 50,
