@@ -41,8 +41,8 @@ class _NarudzbaDetailsScreenState extends State<NarudzbaDetailsScreen> {
       'kolicina': widget.narudzba?.narudzbaProizvodis?.isNotEmpty == true
           ? widget.narudzba?.narudzbaProizvodis?.first.kolicina.toString()
           : null,
-      'cijena': null, // Cijena će se postaviti automatski
-      'ukupnaCijena': null, // Ukupna cijena će se automatski ažurirati
+      'cijena': null, 
+      'ukupnaCijena': null, 
     };
 
     _productProvider = context.read<ProductProvider>();
@@ -109,13 +109,13 @@ class _NarudzbaDetailsScreenState extends State<NarudzbaDetailsScreen> {
                     var selectedProduct = productResult?.result.firstWhere(
                       (p) => p.proizvodId.toString() == value,
                       orElse: () => Product(
-                          0, // Ako je proizvodId 0
-                          '', // naziv
-                          '', // opis
-                          0.0, // cijena
-                          '', // slika
-                          0, // vrstaProizvodaId
-                          0 // zalihe
+                          0, 
+                          '', 
+                          '', 
+                          0.0, 
+                          '',
+                          0, 
+                          0 
                           ),
                     );
 
@@ -144,7 +144,7 @@ class _NarudzbaDetailsScreenState extends State<NarudzbaDetailsScreen> {
               Expanded(
                 child: FormBuilderTextField(
                   name: "cijena",
-                  enabled: false, // Onemogućeno ručno mijenjanje
+                  enabled: false, 
                   decoration: InputDecoration(labelText: "Cijena"),
                 ),
               ),
@@ -160,13 +160,13 @@ class _NarudzbaDetailsScreenState extends State<NarudzbaDetailsScreen> {
                     var selectedProduct = productResult?.result.firstWhere(
                         (p) => p.proizvodId.toString() == proizvodId,
                         orElse: () => Product(
-                            0, // Ako je proizvodId 0
-                            '', // naziv
-                            '', // opis
-                            0.0, // cijena
-                            '', // slika
-                            0, // vrstaProizvodaId
-                            0 // zalihe
+                            0, 
+                            '', 
+                            '', 
+                            0.0,
+                            '', 
+                            0, 
+                            0 
                             ));
 
                     double cijena = selectedProduct?.cijena ?? 0;

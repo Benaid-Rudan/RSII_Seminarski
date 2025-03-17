@@ -59,6 +59,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
 
   Widget _buildSearch() {
     return Card(
+      color: Colors.blueGrey,
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,8 +70,14 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                 decoration: InputDecoration(
                   labelText: "Kupac Id",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _korisnikIdController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
             ),
             SizedBox(width: 18),
@@ -79,16 +86,15 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                 decoration: InputDecoration(
                   labelText: "Narudzba Id",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _narudzbaIdController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
-            ),
-            SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: () async {
-                await _loadData();
-              },
-              child: Text("Pretraga"),
             ),
             SizedBox(width: 16),
             ElevatedButton(
@@ -106,13 +112,19 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
   Widget _buildDataListView() {
     return Expanded(
       child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.black),
+          dataRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey[900]!),
           columns: [
             DataColumn(
               label: Expanded(
                 child: Text(
                   'Narudzba Id',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -120,7 +132,8 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               label: Expanded(
                 child: Text(
                   'Kupac Id',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -128,7 +141,8 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               label: Expanded(
                 child: Text(
                   'Proizvod',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -136,7 +150,8 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               label: Expanded(
                 child: Text(
                   'Cijena',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -144,7 +159,8 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               label: Expanded(
                 child: Text(
                   'Datum i vrijeme',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -152,105 +168,107 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               label: Expanded(
                 child: Text(
                   'Akcije',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ],
-          rows: result?.result
-                  .map(
-                    (Narudzba e) => DataRow(
-                      onSelectChanged: (selected) {
-                        if (selected == true) {
-                          _showNarudzbaDialog(context, narudzba: e);
-                        }
-                      },
-                      cells: [
-                        DataCell(Text("${e.narudzbaId ?? ''}")),
-                        DataCell(Text("${e.korisnikId ?? ''}")),
-                        DataCell(
-                          Text(
-                            e.narudzbaProizvodis
-                                    ?.map((np) => np.proizvod?.naziv)
-                                    .join(', ') ??
-                                "",
-                          ),
-                        ),
-                        DataCell(Text(
+          rows: result?.result.asMap().entries.map((entry) {
+                int index = entry.key;
+                Narudzba e = entry.value;
+
+                return DataRow(
+                  color: MaterialStateColor.resolveWith(
+                    (states) =>
+                        index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
+                  ),
+                  cells: [
+                    DataCell(Text("${e.narudzbaId ?? ''}",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text("${e.korisnikId ?? ''}",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(
+                      Text(
                           e.narudzbaProizvodis
-                                  ?.map((np) =>
-                                      np.proizvod?.cijena?.toStringAsFixed(2))
+                                  ?.map((np) => np.proizvod?.naziv)
                                   .join(', ') ??
                               "",
-                        )),
-                        DataCell(Text(
-                            e.datum != null ? e.datum!.toIso8601String() : "")),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () {
-                                  _showNarudzbaDialog(context, narudzba: e);
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () async {
-                                  bool? potvrda = await showDialog(
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    DataCell(Text(
+                        e.narudzbaProizvodis
+                                ?.map((np) =>
+                                    np.proizvod?.cijena?.toStringAsFixed(2))
+                                .join(', ') ??
+                            "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(
+                        e.datum != null ? e.datum!.toIso8601String() : "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              _showNarudzbaDialog(context, narudzba: e);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              bool? potvrda = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: Text("Potvrda"),
+                                  content: Text(
+                                      "Da li ste sigurni da želite obrisati ovu narudžbu?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: Text("Ne"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: Text("Da"),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (potvrda == true) {
+                                try {
+                                  await _narudzbaProvider.delete(e.narudzbaId!);
+                                  await _loadData();
+                                } catch (e) {
+                                  showDialog(
                                     context: context,
                                     builder: (BuildContext context) =>
                                         AlertDialog(
-                                      title: Text("Potvrda"),
-                                      content: Text(
-                                          "Da li ste sigurni da želite obrisati ovu narudžbu?"),
+                                      title: Text("Greška"),
+                                      content: Text(e.toString()),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
-                                              Navigator.pop(context, false),
-                                          child: Text("Ne"),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
-                                          child: Text("Da"),
+                                              Navigator.pop(context),
+                                          child: Text("OK"),
                                         ),
                                       ],
                                     ),
                                   );
-
-                                  if (potvrda == true) {
-                                    try {
-                                      await _narudzbaProvider
-                                          .delete(e.narudzbaId!);
-                                      await _loadData();
-                                    } catch (e) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) =>
-                                            AlertDialog(
-                                          title: Text("Greška"),
-                                          content: Text(e.toString()),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: Text("OK"),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
+                                }
+                              }
+                            },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )
-                  .toList() ??
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),
@@ -265,15 +283,16 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
           ? DateTime.parse(narudzba!.datum!.toString())
           : null,
       'proizvodId': narudzba?.narudzbaProizvodis?.isNotEmpty == true
-          ? narudzba?.narudzbaProizvodis?.first.proizvodId.toString()
-          : null,
+          ? narudzba?.narudzbaProizvodis?.first.proizvodId.toString() ?? ''
+          : '',
       'kupacId': narudzba?.korisnikId?.toString(),
       'kolicina': narudzba?.narudzbaProizvodis?.isNotEmpty == true
-          ? narudzba?.narudzbaProizvodis?.first.kolicina.toString()
-          : null,
+          ? narudzba?.narudzbaProizvodis?.first.kolicina.toString() ?? ''
+          : '',
       'cijena': narudzba?.narudzbaProizvodis?.isNotEmpty == true
-          ? narudzba?.narudzbaProizvodis?.first.proizvod?.cijena.toString()
-          : null,
+          ? narudzba?.narudzbaProizvodis?.first.proizvod?.cijena.toString() ??
+              ''
+          : '',
       'ukupnaCijena': null,
     };
 
@@ -298,6 +317,12 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                   children: [
                     FormBuilderDropdown<String>(
                       name: 'proizvodId',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Proizvod je obavezan';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(
                         labelText: 'Proizvod',
                         hintText: 'Odaberite proizvod',
@@ -327,12 +352,24 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                     SizedBox(height: 8),
                     FormBuilderTextField(
                       name: "kupacId",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Kupac ID je obavezan';
+                        }
+                        return null;
+                      },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(labelText: "Kupac ID"),
                     ),
                     SizedBox(height: 8),
                     FormBuilderTextField(
                       name: "cijena",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Cijena je obavezna';
+                        }
+                        return null;
+                      },
                       enabled: false,
                       decoration: InputDecoration(labelText: "Cijena"),
                     ),
@@ -341,6 +378,12 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                       name: "kolicina",
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(labelText: "Količina"),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Količina je obavezna';
+                        }
+                        return null;
+                      },
                       onChanged: (value) {
                         String? proizvodId =
                             _formKey.currentState!.fields['proizvodId']?.value;
@@ -355,6 +398,13 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                     SizedBox(height: 8),
                     FormBuilderDateTimePicker(
                       name: "datum",
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Datum je obavezan';
+                        }
+
+                        return null;
+                      },
                       initialValue: narudzba?.datum != null
                           ? DateTime.parse(narudzba!.datum!.toString())
                           : DateTime.now(),
@@ -378,7 +428,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                 final formData =
                     Map<String, dynamic>.from(_formKey.currentState!.value);
 
-                // Dohvati odabrani proizvod
                 String? proizvodId = formData['proizvodId'];
                 var selectedProduct = productResult?.result.firstWhere(
                   (p) => p.proizvodId.toString() == proizvodId,
@@ -393,13 +442,13 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                   {
                     "proizvodID": int.parse(formData['proizvodId']),
                     "kolicina": kolicina,
-                    "cijena": cijena, // Postavite cijenu proizvoda
+                    "cijena": cijena,
                   }
                 ];
 
                 Map<String, dynamic> requestData = {
                   "datum": (formData['datum'] as DateTime).toIso8601String(),
-                  "ukupnaCijena": ukupnaCijena, // Postavite ukupnu cijenu
+                  "ukupnaCijena": ukupnaCijena,
                   "korisnikId": int.parse(formData['kupacId']),
                   "listaProizvoda": listaProizvoda,
                 };
@@ -416,7 +465,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                 }
 
                 Navigator.pop(context);
-                _loadData(); // Osvežite listu narudžbi nakon dodavanja/izmjene
+                _loadData();
               },
               child: Text("Sačuvaj"),
             ),

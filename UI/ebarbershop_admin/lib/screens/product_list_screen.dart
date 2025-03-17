@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:ebarbershop_admin/models/product.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/models/vrsta_proizvoda.dart';
@@ -5,6 +9,7 @@ import 'package:ebarbershop_admin/providers/product_provider.dart';
 import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
@@ -23,8 +28,27 @@ class _ProductListScreenState extends State<ProductListScreen> {
   bool _isLoading = false;
   TextEditingController _nazivController = TextEditingController();
   TextEditingController _opisController = TextEditingController();
-
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+  TextEditingController _slikaController = TextEditingController();
   final _formKey = GlobalKey<FormBuilderState>();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+
+      setState(() {
+        _selectedImage = imageFile;
+      });
+
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+      _slikaController.text = base64Image;
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -34,9 +58,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _fetchData();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _fetchData({String? naziv, String? opis}) async {
     setState(() => _isLoading = true);
-    var productData = await _productProvider.get();
+    var productData = await _productProvider
+        .get(filter: {'naziv': naziv ?? '', 'opis': opis ?? ''});
     var vrstaProizvodaData = await _vrstaProizvodaProvider.get();
     setState(() {
       result = productData;
@@ -59,6 +84,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Widget _buildSearch() {
     return Card(
+      color: Colors.blueGrey,
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
@@ -69,8 +95,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 decoration: InputDecoration(
                   labelText: "Naziv",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _nazivController,
+                onChanged: (value) {
+                  _fetchData(naziv: value, opis: _opisController.text);
+                },
               ),
             ),
             SizedBox(width: 16),
@@ -79,24 +111,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 decoration: InputDecoration(
                   labelText: "Opis",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _opisController,
+                onChanged: (value) {
+                  _fetchData(naziv: _nazivController.text, opis: value);
+                },
               ),
-            ),
-            SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: () async {
-                setState(() => _isLoading = true);
-                var data = await _productProvider.get(filter: {
-                  'naziv': _nazivController.text,
-                  'opis': _opisController.text
-                });
-                setState(() {
-                  result = data;
-                  _isLoading = false;
-                });
-              },
-              child: Text("Pretraga"),
             ),
             SizedBox(width: 16),
             ElevatedButton(
@@ -114,60 +137,86 @@ class _ProductListScreenState extends State<ProductListScreen> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.black),
+          dataRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey[900]!),
           columns: [
             DataColumn(
-                label:
-                    Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
+                label: Text('ID',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
                 label: Text('Naziv',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
                 label: Text('Opis',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
                 label: Text('Cijena',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
                 label: Text('Slika',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
                 label: Text('Akcije',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
           ],
-          rows: result?.result
-                  .map((Product e) => DataRow(
-                        cells: [
-                          DataCell(Text(e.proizvodId.toString() ?? "")),
-                          DataCell(Text(e.naziv ?? "")),
-                          DataCell(Text(e.opis ?? "")),
-                          DataCell(Text(formatNumber(e.cijena))),
-                          DataCell(
-                            Container(
-                              width: 100,
-                              height: 100,
-                              child: (e.slika != "string")
-                                  ? Image.network(e.slika!)
-                                  : Icon(Icons.image),
-                            ),
+          rows: result?.result.asMap().entries.map((entry) {
+                int index = entry.key;
+                Product e = entry.value;
+
+                return DataRow(
+                  color: MaterialStateColor.resolveWith(
+                    (states) =>
+                        index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
+                  ),
+                  cells: [
+                    DataCell(Text(e.proizvodId.toString() ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.naziv ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.opis ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(formatNumber(e.cijena),
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(e.slika != null && e.slika!.isNotEmpty
+                        ? (e.slika!.startsWith('http')
+                            ? Image.network(
+                                e.slika!,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.memory(base64Decode(e.slika!),
+                                width: 50, height: 50, fit: BoxFit.cover))
+                        : Icon(
+                            Icons.image,
+                            size: 50,
+                            color: Colors.white,
+                          )),
+                    DataCell(
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _showProductDialog(product: e),
                           ),
-                          DataCell(
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () =>
-                                      _showProductDialog(product: e),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => _deleteProduct(e),
-                                ),
-                              ],
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteProduct(e),
                           ),
                         ],
-                      ))
-                  .toList() ??
+                      ),
+                    ),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),
@@ -216,6 +265,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void _showProductDialog({Product? product}) {
+    _selectedImage = null;
+
     final initialValues = {
       'naziv': product?.naziv ?? "",
       'opis': product?.opis ?? "",
@@ -230,8 +281,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
       builder: (context) => AlertDialog(
         title: Text(product == null ? "Dodaj proizvod" : "Uredi proizvod"),
         content: Container(
-          width: 400, // Fiksna širina dijaloga
-          height: 380, // Fiksna visina dijaloga
+          width: 400,
+          height: 450,
           child: SingleChildScrollView(
             child: FormBuilder(
               key: _formKey,
@@ -242,30 +293,102 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   FormBuilderTextField(
                     name: 'naziv',
                     decoration: InputDecoration(labelText: "Naziv"),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Naziv je obavezan';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 8), // Smanjen razmak
+                  SizedBox(height: 8),
                   FormBuilderTextField(
                     name: 'opis',
                     decoration: InputDecoration(labelText: "Opis"),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Opis je obavezan';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 8), // Smanjen razmak
+                  SizedBox(height: 8),
                   FormBuilderTextField(
                     name: 'cijena',
                     decoration: InputDecoration(labelText: "Cijena"),
                     keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Cijena je obavezna';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 8), // Smanjen razmak
-                  FormBuilderTextField(
+                  SizedBox(height: 8),
+                  FormBuilderField(
                     name: 'slika',
-                    decoration: InputDecoration(labelText: "Slika"),
+                    validator: (value) {
+                      if (_selectedImage == null &&
+                          (product == null ||
+                              product?.slika == null ||
+                              product!.slika!.isEmpty)) {
+                        return 'Slika je obavezna';
+                      }
+                      return null;
+                    },
+                    builder: ((field) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          label: Text('Izaberite sliku'),
+                          errorText:
+                              field.errorText, // Prikazuje grešku ako postoji
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.photo),
+                          title: _selectedImage != null
+                              ? Image.file(
+                                  _selectedImage!,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                )
+                              : (product?.slika != null &&
+                                      product!.slika!.isNotEmpty
+                                  ? (product!.slika!.startsWith('http')
+                                      ? Image.network(
+                                          product!.slika!,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.memory(
+                                          base64Decode(product!.slika!),
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        ))
+                                  : Text('Nema slike')),
+                          trailing: Icon(Icons.file_upload),
+                          onTap: () {
+                            _pickImage();
+                            setState(() {});
+                          },
+                        ),
+                      );
+                    }),
                   ),
-                  SizedBox(height: 8), // Smanjen razmak
+                  SizedBox(height: 8),
                   FormBuilderTextField(
                     name: 'zalihe',
                     decoration: InputDecoration(labelText: "Zalihe"),
                     keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Zalihe su obavezne';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 8), // Smanjen razmak
+                  SizedBox(height: 8),
                   FormBuilderDropdown<String>(
                     name: 'vrstaProizvodaId',
                     decoration: InputDecoration(labelText: "Vrsta proizvoda"),
@@ -276,8 +399,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                 ))
                             .toList() ??
                         [],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vrsta proizvoda je obavezna';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 12), // Smanjen razmak prije dugmadi
+                  SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -285,12 +414,36 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         onPressed: () => Navigator.pop(context),
                         child: Text("Odustani"),
                       ),
-                      SizedBox(width: 8), // Smanjen razmak između dugmadi
+                      SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () async {
                           if (_formKey.currentState?.saveAndValidate() ??
                               false) {
                             final formData = _formKey.currentState?.value;
+
+                            // Check if at least one parameter is entered
+                            if (formData?['naziv'].isEmpty &&
+                                formData?['opis'].isEmpty &&
+                                formData?['cijena'].isEmpty &&
+                                formData?['slika'].isEmpty &&
+                                formData?['zalihe'].isEmpty &&
+                                formData?['vrstaProizvodaId'].isEmpty) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Greška"),
+                                  content: Text(
+                                      "Svi parametri su obavezni za unos."),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("OK"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              return;
+                            }
 
                             try {
                               if (product == null) {
@@ -299,7 +452,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                   'opis': formData?['opis'],
                                   'cijena': double.tryParse(
                                       formData?['cijena'] ?? "0"),
-                                  'slika': formData?['slika'],
+                                  'slika': _slikaController.text,
                                   'zalihe':
                                       int.tryParse(formData?['zalihe'] ?? "0"),
                                   'vrstaProizvodaId':
@@ -313,7 +466,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     'opis': formData?['opis'],
                                     'cijena': double.tryParse(
                                         formData?['cijena'] ?? "0"),
-                                    'slika': formData?['slika'],
+                                    'slika': _slikaController.text,
                                     'zalihe': int.tryParse(
                                         formData?['zalihe'] ?? "0"),
                                     'vrstaProizvodaId':

@@ -2,7 +2,6 @@ import 'package:ebarbershop_admin/models/grad.dart';
 // ignore_for_file: sort_child_properties_last
 
 import 'package:ebarbershop_admin/models/search_result.dart';
-// import 'package:ebarbershop_admin/models/uloga.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
 import 'package:ebarbershop_admin/providers/grad_provider.dart';
 import 'package:ebarbershop_admin/providers/korisnik_provider.dart';

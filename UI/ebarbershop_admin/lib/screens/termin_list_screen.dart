@@ -54,6 +54,7 @@ class _TerminListScreenState extends State<TerminListScreen> {
 
   Widget _buildSearch() {
     return Card(
+      color: Colors.blueGrey,
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
@@ -64,8 +65,14 @@ class _TerminListScreenState extends State<TerminListScreen> {
                 decoration: InputDecoration(
                   labelText: "Ime i prezime",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _imePrezimeController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
             ),
             SizedBox(width: 16),
@@ -74,16 +81,15 @@ class _TerminListScreenState extends State<TerminListScreen> {
                 decoration: InputDecoration(
                   labelText: "Datum termina",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _datumRezervacijeController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
-            ),
-            SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: () async {
-                await _loadData();
-              },
-              child: Text("Pretraga"),
             ),
           ],
         ),
@@ -95,102 +101,114 @@ class _TerminListScreenState extends State<TerminListScreen> {
     return Expanded(
       child: SingleChildScrollView(
         child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.black),
+          dataRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey[900]!),
           columns: [
             DataColumn(
               label: Text(
                 'ID',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
             DataColumn(
               label: Text(
                 'Frizer',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
             DataColumn(
               label: Text(
                 'Datum termina',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
             const DataColumn(
               label: Text(
                 'Akcije',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
-          rows: result?.result
-                  .map(
-                    (Rezervacija e) => DataRow(
-                      cells: [
-                        DataCell(Text(e.korisnikId?.toString() ?? "")),
-                        DataCell(Text(
-                          "${e.korisnik?.ime ?? 'Nepoznato'} ${e.korisnik?.prezime ?? ''}",
-                        )),
-                        DataCell(Text(
-                            e.datumRezervacije?.toIso8601String() ?? "N/A")),
-                        DataCell(
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              bool? potvrda = await showDialog(
+          rows: result?.result.asMap().entries.map((entry) {
+                int index = entry.key;
+                Rezervacija e = entry.value;
+
+                return DataRow(
+                  color: MaterialStateColor.resolveWith(
+                    (states) =>
+                        index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
+                  ),
+                  cells: [
+                    DataCell(Text(e.korisnikId?.toString() ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(
+                        "${e.korisnik?.ime ?? 'Nepoznato'} ${e.korisnik?.prezime ?? ''}",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(
+                        e.datumRezervacije?.toIso8601String() ?? "N/A",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          bool? potvrda = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text("Potvrda"),
+                              content: Text(
+                                  "Da li ste sigurni da želite obrisati ovaj termin?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text("Ne"),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text("Da"),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (potvrda == true) {
+                            try {
+                              if (e.rezervacijaId != null) {
+                                await _rezervacijaProvider
+                                    .delete(e.rezervacijaId!);
+
+                                await _loadData();
+                              } else {
+                                throw Exception("Termin ID je null.");
+                              }
+                            } catch (e) {
+                              showDialog(
                                 context: context,
                                 builder: (BuildContext context) => AlertDialog(
-                                  title: Text("Potvrda"),
-                                  content: Text(
-                                      "Da li ste sigurni da želite obrisati ovaj termin?"),
+                                  title: Text("Greška"),
+                                  content: Text(e.toString()),
                                   actions: [
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: Text("Ne"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: Text("Da"),
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("OK"),
                                     ),
                                   ],
                                 ),
                               );
-
-                              if (potvrda == true) {
-                                try {
-                                  if (e.rezervacijaId != null) {
-                                    await _rezervacijaProvider
-                                        .delete(e.rezervacijaId!);
-
-                                    await _loadData();
-                                  } else {
-                                    throw Exception("Termin ID je null.");
-                                  }
-                                } catch (e) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        AlertDialog(
-                                      title: Text("Greška"),
-                                      content: Text(e.toString()),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: Text("OK"),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                            }
+                          }
+                        },
+                      ),
                     ),
-                  )
-                  .toList() ??
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),

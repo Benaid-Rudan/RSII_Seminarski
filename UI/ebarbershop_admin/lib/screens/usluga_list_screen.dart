@@ -28,7 +28,6 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
   TextEditingController _uslugaController = TextEditingController();
   TextEditingController _datumRezervacijeController = TextEditingController();
 
-  // Controllers for the dialog
   TextEditingController _nazivController = TextEditingController();
   TextEditingController _opisController = TextEditingController();
   TextEditingController _cijenaController = TextEditingController();
@@ -66,6 +65,7 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
 
   Widget _buildSearch() {
     return Card(
+      color: Colors.blueGrey,
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -76,17 +76,17 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                 decoration: InputDecoration(
                   labelText: "Usluga",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _uslugaController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
             ),
             SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: () async {
-                await _loadData();
-              },
-              child: Text("Pretraga"),
-            ),
             SizedBox(width: 16),
             ElevatedButton(
               onPressed: () {
@@ -104,20 +104,50 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
     return Expanded(
       child: SingleChildScrollView(
         child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.black),
+          dataRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey[900]!),
           columns: [
-            DataColumn(label: Text('ID')),
-            DataColumn(label: Text('Usluga')),
-            DataColumn(label: Text('Opis')),
-            DataColumn(label: Text('Cijena')),
-            DataColumn(label: Text('Akcije')),
+            DataColumn(
+                label: Text('ID',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Usluga',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Opis',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Cijena',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
+            DataColumn(
+                label: Text('Akcije',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
           ],
-          rows: result?.result.map((Usluga e) {
+          rows: result?.result.asMap().entries.map((entry) {
+                int index = entry.key;
+                Usluga e = entry.value;
+
                 return DataRow(
+                  color: MaterialStateColor.resolveWith(
+                    (states) =>
+                        index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
+                  ),
                   cells: [
-                    DataCell(Text(e.uslugaId.toString() ?? "")),
-                    DataCell(Text(e.naziv ?? "")),
-                    DataCell(Text(e.opis ?? "")),
-                    DataCell(Text(e.cijena.toString() ?? "")),
+                    DataCell(Text(e.uslugaId.toString() ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.naziv ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.opis ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.cijena.toString() ?? "",
+                        style: TextStyle(color: Colors.white))),
                     DataCell(
                       Row(
                         children: [
@@ -241,14 +271,12 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                   _cijenaController.text.isNotEmpty) {
                 try {
                   if (usluga == null) {
-                    // Add new usluga
                     await _uslugaProvider.insert({
                       'naziv': _nazivController.text,
                       'opis': _opisController.text,
                       'cijena': double.parse(_cijenaController.text),
                     });
                   } else {
-                    // Update existing usluga
                     await _uslugaProvider.update(usluga.uslugaId!, {
                       'naziv': _nazivController.text,
                       'opis': _opisController.text,

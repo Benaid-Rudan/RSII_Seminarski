@@ -1,9 +1,10 @@
+import 'package:ebarbershop_admin/main.dart';
+import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:ebarbershop_admin/screens/arhiv.dart';
 import 'package:ebarbershop_admin/screens/usluga_list_screen.dart';
 import 'package:ebarbershop_admin/screens/narudzba_list_screen.dart';
 import 'package:ebarbershop_admin/screens/novost_list_screen.dart';
-import 'package:ebarbershop_admin/screens/product_details.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
 import 'package:ebarbershop_admin/screens/rezervacija_list_screen.dart';
@@ -14,8 +15,12 @@ class MasterScreenWidget extends StatefulWidget {
   final String? title;
   final Widget? title_widget;
 
-  const MasterScreenWidget(
-      {this.child, this.title, this.title_widget, super.key});
+  const MasterScreenWidget({
+    this.child,
+    this.title,
+    this.title_widget,
+    super.key,
+  });
 
   @override
   State<MasterScreenWidget> createState() => _MasterScreenWidgetState();
@@ -24,6 +29,7 @@ class MasterScreenWidget extends StatefulWidget {
 class _MasterScreenWidgetState extends State<MasterScreenWidget> {
   @override
   Widget build(BuildContext context) {
+    String username = Authorization.username ?? "Guest";
     return Scaffold(
       body: Row(
         children: [
@@ -32,15 +38,35 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
             color: Colors.blueGrey[900],
             child: Column(
               children: [
-                const SizedBox(height: 50),
-                menuItem("Zaposlenici", KorisnikListScreen()),
-                menuItem("Proizvodi", ProductListScreen()),
-                menuItem("Rezervacije", RezervacijaListScreen()),
-                menuItem("Novosti", NovostListScreen()),
-                menuItem("Termini", TerminListScreen()),
-                menuItem("Narudžbe", NarudzbaListScreen()),
-                menuItem("Usluge", UslugaListScreen()),
-                menuItem("Arhiva", ArhivaListScreen()),
+                const SizedBox(height: 30),
+                Icon(Icons.cut, size: 50, color: Colors.white),
+                const SizedBox(height: 20),
+                Text(
+                  "Hello, $username",
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                menuItem("Zaposlenici", Icons.people, KorisnikListScreen()),
+                menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
+                menuItem("Rezervacije", Icons.calendar_today,
+                    RezervacijaListScreen()),
+                menuItem("Novosti", Icons.article, NovostListScreen()),
+                menuItem("Termini", Icons.schedule, TerminListScreen()),
+                menuItem("Narudžbe", Icons.shopping_cart, NarudzbaListScreen()),
+                menuItem("Usluge", Icons.design_services, UslugaListScreen()),
+                menuItem("Arhiva", Icons.archive, ArhivaListScreen()),
+                const Spacer(),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.white),
+                  title: const Text("Odjava",
+                      style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -60,8 +86,9 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
     );
   }
 
-  Widget menuItem(String title, Widget screen) {
+  Widget menuItem(String title, IconData icon, Widget screen) {
     return ListTile(
+      leading: Icon(icon, color: Colors.white),
       title: Text(title, style: const TextStyle(color: Colors.white)),
       onTap: () {
         Navigator.of(context).push(

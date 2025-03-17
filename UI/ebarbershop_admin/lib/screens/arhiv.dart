@@ -54,6 +54,7 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
 
   Widget _buildSearch() {
     return Card(
+      color: Colors.blueGrey,
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,8 +65,14 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
                 decoration: InputDecoration(
                   labelText: "Datum obavljene usluge",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _datumController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
             ),
             SizedBox(width: 16),
@@ -74,15 +81,17 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
                 decoration: InputDecoration(
                   labelText: "Naziv usluge",
                   border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
                 controller: _uslugaController,
+                onChanged: (value) {
+                  _loadData();
+                },
               ),
             ),
             SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: _loadData,
-              child: Text("Pretraga"),
-            ),
           ],
         ),
       ),
@@ -93,12 +102,17 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
     return Expanded(
       child: SingleChildScrollView(
         child: DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.black),
+          dataRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey[900]!),
           columns: [
             DataColumn(
               label: Expanded(
                 child: Text(
                   'Datum',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -106,22 +120,29 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
               label: Expanded(
                 child: Text(
                   'Usluga',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ],
-          rows: result?.result
-                  .map(
-                    (Rezervacija e) => DataRow(
-                      cells: [
-                        DataCell(
-                            Text(e.datumRezervacije?.toIso8601String() ?? "")),
-                        DataCell(Text(e.usluga?.naziv ?? "")),
-                      ],
-                    ),
-                  )
-                  .toList() ??
+          rows: result?.result.asMap().entries.map((entry) {
+                int index = entry.key;
+                Rezervacija e = entry.value;
+
+                return DataRow(
+                  color: MaterialStateColor.resolveWith(
+                    (states) =>
+                        index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
+                  ),
+                  cells: [
+                    DataCell(Text(e.datumRezervacije?.toIso8601String() ?? "",
+                        style: TextStyle(color: Colors.white))),
+                    DataCell(Text(e.usluga?.naziv ?? "",
+                        style: TextStyle(color: Colors.white))),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),
