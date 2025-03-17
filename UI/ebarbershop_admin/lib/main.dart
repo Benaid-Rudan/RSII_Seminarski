@@ -8,8 +8,10 @@ import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
 import 'package:ebarbershop_admin/providers/termin_provider.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
 import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
+import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
+import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,107 +32,6 @@ void main() {
   ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        primarySwatch: Colors.blue,
-      ),
-      home: LayoutExamples(),
-    );
-  }
-}
-
-class MyAppBar extends StatelessWidget {
-  String title;
-  MyAppBar({Key? key, required this.title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(title);
-  }
-}
-
-class Counter extends StatefulWidget {
-  const Counter({super.key});
-
-  @override
-  State<Counter> createState() => _CounterState();
-}
-
-class _CounterState extends State<Counter> {
-  int _count = 0;
-  void incrementCounter() {
-    setState(() {
-      _count++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('You have pushed $_count times'),
-        ElevatedButton(onPressed: incrementCounter, child: Text("Increment++")),
-      ],
-    );
-  }
-}
-
-class LayoutExamples extends StatelessWidget {
-  const LayoutExamples({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 150,
-          color: Colors.red,
-          child: Center(
-            child: Container(
-              height: 100,
-              color: Colors.blue,
-              child: Text("Example text"),
-              alignment: Alignment.center,
-            ),
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [Text("Item1"), Text("Item2"), Text("Item3")],
-        ),
-        Container(
-          height: 150,
-          color: Colors.red,
-          child: Text("Container 2"),
-          alignment: Alignment.center,
-        )
-      ],
-    );
-  }
-}
-
 class MyMaterialApp extends StatelessWidget {
   const MyMaterialApp({super.key});
 
@@ -138,17 +39,42 @@ class MyMaterialApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RS II Material app',
-      // theme: ThemeData(primarySwatch: Colors.blue),
       theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.blueGrey, // Crna pozadina
+        primaryColor: Colors.white,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.white,
+          secondary: Colors.grey[700]!,
+        ),
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
+          elevation: 4,
         ),
         inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[900], // Tamna pozadina polja
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 2.0),
+            borderSide: BorderSide(color: Colors.white, width: 2.0),
           ),
-          labelStyle: TextStyle(color: Colors.blue),
+          labelStyle: TextStyle(color: Colors.white),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          prefixIconColor: Colors.white, // Boja ikonica u poljima
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+          ),
+        ),
+        textTheme: TextTheme(
+          titleLarge: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
+          bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
         ),
       ),
       home: LoginPage(),
@@ -159,78 +85,131 @@ class MyMaterialApp extends StatelessWidget {
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
-  TextEditingController _usernameController = new TextEditingController();
-  TextEditingController _passwordController = new TextEditingController();
-  late ProductProvider _productProvider;
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  late KorisnikProvider _korisnikProvider;
 
   @override
   Widget build(BuildContext context) {
-    _productProvider = context.read<ProductProvider>();
+    _korisnikProvider = context.read<KorisnikProvider>();
     return Scaffold(
       appBar: AppBar(title: Text("Login")),
-      body: Center(
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 400, maxHeight: 400),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Image.network(
-                  //   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsCf_sywD508Bnnq-s_hC35LrhMaBNM3jfrA&s",
-                  // height: 100,
-                  // width: 100,
-                  // ),
-                  Image.asset(
-                    "assets/images/logo.png",
-                    height: 100,
-                    width: 100,
-                  ),
-
-                  TextField(
+      body: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 400, maxHeight: 400),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cut,
+                      size: 100,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
                       decoration: InputDecoration(
-                          labelText: "Username", prefixIcon: Icon(Icons.email)),
-                      controller: _usernameController),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  TextField(
+                        labelText: "Username",
+                        prefixIcon: Icon(Icons.email, color: Colors.white),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      controller: _usernameController,
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
                       decoration: InputDecoration(
-                          labelText: "Password",
-                          prefixIcon: Icon(Icons.password)),
-                      controller: _passwordController),
-                  ElevatedButton(
+                        labelText: "Password",
+                        prefixIcon: Icon(Icons.password, color: Colors.white),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      controller: _passwordController,
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton(
                       onPressed: () async {
-                        var username = _usernameController.text;
-                        var password = _passwordController.text;
+                        var username = _usernameController.text.trim();
+                        var password = _passwordController.text.trim();
+
+                        if (username.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Molimo unesite ispravan username i password."),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return; // Zaustavi daljnje izvršavanje
+                        }
+
                         print("Login proceed $username $password");
 
                         Authorization.username = username;
                         Authorization.password = password;
 
                         try {
-                          await _productProvider.get();
+                          // Dohvati podatke o korisniku
+                          var korisnici = await _korisnikProvider.get(filter: {
+                            'username': username,
+                          });
 
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const ProductListScreen(),
-                          ));
+                          if (korisnici.result.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Korisnik nije pronađen."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          var korisnik = korisnici.result.first;
+
+                          // Provjeri ima li korisnik ulogu "Administrator"
+                          if (korisnik.uloge != "Administrator") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    "Samo korisnici s ulogom Administrator mogu se prijaviti."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // Ako je korisnik administrator, preusmjeri na MasterScreen
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => MasterScreenWidget(
+                                title: "Proizvodi",
+                                child: ProductListScreen(),
+                              ),
+                            ),
+                          );
                         } on Exception catch (e) {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                    title: Text("Error"),
-                                    content: Text(e.toString()),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: Text("OK"))
-                                    ],
-                                  ));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text("Neuspješna prijava: ${e.toString()}"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
                         }
                       },
-                      child: Text("Login"))
-                ],
+                      child: Text("Login"),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -27,7 +27,6 @@ class _NovostDetailsScreenState extends State<NovostDetailsScreen> {
     super.initState();
     _novostProvider = context.read<NovostProvider>();
 
-    // Initialize form values with the existing `novost` data
     _initialValue = {
       'novostId': widget.novost?.novostId,
       'naslov': widget.novost?.naslov,
@@ -58,11 +57,9 @@ class _NovostDetailsScreenState extends State<NovostDetailsScreen> {
                     print(_formKey.currentState?.value);
                     try {
                       if (widget.novost == null) {
-                        // Insert a new novost
                         await _novostProvider
                             .insert(_formKey.currentState?.value);
                       } else {
-                        // Update existing novost
                         await _novostProvider.update(
                           widget.novost!.novostId!,
                           _formKey.currentState!.value,

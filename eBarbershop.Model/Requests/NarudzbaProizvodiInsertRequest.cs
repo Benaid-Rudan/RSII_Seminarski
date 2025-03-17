@@ -9,7 +9,9 @@ namespace eBarbershop.Model.Requests
 {
     public class NarudzbaProizvodiInsertRequest
     {
+        [Required]
         public int ProizvodID { get; set; }
+        [Required]
         public int Kolicina { get; set; }
     }
 }

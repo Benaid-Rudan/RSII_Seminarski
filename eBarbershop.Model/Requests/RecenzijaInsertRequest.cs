@@ -14,6 +14,7 @@ namespace eBarbershop.Model.Requests
         [Required(AllowEmptyStrings = false, ErrorMessage = "Ocjena ne smije ostati prazno polje")]
 
         public int Ocjena { get; set; }
+        [Required]
 
         public DateTime Datum { get; set; }
         [Required]

@@ -18,12 +18,3 @@ class Product {
       _$ProductFromJson(json);
   Map<String, dynamic> toJson() => _$ProductToJson(this);
 }
-
-
-//     "proizvodId": 2,
-//     "naziv": "Masinica za kosu",
-//     "opis": "Masinica za kosu",
-//     "cijena": 10,
-//     "zalihe": 10,
-//     "slika": "string",
-//     "vrstaProizvodaId": 1

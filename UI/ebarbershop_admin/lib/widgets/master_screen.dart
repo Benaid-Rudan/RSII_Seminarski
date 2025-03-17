@@ -1,23 +1,26 @@
 import 'package:ebarbershop_admin/main.dart';
-import 'package:ebarbershop_admin/models/korisnik.dart';
-import 'package:ebarbershop_admin/models/narudzba.dart';
+import 'package:ebarbershop_admin/utils/util.dart';
+import 'package:flutter/material.dart';
 import 'package:ebarbershop_admin/screens/arhiv.dart';
 import 'package:ebarbershop_admin/screens/usluga_list_screen.dart';
 import 'package:ebarbershop_admin/screens/narudzba_list_screen.dart';
 import 'package:ebarbershop_admin/screens/novost_list_screen.dart';
-import 'package:ebarbershop_admin/screens/product_details.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
 import 'package:ebarbershop_admin/screens/rezervacija_list_screen.dart';
 import 'package:ebarbershop_admin/screens/termin_list_screen.dart';
 
-import 'package:flutter/material.dart';
-
 class MasterScreenWidget extends StatefulWidget {
-  Widget? child;
-  String? title;
-  Widget? title_widget;
-  MasterScreenWidget({this.child, this.title, this.title_widget, super.key});
+  final Widget? child;
+  final String? title;
+  final Widget? title_widget;
+
+  const MasterScreenWidget({
+    this.child,
+    this.title,
+    this.title_widget,
+    super.key,
+  });
 
   @override
   State<MasterScreenWidget> createState() => _MasterScreenWidgetState();
@@ -26,103 +29,77 @@ class MasterScreenWidget extends StatefulWidget {
 class _MasterScreenWidgetState extends State<MasterScreenWidget> {
   @override
   Widget build(BuildContext context) {
+    String username = Authorization.username ?? "Guest";
     return Scaffold(
-      appBar: AppBar(
-        title: widget.title_widget ?? Text(widget.title ?? ""),
+      body: Row(
+        children: [
+          Container(
+            width: 250,
+            color: Colors.blueGrey[900],
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                Icon(Icons.cut, size: 50, color: Colors.white),
+                const SizedBox(height: 20),
+                Text(
+                  "Hello, $username",
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                menuItem("Zaposlenici", Icons.people, KorisnikListScreen()),
+                menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
+                menuItem("Rezervacije", Icons.calendar_today,
+                    RezervacijaListScreen()),
+                menuItem("Novosti", Icons.article, NovostListScreen()),
+                menuItem("Termini", Icons.schedule, TerminListScreen()),
+                menuItem("Narudžbe", Icons.shopping_cart, NarudzbaListScreen()),
+                menuItem("Usluge", Icons.design_services, UslugaListScreen()),
+                menuItem("Arhiva", Icons.archive, ArhivaListScreen()),
+                const Spacer(),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.white),
+                  title: const Text("Odjava",
+                      style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                AppBar(
+                  title: widget.title_widget ?? Text(widget.title ?? ""),
+                  backgroundColor: Colors.blueGrey,
+                ),
+                Expanded(child: widget.child ?? Container()),
+              ],
+            ),
+          ),
+        ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            ListTile(
-              title: Text("Login page"),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage(),
-                  ),
-                );
-              },
+    );
+  }
+
+  Widget menuItem(String title, IconData icon, Widget screen) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MasterScreenWidget(
+              title: title,
+              child: screen,
             ),
-            ListTile(
-              title: Text("Zaposlenici"),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => KorisnikListScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text("Proizvodi"),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ProductListScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: Text("Detalji"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ProductDetailsScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Rezervacije"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => RezervacijaListScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Novosti"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => NovostListScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Termini"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => TerminListScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Narudzbe"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => NarudzbaListScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Usluge"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UslugaListScreen(),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text("Arhiva"),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ArhivaListScreen(),
-                ));
-              },
-            ),
-          ],
-        ),
-      ),
-      body: widget.child!,
+          ),
+        );
+      },
     );
   }
 }

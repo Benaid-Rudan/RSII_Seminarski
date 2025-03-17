@@ -27,7 +27,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     print("Initial zalihe: ${widget.product?.zalihe}");
     _initalValue = {
@@ -36,8 +35,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       'slika': widget.product?.slika,
       'cijena': widget.product?.cijena?.toString(),
       'zalihe': widget.product?.zalihe?.toString(),
-      'vrstaProizvodaId':
-          widget.product?.vrstaProizvodaId?.toString(), // Convert int to String
+      'vrstaProizvodaId': widget.product?.vrstaProizvodaId?.toString(),
     };
 
     _vrstaProizvodaProvider = context.read<VrstaProizvodaProvider>();
@@ -56,15 +54,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    // if (widget.product != null) {
-    //   setState(() {
-    //     _formKey.currentState?.patchValue({
-    //       'naziv': widget.product?.naziv ?? "product details",
-    //     });
-    //   });
-    // }
   }
 
   @override
@@ -115,7 +105,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ],
           ),
-          //
         ],
       ),
       title: this.widget.product?.naziv ?? "Product details",
@@ -138,7 +127,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               SizedBox(
                 width: 10,
-              ), // Dodaje razmak između polja
+              ),
               Expanded(
                 child: FormBuilderTextField(
                   name: "opis",
@@ -147,7 +136,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               SizedBox(
                 width: 10,
-              ), // Dodaje razmak između polja
+              ),
               Expanded(
                 child: FormBuilderTextField(
                   name: "zalihe",
@@ -193,8 +182,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   items: vrstaProizvodaResult?.result
                           .map((item) => DropdownMenuItem(
                                 alignment: AlignmentDirectional.center,
-                                value: item.vrstaProizvodaId
-                                    .toString(), // Ensure it's a string
+                                value: item.vrstaProizvodaId.toString(),
                                 child: Text(item.naziv ?? ""),
                               ))
                           .toList() ??
