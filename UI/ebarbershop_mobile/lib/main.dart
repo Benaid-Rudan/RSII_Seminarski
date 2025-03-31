@@ -1,122 +1,447 @@
+import 'package:ebarbershop_mobile/models/grad.dart';
+import 'package:ebarbershop_mobile/screens/cart_screen.dart';
+import 'package:ebarbershop_mobile/screens/home_screen.dart';
+import 'package:ebarbershop_mobile/screens/product_details.dart';
+import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
+import 'package:ebarbershop_mobile/screens/user_profile_screen.dart';
+import 'package:ebarbershop_mobile/utils/util.dart';
+import 'package:ebarbershop_mobile/widgets/master_screen.dart';
+import 'package:ebarbershop_mobile/providers/cart_provider.dart';
+import 'package:ebarbershop_mobile/providers/grad_provider.dart';
+import 'package:ebarbershop_mobile/providers/korisnik_provider.dart';
+import 'package:ebarbershop_mobile/providers/narudzba_provider.dart';
+import 'package:ebarbershop_mobile/providers/novost_provider.dart';
+import 'package:ebarbershop_mobile/providers/product_provider.dart';
+import 'package:ebarbershop_mobile/providers/rezervacija_provider.dart';
+import 'package:ebarbershop_mobile/providers/termin_provider.dart';
+import 'package:ebarbershop_mobile/providers/usluga_provider.dart';
+import 'package:ebarbershop_mobile/providers/vrsta_proizvoda.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => CartProvider()),
+      ChangeNotifierProvider(create: (_) => ProductProvider()),
+      ChangeNotifierProvider(create: (_) => VrstaProizvodaProvider()),
+      ChangeNotifierProvider(create: (_) => KorisnikProvider()),
+      ChangeNotifierProvider(create: (_) => GradProvider()),
+      ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
+      ChangeNotifierProvider(create: (_) => UslugaProvider()),
+      ChangeNotifierProvider(create: (_) => NovostProvider()),
+      ChangeNotifierProvider(create: (_) => TerminProvider()),
+      ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
+    ],
+    child: const MyMaterialApp(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyMaterialApp extends StatelessWidget {
+  const MyMaterialApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'RS II Material app',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.blueGrey, // Crna pozadina
+        primaryColor: Colors.white,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.white,
+          secondary: Colors.grey[700]!,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 4,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[900], // Tamna pozadina polja
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 2.0),
+          ),
+          labelStyle: TextStyle(color: Colors.white),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          prefixIconColor: Colors.white, // Boja ikonica u poljima
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+          ),
+        ),
+        textTheme: TextTheme(
+          titleLarge: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
+          bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LoginPage(),
+      routes: {
+        CartScreen.routeName: (context) => CartScreen(),
+        ProductListScreen.routeName: (context) => ProductListScreen(),
+        RegistrationPage.routeName: (context) => RegistrationPage(),
+        UserProfileScreen.routeName: (context) => UserProfileScreen(),
+
+      },
+      // Define dynamic route for product details
+      onGenerateRoute: (settings) {
+        if (settings.name?.startsWith('/product_details/') ?? false) {
+          final productId  = settings.name?.split('/')[2]; // Extract product ID
+          return MaterialPageRoute(
+            builder: (context) => ProductDetailsScreen(proizvodId: productId!),
+          );
+        }
+        return null; // Return null if no matching route
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class LoginPage extends StatelessWidget {
+  LoginPage({super.key});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  late KorisnikProvider _korisnikProvider;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    _korisnikProvider = context.read<KorisnikProvider>();
+    return Scaffold(
+      appBar: AppBar(title: Text("Login")),
+      body: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 400, maxHeight: 400),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cut,
+                      size: 100,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: "Username",
+                        prefixIcon: Icon(Icons.email, color: Colors.white),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      controller: _usernameController,
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: "Password",
+                        prefixIcon: Icon(Icons.password, color: Colors.white),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      controller: _passwordController,
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () async {
+                        var username = _usernameController.text.trim();
+                        var password = _passwordController.text.trim();
+
+                        if (username.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Molimo unesite ispravan username i password."),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return; 
+                        }
+
+                         try {
+                           var korisnici = await _korisnikProvider.get(filter: {
+                             'username': username,
+                           });
+
+                           if (korisnici.result.isEmpty) {
+                             ScaffoldMessenger.of(context).showSnackBar(
+                               SnackBar(
+                                 content: Text("Korisnik nije pronađen."),
+                                 backgroundColor: Colors.red,
+                               ),
+                             );
+                             return;
+                           }
+                            var korisnik = korisnici.result.first;
+                            print('Dobijeni korisnik sa servera: ${korisnik.toJson()}'); 
+                            Authorization.username = username;
+                            Authorization.password = password;
+                            Authorization.userId = korisnik.korisnikId;
+                            Authorization.ime = korisnik.ime;
+                            Authorization.prezime = korisnik.prezime;
+                            Authorization.email = korisnik.email;
+                             Authorization.gradId = korisnik.gradId?.toString();
+                            Authorization.slika = korisnik.slika;
+                            Authorization.localImage = null;
+                             print('Spremljena slika: ${Authorization.slika}');
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => MasterScreenWidget(
+                                 child: HomeScreen(),
+                              ),
+                            ),
+                          );
+                         } on Exception catch (e) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             SnackBar(
+                               content:
+                                   Text("Neuspješna prijava: ${e.toString()}"),
+                               backgroundColor: Colors.red,
+                             ),
+                           );
+                         }
+                      },
+                      child: Text("Login"),
+                    ),
+                    SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RegistrationPage(),
+                          ),
+                        );
+                      },
+                      child: Text("Nemate račun? Registrujte se"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class RegistrationPage extends StatefulWidget {
+  static var routeName = "/registration";
 
-  void _incrementCounter() {
+  @override
+  _RegistrationPageState createState() => _RegistrationPageState();
+}
+
+class _RegistrationPageState extends State<RegistrationPage> {
+  TextEditingController _imeController = TextEditingController();
+  TextEditingController _prezimeController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _passwordPotvrdaController = TextEditingController();
+  int? _selectedGradId;
+  late GradProvider _gradProvider;
+  List<Grad> _gradovi = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _gradProvider = context.read<GradProvider>();
+    _fetchGradovi();
+  }
+
+  Future<void> _fetchGradovi() async {
+    var gradoviData = await _gradProvider.get();
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _gradovi = gradoviData.result;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(title: Text("Registracija")),
+      body: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 400, maxHeight: 800),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cut,
+                        size: 100,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Ime",
+                          prefixIcon: Icon(Icons.person, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _imeController,
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Prezime",
+                          prefixIcon: Icon(Icons.person, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _prezimeController,
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Email",
+                          prefixIcon: Icon(Icons.email, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _emailController,
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Username",
+                          prefixIcon: Icon(Icons.person, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _usernameController,
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Password",
+                          prefixIcon: Icon(Icons.password, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _passwordController,
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: "Potvrdi Password",
+                          prefixIcon: Icon(Icons.password, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        style: TextStyle(color: Colors.white),
+                        controller: _passwordPotvrdaController,
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 8),
+                      DropdownButtonFormField<int>(
+                        decoration: InputDecoration(
+                          labelText: "Grad",
+                          prefixIcon: Icon(Icons.location_city, color: Colors.white),
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedGradId,
+                        items: _gradovi.map((Grad grad) {
+                          return DropdownMenuItem<int>(
+                            value: grad.gradId,
+                            child: Text(grad.naziv ?? "", style: TextStyle(color: Colors.white)),
+                          );
+                        }).toList(),
+                        onChanged: (int? value) {
+                          setState(() {
+                            _selectedGradId = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (_passwordController.text != _passwordPotvrdaController.text) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Lozinke se ne podudaraju."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+                
+                          var korisnik = {
+                            "ime": _imeController.text,
+                            "prezime": _prezimeController.text,
+                            "email": _emailController.text,
+                            "username": _usernameController.text,
+                            "password": _passwordController.text,
+                            "passwordPotvrda": _passwordPotvrdaController.text,
+                            "slika": "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png",
+                            "gradId": _selectedGradId,
+                            "ulogeID": [3],
+                          };
+                
+                          try {
+                            var korisnikProvider = context.read<KorisnikProvider>();
+                            await korisnikProvider.insert(korisnik);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Uspešno ste se registrovali."),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                
+                            // Navigacija natrag na Login page
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => LoginPage(),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Došlo je do greške: ${e.toString()}"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text("Registrujte se"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

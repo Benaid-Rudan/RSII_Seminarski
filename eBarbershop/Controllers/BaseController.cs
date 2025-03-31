@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace eBarbershop.Controllers
 {
     [Route("[controller]")]
-    //[Authorize]
+    [Authorize]
     public class BaseController<T, TSearch> : ControllerBase where T : class where TSearch : class
     {
         protected readonly IService<T, TSearch> _service;
@@ -17,6 +17,7 @@ namespace eBarbershop.Controllers
         }
 
         [HttpGet()]
+        [AllowAnonymous]
         public async Task<IEnumerable<T>> Get([FromQuery]TSearch search = null)
         {
             var a = await _service.Get(search);

@@ -6,7 +6,10 @@ namespace eBarbershop.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProizvodController : BaseCRUDController<Model.Proizvod, Model.SearchObjects.ProizvodSearchObject, Model.Requests.ProizvodInsertRequest, Model.Requests.ProizvodUpdateRequest>
+    public class ProizvodController : BaseCRUDController<Model.Proizvod,
+        Model.SearchObjects.ProizvodSearchObject,
+        Model.Requests.ProizvodInsertRequest, 
+        Model.Requests.ProizvodUpdateRequest>
     {
 
         public ProizvodController(IProizvodService service) : base(service)

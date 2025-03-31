@@ -12,13 +12,16 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public class ProizvodService : BaseCRUDService<Model.Proizvod, Database.Proizvod, ProizvodSearchObject, ProizvodInsertRequest, ProizvodUpdateRequest>, IProizvodService
+    public class ProizvodService : BaseCRUDService<Model.Proizvod, 
+        Database.Proizvod, ProizvodSearchObject, 
+        ProizvodInsertRequest, ProizvodUpdateRequest>, IProizvodService
     {
         public ProizvodService(EBarbershop1Context context, IMapper mapper) : base(context, mapper)
         {
 
         }
-        public override IQueryable<Database.Proizvod> AddInclude(IQueryable<Database.Proizvod> entity, ProizvodSearchObject obj)
+        public override IQueryable<Database.Proizvod> AddInclude(
+            IQueryable<Database.Proizvod> entity, ProizvodSearchObject obj)
         {
             if (obj.IncludeVrstaProizvoda == true)
             {
@@ -27,7 +30,8 @@ namespace eBarbershop.Services
 
             return entity;
         }
-        public override IQueryable<Database.Proizvod> AddFilter(IQueryable<Database.Proizvod> entity, ProizvodSearchObject? obj = null)
+        public override IQueryable<Database.Proizvod> AddFilter(
+            IQueryable<Database.Proizvod> entity, ProizvodSearchObject? obj = null)
         {
             if (obj.VrstaProizvodaID.HasValue)
             {

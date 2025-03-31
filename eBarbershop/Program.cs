@@ -28,6 +28,20 @@ builder.Services.AddTransient<INovostService, NovostService>();
 //builder.Services.AddTransient<IService<eBarbershop.Model.Drzava,BaseSearchObject>, BaseService<eBarbershop.Model.Drzava, eBarbershop.Services.Database.Drzava, BaseSearchObject>>();
 
 builder.Services.AddControllers();
+
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
 //builder.Services.AddControllers().AddJsonOptions(options =>
 //{
 //    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
@@ -72,7 +86,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
