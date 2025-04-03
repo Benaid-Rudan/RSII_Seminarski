@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:ebarbershop_mobile/models/search_result.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
-import 'package:http/io_client.dart';  // Import IOClient
-import 'dart:io';  // Import for HttpClient
+import 'package:http/io_client.dart';  
+import 'dart:io';  
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';  // Import for default HTTP client (used in IOClient)
+import 'package:http/http.dart';  
 
 abstract class BaseProvider<T> with ChangeNotifier {
   static String? _baseUrl;
@@ -13,10 +13,9 @@ abstract class BaseProvider<T> with ChangeNotifier {
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
     _baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "https://10.0.2.2:7286/");  // Make sure the base URL is correct
+        defaultValue: "https://10.0.2.2:7286/");  
   }
 
-  // Create a custom HTTP client that bypasses SSL verification
   IOClient _createClient() {
     HttpClient httpClient = HttpClient()
       ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
@@ -25,39 +24,52 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   Future<SearchResult<T>> get({dynamic filter}) async {
-    var url = "$_baseUrl$_endpoint";
-    if (filter != null) {
-      var queryString = getQueryString(filter);
-      url = "$url?$queryString";
-    }
-    var uri = Uri.parse(url);
-    var headers = createHeaders();
-
-    // Use the custom IOClient instead of the default http client
-    var ioClient = _createClient();
-    var response = await ioClient.get(uri, headers: headers);
-
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-      var result = SearchResult<T>();
-
-      result.count = data.length;
-      for (var item in data) {
-        result.result.add(fromJson(item));
-      }
-
-      return result;
-    } else {
-      throw new Exception("Unknown error");
-    }
+  var url = "$_baseUrl$_endpoint";
+  if (filter != null) {
+    var queryString = getQueryString(filter);
+    url = "$url?$queryString";
   }
+  var uri = Uri.parse(url);
+  var headers = createHeaders();
+
+  
+  var ioClient = _createClient();
+  var response = await ioClient.get(uri, headers: headers);
+
+
+  if (isValidResponse(response)) {
+    try {
+      var data = jsonDecode(response.body);
+      
+      if (data is List) {
+        var result = SearchResult<T>();
+        result.count = data.length;
+        for (var item in data) {
+          result.result.add(fromJson(item));
+        }
+        return result;
+      } else if (data is Map<String, dynamic>) {
+        var result = SearchResult<T>();
+        result.count = 1;
+        result.result.add(fromJson(data));
+        return result;
+      } else {
+        throw Exception("Neočekivani format odgovora");
+      }
+    } catch (e) {
+      debugPrint("Greška pri parsiranju: $e");
+      throw Exception("Greška pri parsiranju API odgovora");
+    }
+  } else {
+    throw Exception("Neuspješan API poziv");
+  }
+}
 
   Future<T> getById(int id) async {
   var url = "$_baseUrl$_endpoint/$id";
   var uri = Uri.parse(url);
   var headers = createHeaders();
 
-  // Use the custom IOClient instead of the default http client
   var ioClient = _createClient();
   var response = await ioClient.get(uri, headers: headers);
 
@@ -113,7 +125,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var response = await ioClient.delete(uri, headers: headers);
 
     if (isValidResponse(response)) {
-      notifyListeners(); // Refresh UI if needed
+      notifyListeners(); 
     } else {
       throw Exception("Failed to delete");
     }

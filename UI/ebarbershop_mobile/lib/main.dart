@@ -1,4 +1,5 @@
 import 'package:ebarbershop_mobile/models/grad.dart';
+import 'package:ebarbershop_mobile/providers/reviews_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
 import 'package:ebarbershop_mobile/screens/product_details.dart';
@@ -32,6 +33,8 @@ void main() {
       ChangeNotifierProvider(create: (_) => NovostProvider()),
       ChangeNotifierProvider(create: (_) => TerminProvider()),
       ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
+      ChangeNotifierProvider(create: (_) => ReviewsProvider()),
+
     ],
     child: const MyMaterialApp(),
   ));
@@ -46,7 +49,7 @@ class MyMaterialApp extends StatelessWidget {
       title: 'RS II Material app',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.blueGrey, // Crna pozadina
+        scaffoldBackgroundColor: Colors.blueGrey, 
         primaryColor: Colors.white,
         colorScheme: ColorScheme.dark(
           primary: Colors.white,
@@ -59,7 +62,7 @@ class MyMaterialApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.grey[900], // Tamna pozadina polja
+          fillColor: Colors.grey[900],
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white, width: 2.0),
           ),
@@ -67,7 +70,7 @@ class MyMaterialApp extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          prefixIconColor: Colors.white, // Boja ikonica u poljima
+          prefixIconColor: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -90,15 +93,14 @@ class MyMaterialApp extends StatelessWidget {
         UserProfileScreen.routeName: (context) => UserProfileScreen(),
 
       },
-      // Define dynamic route for product details
       onGenerateRoute: (settings) {
         if (settings.name?.startsWith('/product_details/') ?? false) {
-          final productId  = settings.name?.split('/')[2]; // Extract product ID
+          final productId  = settings.name?.split('/')[2]; 
           return MaterialPageRoute(
             builder: (context) => ProductDetailsScreen(proizvodId: productId!),
           );
         }
-        return null; // Return null if no matching route
+        return null; 
       },
     );
   }
@@ -417,7 +419,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               ),
                             );
                 
-                            // Navigacija natrag na Login page
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => LoginPage(),

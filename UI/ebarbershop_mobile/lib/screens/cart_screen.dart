@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:ebarbershop_mobile/models/cart.dart';
 import 'package:ebarbershop_mobile/providers/cart_provider.dart';
 import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
-import 'package:ebarbershop_mobile/widgets/ebarbershop_drawer.dart';
 import 'package:ebarbershop_mobile/widgets/master_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
