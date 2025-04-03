@@ -94,8 +94,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       margin: EdgeInsets.all(10),
-      backgroundColor: Colors.red[700], // Tamnija nijansa crvene
-      elevation: 6, // Sjena za bolji 3D efekt
+      backgroundColor: Colors.red[700], 
+      elevation: 6, 
     ),
   );
       }

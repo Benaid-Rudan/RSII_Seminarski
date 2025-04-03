@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late NovostProvider _novostProvider;
   List<Novost> novosti = [];
+  bool _showGallery = false; 
 
   @override
   void initState() {
@@ -54,34 +55,73 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextButton(
-                onPressed: () {},
-                child: Text('Feed'),
+                onPressed: () {
+                  setState(() {
+                    _showGallery = false; 
+                  });
+                },
+                child: Text(
+                  'Feed',
+                  style: TextStyle(
+                    color: !_showGallery ? Colors.amber[800] : Colors.grey,
+                  ),
+                ),
               ),
               TextButton(
-                onPressed: () {},
-                child: Text('Gallery'),
+                onPressed: () {
+                  setState(() {
+                    _showGallery = true; 
+                  });
+                },
+                child: Text(
+                  'Gallery',
+                  style: TextStyle(
+                    color: _showGallery ? Colors.amber[800] : Colors.grey,
+                  ),
+                ),
               ),
             ],
           ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(8.0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // 2 kolone
-                  childAspectRatio: 0.8, // Omjer širine i visine
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: novosti.length,
-                itemBuilder: (context, index) {
-                  return _buildNovostCard(novosti[index]);
-                },
-              ),
+              child: _showGallery 
+                  ? _buildGalleryView() 
+                  : _buildFeedView(),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFeedView() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.8,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: novosti.length,
+      itemBuilder: (context, index) {
+        return _buildNovostCard(novosti[index]);
+      },
+    );
+  }
+
+  Widget _buildGalleryView() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,  
+        childAspectRatio: 1, 
+        crossAxisSpacing: 5,
+        mainAxisSpacing: 5,
+      ),
+      itemCount: novosti.length,
+      itemBuilder: (context, index) {
+        return _buildGalleryImage(novosti[index]);
+      },
     );
   }
 
@@ -112,6 +152,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGalleryImage(Novost novost) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(5),
+      child: _buildNovostImage(novost),
     );
   }
 

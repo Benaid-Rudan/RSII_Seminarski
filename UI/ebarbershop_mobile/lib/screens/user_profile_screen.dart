@@ -149,19 +149,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           if (base64Image != null) "slika": base64Image,
         };
 
-        // Ažurirajte korisnika i dobijte ažuriranog korisnika nazad
         var updatedUser = await korisnikProvider.update(Authorization.userId!, updatedData);
         
-        // Ažurirajte sve Authorization podatke sa podacima sa servera
         Authorization.ime = updatedUser.ime;
         Authorization.prezime = updatedUser.prezime;
         Authorization.email = updatedUser.email;
         Authorization.username = updatedUser.username;
         Authorization.gradId = updatedUser.gradId?.toString();
-        Authorization.slika = updatedUser.slika;  // Ovo je ključno za sliku
-        Authorization.localImage = null;  // Resetirajte lokalnu sliku
+        Authorization.slika = updatedUser.slika;  
+        Authorization.localImage = null;  
         setState(() {
-        // _selectedImage = null;
         _isSaving=false;
       });
         if(mounted){
@@ -171,7 +168,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           Navigator.of(context).pop();
           setState(() {
             _isSaving = false;
-            _selectedImage = null; // Resetirajte odabranu sliku
+            _selectedImage = null; 
           });
         }
       } catch (e) {
@@ -188,15 +185,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   ImageProvider? _getProfileImage() {
-  // Zatim provjerite server sliku
   if (Authorization.slika != null && Authorization.slika!.isNotEmpty) {
     try {
-      // Probajte prvo kao URL
       if (Authorization.slika!.startsWith('http')) {
         return CachedNetworkImageProvider(Authorization.slika!);
       }
       
-      // Ako nije URL, probajte kao base64
       final String imageString = Authorization.slika!;
       final String base64String = imageString.startsWith('data:image')
           ? imageString.split(',').last
@@ -210,7 +204,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
   
-  // Na kraju probajte lokalno spremljenu sliku
   if (Authorization.localImage != null) {
     return FileImage(File(Authorization.localImage!));
   }
@@ -308,9 +301,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void _showEditDialog() {
-  // Koristimo lokalnu varijablu za prikaz u dijalogu
   File? dialogImage;
-  // Kopija originalne slike za slučaj da korisnik odustane
   final String? originalImage = Authorization.slika;
 
   showDialog(

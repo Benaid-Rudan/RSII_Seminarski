@@ -16,16 +16,13 @@ class UslugaProvider extends BaseProvider<Usluga> {
     return Usluga.fromJson(data);
   }
 
-  // Funkcija koja preuzima usluge po datumu
   Future<http.Response> getUslugeByDate(DateTime datum) async {
-    // Definisanje filtera kao mapa
     Map<String, dynamic> filter = {
-      "datum": datum.toIso8601String(), // Pretvaranje datuma u string
+      "datum": datum.toIso8601String(), 
     };
 
-    // Pozivanje funkcije iz BaseProvider i prosleđivanje filtera
     var result =
-        await get(filter as Uri); // Dodajte filter kao pozicioni parametar
+        await get(filter as Uri); 
 
     return result;
   }
