@@ -3,13 +3,18 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ebarbershop_mobile/main.dart';
+import 'package:ebarbershop_mobile/providers/korisnik_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
+import 'package:ebarbershop_mobile/screens/employee_selection_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
 import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
 import 'package:ebarbershop_mobile/screens/reviews_screen.dart';
 import 'package:ebarbershop_mobile/screens/user_profile_screen.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+
 
 class MasterScreenWidget extends StatefulWidget {
   Widget? child;
@@ -36,10 +41,15 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
         widget.child = CartScreen();
       }
       else if (currentIndex == 3) {
+        widget.child = ChangeNotifierProvider(
+          create: (context) => KorisnikProvider(),
+          child: EmployeeSelectionScreen(),
+        );
+      }
+      else if (currentIndex == 4) {
         widget.child = ReviewsScreen();
       }
-      
-       else if (currentIndex == 4) {
+      else if (currentIndex == 5) {
         widget.child = UserProfileScreen();
       }
     });
@@ -146,7 +156,10 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
             icon: Icon(Icons.shopping_cart),
             label: 'Cart',
           ),
-
+          BottomNavigationBarItem(
+            icon: Icon(Icons.cut),
+            label: 'Services',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
             label: 'Reviews',
@@ -166,3 +179,4 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
     );
   }
 }
+
