@@ -1,0 +1,344 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ebarbershop_mobile/models/korisnik.dart';
+import 'package:ebarbershop_mobile/models/usluga.dart';
+import 'package:ebarbershop_mobile/providers/rezervacija_provider.dart';
+import 'package:ebarbershop_mobile/providers/termin_provider.dart';
+
+class AppointmentTimeScreen extends StatefulWidget {
+  final Korisnik employee;
+  final Usluga service;
+  final DateTime selectedDate;
+
+  const AppointmentTimeScreen({
+    Key? key, 
+    required this.employee, 
+    required this.service,
+    required this.selectedDate,
+  }) : super(key: key);
+
+  @override
+  _AppointmentTimeScreenState createState() => _AppointmentTimeScreenState();
+}
+
+class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
+  bool isLoading = true;
+  bool isCreatingReservation = false;
+  List<TimeSlot> availableTimeSlots = [];
+  TimeSlot? selectedTimeSlot;
+
+  @override
+  void initState() {
+    super.initState();
+    loadAvailableTimeSlots();
+  }
+
+  Future<void> loadAvailableTimeSlots() async {
+    setState(() {
+      isLoading = true;
+    });
+    
+    try {
+      // Simulate API call to get available time slots
+      await Future.delayed(Duration(seconds: 1));
+      
+      // Example time slots (in real app, this would come from API)
+      final slots = [
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 9, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 10, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 11, 0), false),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 12, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 13, 0), false),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 14, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 15, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 16, 0), true),
+        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 17, 0), false),
+      ];
+      
+      setState(() {
+        availableTimeSlots = slots;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Greška pri učitavanju termina: $e')),
+      );
+    }
+  }
+
+  Future<void> _createReservation() async {
+    if (selectedTimeSlot == null) return;
+
+    setState(() {
+      isCreatingReservation = true;
+    });
+
+    try {
+      final rezervacijaProvider = context.read<RezervacijaProvider>();
+      final terminProvider = context.read<TerminProvider>();
+      
+      // Combine selected date with selected time
+      final reservationDateTime = DateTime(
+        widget.selectedDate.year,
+        widget.selectedDate.month,
+        widget.selectedDate.day,
+        selectedTimeSlot!.time.hour,
+        selectedTimeSlot!.time.minute,
+      );
+
+      // Step 1: Create reservation
+      final createdReservation = await rezervacijaProvider.createReservation(
+        datumRezervacije: reservationDateTime,
+        korisnikId: widget.employee.korisnikId!,
+        uslugaId: widget.service.uslugaId!,
+      );
+      
+      // Step 2: Create termin with the same reservation details
+      await terminProvider.insert({
+        "vrijeme": reservationDateTime.toIso8601String(),
+        "rezervacijaId": createdReservation.rezervacijaId,
+        "korisnikID": widget.employee.korisnikId,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Rezervacija uspješno kreirana')),
+      );
+      
+      // Navigate back to home screen
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Greška pri kreiranju rezervacije: $e')),
+      );
+    } finally {
+      setState(() {
+        isCreatingReservation = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final formattedDate = "${widget.selectedDate.day}.${widget.selectedDate.month}.${widget.selectedDate.year}";
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Odabir termina'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                // Date and service info section
+                Container(
+                  padding: EdgeInsets.all(16),
+                  color: Colors.grey[900],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Datum: $formattedDate',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[800],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.cut,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.service.naziv ?? 'Nepoznata usluga',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Cijena: ${widget.service.cijena?.toStringAsFixed(2)} BAM',
+                                  style: TextStyle(color: Colors.grey[300]),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Barber info
+                Container(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundImage: widget.employee.slika != null 
+                            ? NetworkImage(widget.employee.slika!)
+                            : null,
+                        child: widget.employee.slika == null 
+                            ? Icon(Icons.person, color: Colors.white)
+                            : null,
+                      ),
+                      SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${widget.employee.ime} ${widget.employee.prezime}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Frizer',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                Divider(height: 1),
+                
+                // Available time slots
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Dostupni termini',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                
+                availableTimeSlots.isEmpty
+                    ? Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nema dostupnih termina za odabrani datum',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      )
+                    : Expanded(
+                        child: GridView.builder(
+                          padding: EdgeInsets.all(16),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 2.5,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemCount: availableTimeSlots.length,
+                          itemBuilder: (context, index) {
+                            final slot = availableTimeSlots[index];
+                            return _buildTimeSlot(slot);
+                          },
+                        ),
+                      ),
+                
+                // Confirmation button
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: ElevatedButton(
+                    onPressed: selectedTimeSlot == null || isCreatingReservation
+                        ? null
+                        : _createReservation,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: isCreatingReservation
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Potvrdi rezervaciju',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildTimeSlot(TimeSlot slot) {
+    final isSelected = selectedTimeSlot == slot;
+    final hour = slot.time.hour.toString().padLeft(2, '0');
+    final minute = slot.time.minute.toString().padLeft(2, '0');
+    
+    return GestureDetector(
+      onTap: slot.isAvailable
+          ? () {
+              setState(() {
+                selectedTimeSlot = slot;
+              });
+            }
+          : null,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: !slot.isAvailable
+              ? Colors.grey[800]
+              : isSelected
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[700],
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? Border.all(color: Colors.white, width: 2)
+              : null,
+        ),
+        child: Text(
+          '$hour:$minute',
+          style: TextStyle(
+            color: !slot.isAvailable
+                ? Colors.grey
+                : Colors.white,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TimeSlot {
+  final DateTime time;
+  final bool isAvailable;
+
+  TimeSlot(this.time, this.isAvailable);
+}
