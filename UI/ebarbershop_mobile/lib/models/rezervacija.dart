@@ -9,16 +9,24 @@ part 'rezervacija.g.dart';
 class Rezervacija {
   int? rezervacijaId;
   DateTime? datumRezervacije;
-  int? korisnikId;
+  int? korisnikId; // frizer
   Korisnik? korisnik;
+  int? klijentId; // logirani korisnik
+  Korisnik? klijent;
   int? uslugaId;
   Usluga? usluga;
-  List<Termin>? termini;
 
-  Rezervacija(this.rezervacijaId, this.datumRezervacije, this.korisnikId,
-      this.uslugaId, this.usluga, this.korisnik);
+  Rezervacija({
+    this.rezervacijaId,
+    this.datumRezervacije,
+    this.korisnikId,
+    this.korisnik,
+    this.klijentId,
+    this.klijent,
+    this.uslugaId,
+    this.usluga,
+  });
 
-  factory Rezervacija.fromJson(Map<String, dynamic> json) =>
-      _$RezervacijaFromJson(json);
+  factory Rezervacija.fromJson(Map<String, dynamic> json) => _$RezervacijaFromJson(json);
   Map<String, dynamic> toJson() => _$RezervacijaToJson(this);
 }

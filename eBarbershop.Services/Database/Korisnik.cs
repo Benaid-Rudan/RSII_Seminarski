@@ -29,6 +29,7 @@ public  class Korisnik
     public virtual ICollection<Narudzba> Narudzbas { get; set; } = new List<Narudzba>();
 
     public virtual ICollection<Recenzija> Recenzijas { get; set; } = new List<Recenzija>();
+    public virtual ICollection<Rezervacija> RezervacijeKaoKlijent { get; set; }
 
-    public virtual ICollection<Rezervacija> Rezervacijas { get; set; } = new List<Rezervacija>();
+    public virtual ICollection<Rezervacija> RezervacijeKaoFrizer { get; set; } = new List<Rezervacija>();
 }

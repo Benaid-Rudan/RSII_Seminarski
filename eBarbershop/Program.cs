@@ -23,7 +23,9 @@ builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
 builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<INovostService, NovostService>();
-
+// In Program.cs or Startup.cs
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
 
 //builder.Services.AddTransient<IService<eBarbershop.Model.Drzava,BaseSearchObject>, BaseService<eBarbershop.Model.Drzava, eBarbershop.Services.Database.Drzava, BaseSearchObject>>();
 

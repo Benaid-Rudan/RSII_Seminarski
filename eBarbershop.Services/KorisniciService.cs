@@ -48,7 +48,7 @@ namespace eBarbershop.Services
                 Slika = request.Slika
             };
 
-            await _context.Korisniks.AddAsync(entity); // Asinkrono dodavanje korisnika
+            await _context.Korisnik.AddAsync(entity); // Asinkrono dodavanje korisnika
             await _context.SaveChangesAsync(); // Asinkrono spremanje korisnika da bismo dobili njegov ID
 
             // Dodavanje uloga za korisnika
@@ -61,7 +61,7 @@ namespace eBarbershop.Services
                     DatumDodjele = DateTime.Now
                 };
 
-                await _context.KorisnikUlogas.AddAsync(korisnikUloga); // Asinkrono dodavanje korisnik-uloze
+                await _context.KorisnikUloga.AddAsync(korisnikUloga); // Asinkrono dodavanje korisnik-uloze
             }
 
             await _context.SaveChangesAsync(); // Asinkrono spremanje uloga u bazu
@@ -111,7 +111,7 @@ namespace eBarbershop.Services
         public async Task<Model.Korisnik> Update(int id, KorisniciUpdateRequest request)
         {
             // Pronalaženje entiteta asinkrono
-            var entity = await _context.Korisniks.FindAsync(id);
+            var entity = await _context.Korisnik.FindAsync(id);
 
             if (entity == null)
             {
@@ -160,12 +160,12 @@ namespace eBarbershop.Services
         public eBarbershop.Model.Korisnik AddUloga(int id, KorisniciUlogaUpdateRequest request)
         {
             // Pronađi korisnika
-            var user = _context.Korisniks.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
+            var user = _context.Korisnik.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
             if (user == null)
                 throw new Exception("Korisnik nije pronađen.");
 
             // Pronađi ulogu
-            var uloga = _context.Ulogas.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
+            var uloga = _context.Uloga.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
             if (uloga == null)
                 throw new Exception("Uloga nije pronađena.");
 
@@ -180,7 +180,7 @@ namespace eBarbershop.Services
                 KorisnikId = id,
                 UlogaId = uloga.UlogaId
             };
-            _context.KorisnikUlogas.Add(nova);
+            _context.KorisnikUloga.Add(nova);
             _context.SaveChanges();
                 
             // Vrati ažuriranog korisnika
@@ -189,12 +189,12 @@ namespace eBarbershop.Services
         public eBarbershop.Model.Korisnik DeleteUloga(int id, KorisniciUlogaUpdateRequest request)
         {
             // Pronađi korisnika
-            var user = _context.Korisniks.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
+            var user = _context.Korisnik.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
             if (user == null)
                 throw new Exception("Korisnik nije pronađen.");
 
             // Pronađi ulogu
-            var uloga = _context.Ulogas.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
+            var uloga = _context.Uloga.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
             if (uloga == null)
                 throw new Exception("Uloga nije pronađena.");
 
@@ -204,7 +204,7 @@ namespace eBarbershop.Services
                 throw new Exception("Korisnik nema ovu ulogu.");
 
             // Izbriši ulogu
-            _context.KorisnikUlogas.Remove(korisnikUloga);
+            _context.KorisnikUloga.Remove(korisnikUloga);
             _context.SaveChanges();
 
             // Vrati ažuriranog korisnika
@@ -212,7 +212,7 @@ namespace eBarbershop.Services
         }
         public Model.Korisnik Login(string username, string password)
         {
-            var user = _context.Korisniks.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.Username == username);
+            var user = _context.Korisnik.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.Username == username);
 
             if (user == null) { throw new Exception("No user found"); }
 

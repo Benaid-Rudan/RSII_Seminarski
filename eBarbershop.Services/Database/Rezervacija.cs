@@ -11,10 +11,14 @@ public  class Rezervacija
 
 
     public int KorisnikId { get; set; }
+    public virtual Korisnik Korisnik { get; set; } = null!;
+
+    public int KlijentId { get; set; }
+    public virtual Korisnik Klijent { get; set; } = null!;
+
 
     public int UslugaId { get; set; }
 
-    public virtual Korisnik Korisnik { get; set; } = null!;
 
     public virtual ICollection<Termin> Termins { get; set; } = new List<Termin>();
 

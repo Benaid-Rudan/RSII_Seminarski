@@ -3,6 +3,7 @@ import 'package:ebarbershop_mobile/models/korisnik.dart';
 import 'package:ebarbershop_mobile/models/search_result.dart';
 import 'package:ebarbershop_mobile/providers/korisnik_provider.dart';
 import 'package:ebarbershop_mobile/screens/service_selection_screen.dart';
+import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,14 +18,20 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
   late KorisnikProvider _korisniciProvider;
   bool isLoading = true;
   SearchResult<Korisnik>? result;
-
+  late Korisnik klijent;
   @override
   void initState() {
     super.initState();
     _korisniciProvider = context.read<KorisnikProvider>();
+     loadKlijent();
     loadData();
   }
-
+  Future<void> loadKlijent() async {
+  var data = await _korisniciProvider.getById(Authorization.userId!);
+  setState(() {
+    klijent = data;
+  });
+}
   Future<void> loadData() async {
     setState(() {
       isLoading = true;
@@ -90,7 +97,7 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
               Navigator.push(
                 context, 
                 MaterialPageRoute(
-                  builder: (context) => ServiceSelectionScreen(employee: employee),
+                  builder: (context) => ServiceSelectionScreen(employee: employee, klijent: klijent),
                 ),
               );
             },

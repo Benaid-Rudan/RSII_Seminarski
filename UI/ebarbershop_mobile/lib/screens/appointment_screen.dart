@@ -1,3 +1,4 @@
+import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/models/korisnik.dart';
@@ -9,12 +10,13 @@ class AppointmentTimeScreen extends StatefulWidget {
   final Korisnik employee;
   final Usluga service;
   final DateTime selectedDate;
-
+  final Korisnik klijent;
   const AppointmentTimeScreen({
     Key? key, 
     required this.employee, 
     required this.service,
     required this.selectedDate,
+    required this.klijent,
   }) : super(key: key);
 
   @override
@@ -26,7 +28,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   bool isCreatingReservation = false;
   List<TimeSlot> availableTimeSlots = [];
   TimeSlot? selectedTimeSlot;
-
+  
   @override
   void initState() {
     super.initState();
@@ -72,6 +74,14 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   Future<void> _createReservation() async {
     if (selectedTimeSlot == null) return;
 
+    widget.klijent.korisnikId = Authorization.userId;
+
+    if (widget.klijent.korisnikId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Morate biti prijavljeni da biste rezervisali termin')),
+    );
+    return;
+  }
     setState(() {
       isCreatingReservation = true;
     });
@@ -88,11 +98,15 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
         selectedTimeSlot!.time.hour,
         selectedTimeSlot!.time.minute,
       );
-
+      print("Kreiram rezervaciju sa:");
+print("FrizerId: ${widget.employee.korisnikId}");
+print("KlijentId: ${widget.klijent.korisnikId}");
+print("UslugaId: ${widget.service.uslugaId}");
       // Step 1: Create reservation
       final createdReservation = await rezervacijaProvider.createReservation(
-        datumRezervacije: reservationDateTime,
+        datumRezervacije: DateTime.now(),
         korisnikId: widget.employee.korisnikId!,
+        klijentId: widget.klijent.korisnikId!,
         uslugaId: widget.service.uslugaId!,
       );
       
@@ -100,7 +114,9 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       await terminProvider.insert({
         "vrijeme": reservationDateTime.toIso8601String(),
         "rezervacijaId": createdReservation.rezervacijaId,
-        "korisnikID": widget.employee.korisnikId,
+        "korisnikId": widget.employee.korisnikId,
+        "klijentId": widget.klijent.korisnikId!,
+        "isBooked": true
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

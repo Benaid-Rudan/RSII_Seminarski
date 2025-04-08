@@ -50,7 +50,7 @@ namespace eBarbershop
                 // Kreiranje claim-ova za korisnika
                 var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, username),
+            new Claim(ClaimTypes.NameIdentifier, user.KorisnikId.ToString()),
             new Claim(ClaimTypes.Name, user.Ime ?? "Unknown")
         };
 

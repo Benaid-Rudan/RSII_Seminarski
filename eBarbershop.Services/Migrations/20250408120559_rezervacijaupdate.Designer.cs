@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eBarbershop.Services.Database;
 
@@ -11,9 +12,11 @@ using eBarbershop.Services.Database;
 namespace eBarbershop.Services.Migrations
 {
     [DbContext(typeof(EBarbershop1Context))]
-    partial class EBarbershop1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250408120559_rezervacijaupdate")]
+    partial class rezervacijaupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,7 +413,7 @@ namespace eBarbershop.Services.Migrations
 
                     b.HasIndex("NarudzbaId");
 
-                    b.ToTable("Uplata", (string)null);
+                    b.ToTable("Uplata");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Usluga", b =>
@@ -456,7 +459,7 @@ namespace eBarbershop.Services.Migrations
                     b.HasKey("VrstaProizvodaId")
                         .HasName("PK__VrstaPro__7DC005E063976FC1");
 
-                    b.ToTable("VrstaProizvoda", (string)null);
+                    b.ToTable("VrstaProizvoda");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Grad", b =>

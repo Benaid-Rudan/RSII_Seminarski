@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
   final Korisnik employee;
+  final Korisnik klijent;
 
-  const ServiceSelectionScreen({Key? key, required this.employee}) : super(key: key);
+  const ServiceSelectionScreen({Key? key, required this.employee, required this.klijent}) : super(key: key);
 
   @override
   _ServiceSelectionScreenState createState() => _ServiceSelectionScreenState();
@@ -177,14 +178,14 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                           child: ElevatedButton(
                             onPressed: selectedDate == null
                                 ? null
-                                : () {
-                                    Navigator.push(
+                                : () {                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => AppointmentTimeScreen(
                                           employee: widget.employee,
                                           service: service,
                                           selectedDate: selectedDate!,
+                                          klijent: widget.klijent,
                                         ),
                                       ),
                                     );

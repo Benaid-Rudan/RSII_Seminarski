@@ -10,13 +10,13 @@ namespace eBarbershop.Model
     {
         public int RezervacijaId { get; set; }
         public DateTime DatumRezervacije { get; set; }
-        //public DateTime Termin { get; set; }
 
-        // Veza sa korisnikom
+        // Frizer koji izvodi uslugu
         public int KorisnikId { get; set; }
-        public Korisnik Korisnik { get; set; }
 
-        // Veza sa uslugom
+        // Klijent koji naručuje termin
+        public int KlijentId { get; set; }
+
         public int UslugaId { get; set; }
         public Usluga Usluga { get; set; }
     }
