@@ -60,6 +60,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text("Product List"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(context, CartScreen.routeName);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -136,20 +144,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   List<Widget> _buildProductCardList() {
-  if (data.isEmpty) {
-    return [
-      Container(
-        alignment: Alignment.center,
-        height: 300, 
-        child: Text(
-          "No products found",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      )
-    ];
-  }
-
+    if (data.isEmpty) {
+      return [
+        Container(
+          alignment: Alignment.center,
+          height: 300, 
+          child: Text(
+            "No products found",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        )
+      ];
+    }
 
     List<Widget> list = data
         .map((x) => Container(

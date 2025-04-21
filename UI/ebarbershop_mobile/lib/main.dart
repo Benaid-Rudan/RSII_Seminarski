@@ -177,20 +177,9 @@ class LoginPage extends StatelessWidget {
                         }
 
                          try {
-                           var korisnici = await _korisnikProvider.get(filter: {
-                             'username': username,
-                           });
+                           var korisnik = await _korisnikProvider.authenticate(username, password);
 
-                           if (korisnici.result.isEmpty) {
-                             ScaffoldMessenger.of(context).showSnackBar(
-                               SnackBar(
-                                 content: Text("Korisnik nije pronađen."),
-                                 backgroundColor: Colors.red,
-                               ),
-                             );
-                             return;
-                           }
-                            var korisnik = korisnici.result.first;
+                           
                             print('Dobijeni korisnik sa servera: ${korisnik.toJson()}'); 
                             Authorization.username = username;
                             Authorization.password = password;

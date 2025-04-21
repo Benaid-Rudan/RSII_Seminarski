@@ -58,7 +58,7 @@ class _ArhivaListScreenState extends State<ArhivaListScreen> {
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Wrap(
           children: [
             Expanded(
               child: TextField(

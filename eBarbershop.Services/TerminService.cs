@@ -18,6 +18,43 @@ namespace eBarbershop.Services
         public TerminService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
            
         }
+        public override async Task<Model.Termin> Delete(int terminId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var termin = await _context.Termin.FindAsync(terminId);
+                if (termin != null)
+                {
+                    var rezervacijaId = termin.RezervacijaId;
+
+                    // Prvo briši termin
+                    _context.Termin.Remove(termin);
+                    await _context.SaveChangesAsync();
+
+                    // Zatim briši rezervaciju ako postoji
+                    var rezervacija = await _context.Rezervacija.FindAsync(rezervacijaId);
+                    if (rezervacija != null)
+                    {
+                        _context.Rezervacija.Remove(rezervacija);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                    return _mapper.Map<Model.Termin>(termin);
+                }
+
+                return null;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+
+
         public void BeforeInsert(TerminInsertRequest insert, Database.Termin entity)
         {
             entity.Vrijeme = DateTime.Now;
@@ -32,9 +69,11 @@ namespace eBarbershop.Services
             }
             if (obj.IncludeRezervacija == true)
             {
-                entity = entity.Include(x => x.Rezervacija);
+                entity = entity.Include(x => x.Rezervacija)
+                    .ThenInclude(x=> x.Usluga);
 
             }
+            
             
             return entity;
         }

@@ -22,6 +22,8 @@ namespace eBarbershop.Model.SearchObjects
         public DateTime? DatumOd { get; set; }
         public DateTime? DatumDo { get; set; }
         public bool? IncludeKorisnik { get; set; }
+        public bool? IncludeKlijent { get; set; }
+
         public bool? IncludeUsluga { get; set; }
         public string? Usluga { get; set; }
     }

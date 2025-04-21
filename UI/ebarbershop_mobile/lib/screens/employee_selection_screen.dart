@@ -28,6 +28,8 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
   }
   Future<void> loadKlijent() async {
   var data = await _korisniciProvider.getById(Authorization.userId!);
+
+  if (!mounted) return;
   setState(() {
     klijent = data;
   });
@@ -44,6 +46,7 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });

@@ -21,6 +21,10 @@ Termin _$TerminFromJson(Map<String, dynamic> json) => Termin(
       korisnik: json['korisnik'] == null
           ? null
           : Korisnik.fromJson(json['korisnik'] as Map<String, dynamic>),
+      klijentId: (json['klijentId'] as num?)?.toInt(),
+      klijent: json['klijent'] == null
+          ? null
+          : Korisnik.fromJson(json['klijent'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TerminToJson(Termin instance) => <String, dynamic>{
@@ -32,4 +36,6 @@ Map<String, dynamic> _$TerminToJson(Termin instance) => <String, dynamic>{
       'isBooked': instance.isBooked,
       'korisnikID': instance.korisnikID,
       'korisnik': instance.korisnik,
+      'klijentId': instance.klijentId,
+      'klijent': instance.klijent,
     };

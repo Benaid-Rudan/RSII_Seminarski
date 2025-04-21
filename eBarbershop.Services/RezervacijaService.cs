@@ -94,6 +94,10 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezime || x.Korisnik.Prezime == obj.imePrezime);
             }
+            if (obj.IncludeKlijent == true && !string.IsNullOrEmpty(obj.imePrezime))
+            {
+                entity = entity.Where(x => x.Klijent.Ime == obj.imePrezime || x.Klijent.Prezime == obj.imePrezime);
+            }
             if (obj.datumRezervacije.HasValue)
             {
                 entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
@@ -124,6 +128,10 @@ namespace eBarbershop.Services
             if (obj.IncludeUsluga == true)
             {
                 entity = entity.Include(y => y.Usluga);
+            }
+            if (obj.IncludeKlijent == true)
+            {
+                entity = entity.Include(y => y.Klijent);
             }
 
             return entity;

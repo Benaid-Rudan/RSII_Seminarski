@@ -13,6 +13,7 @@ namespace eBarbershop.Model.SearchObjects
         public bool? IncludeKorisnik { get; set; }
         public bool? IncludeRezervacija { get; set; }
 
+
         public bool? isBooked { get; set; }
         public DateTime? Datum { get; set; }
         public DateTime? DatumOd { get; set; }

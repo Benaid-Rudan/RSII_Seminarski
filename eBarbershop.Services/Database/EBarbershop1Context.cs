@@ -202,24 +202,29 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(d => d.Korisnik)
                 .WithMany(p => p.RezervacijeKaoFrizer)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.Restrict) // Promijenjeno sa Cascade na Restrict
+                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
                 .HasConstraintName("FK__Rezervaci__Koris__3F466844");
 
             // Veza sa klijentom (korisnik koji rezerviše termin)
             entity.HasOne(d => d.Klijent)
                 .WithMany(p => p.RezervacijeKaoKlijent)
                 .HasForeignKey(d => d.KlijentId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
                 .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
+            // Veza sa uslugom
             entity.HasOne(d => d.Usluga)
                 .WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.UslugaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientSetNull) // As per your requirement
                 .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
+
+             entity.HasMany(r => r.Termins)
+            .WithOne(t => t.Rezervacija)
+            .HasForeignKey(t => t.RezervacijaId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         });
-
-
 
         modelBuilder.Entity<Termin>(entity =>
         {
@@ -229,16 +234,24 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(d => d.Korisnik)
                 .WithMany()
                 .HasForeignKey(d => d.KorisnikID)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade) // You can change this to Cascade if needed
                 .HasConstraintName("FK_Termin_Korisnik_Frizer");
 
             // Veza sa klijentom
             entity.HasOne(d => d.Klijent)
                 .WithMany()
                 .HasForeignKey(d => d.KlijentId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade) // You can change this to Cascade if needed
                 .HasConstraintName("FK_Termin_Korisnik_Klijent");
+
+            entity.HasOne(t => t.Rezervacija)
+                .WithMany(r => r.Termins)
+                .HasForeignKey(t => t.RezervacijaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         });
+
 
         modelBuilder.Entity<Uloga>(entity =>
         {

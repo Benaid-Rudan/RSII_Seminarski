@@ -9,4 +9,7 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   Korisnik fromJson(data) {
     return Korisnik.fromJson(data);
   }
+  Future<Korisnik> authenticate(String username, String password) async {
+    return await login(username, password);
+  }
 }

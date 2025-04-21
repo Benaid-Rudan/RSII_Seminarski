@@ -13,10 +13,12 @@ class Rezervacija {
   Korisnik? korisnik;
   int? uslugaId;
   Usluga? usluga;
+  Termin? termin;
   List<Termin>? termini;
-
+  int? klijentId; // logirani korisnik
+  Korisnik? klijent;
   Rezervacija(this.rezervacijaId, this.datumRezervacije, this.korisnikId,
-      this.uslugaId, this.usluga, this.korisnik);
+      this.uslugaId, this.usluga, this.korisnik, this.klijentId, this.klijent, this.termin, this.termini);
 
   factory Rezervacija.fromJson(Map<String, dynamic> json) =>
       _$RezervacijaFromJson(json);

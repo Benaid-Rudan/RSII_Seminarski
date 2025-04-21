@@ -13,7 +13,8 @@ namespace eBarbershop.Model
         public DateTime Vrijeme { get; set; }
         public bool IsBooked { get; set; }
 
-        
+        public int KorisnikId { get; set; }
+        public Korisnik Korisnik { get; set; }
 
         
 

@@ -23,6 +23,28 @@ abstract class BaseProvider<T> with ChangeNotifier {
     return IOClient(httpClient);
   }
 
+  Future<T> login(String username, String password) async {
+  var url = "$_baseUrl$_endpoint/Authenticate";
+  var uri = Uri.parse(url);
+  
+  // Create special headers just for this request with the provided credentials
+  String basicAuth = "Basic ${base64Encode(utf8.encode('$username:$password'))}";
+  var headers = {
+    "Content-Type": "application/json",
+    "Authorization": basicAuth
+  };
+  
+  var ioClient = _createClient();
+  var response = await ioClient.get(uri, headers: headers);
+  
+  if (isValidResponse(response)) {
+    var data = jsonDecode(response.body);
+    return fromJson(data);
+    } else {
+    throw Exception("Authentication failed");
+    }
+  }
+
   Future<SearchResult<T>> get({dynamic filter}) async {
   var url = "$_baseUrl$_endpoint";
   if (filter != null) {
@@ -161,6 +183,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
     return headers;
   }
 }
+
+
 
 String getQueryString(Map params,
     {String prefix = '&', bool inRecursion = false}) {
