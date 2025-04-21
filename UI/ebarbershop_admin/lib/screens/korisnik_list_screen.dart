@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ebarbershop_admin/models/grad.dart';
+import 'package:ebarbershop_admin/models/uloga.dart';
 import 'package:ebarbershop_admin/providers/grad_provider.dart';
+import 'package:ebarbershop_admin/providers/uloga_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
@@ -26,7 +28,10 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   SearchResult<Grad>? gradResult;
   late GradProvider _gradProvider;
   File? _selectedImage;
-
+  late UlogaProvider _ulogaProvider;
+  SearchResult<Uloga>? ulogaResult;
+  List<String> _selectedRoles = [];
+  TextEditingController _ulogeController = TextEditingController();
   TextEditingController _imeControllerFilter = TextEditingController();
   TextEditingController _prezimeControllerFilter = TextEditingController();
   TextEditingController _imeController = TextEditingController();
@@ -38,7 +43,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   TextEditingController _passwordPotvrdaController = TextEditingController();
   TextEditingController _gradController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-
+  List<int> _selectedRoleIds = [];
   Future<void> _pickImage() async {
     final XFile? pickedFile =
         await _picker.pickImage(source: ImageSource.gallery);
@@ -61,23 +66,65 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
     super.didChangeDependencies();
     _korisnikProvider = context.read<KorisnikProvider>();
     _gradProvider = context.read<GradProvider>();
+    _ulogaProvider = context.read<UlogaProvider>();
     _refreshData();
     _fetchGradData();
+    _fetchUlogaData();
+  }
+  
+  Future<void> _fetchUlogaData() async {
+    final response = await _ulogaProvider.get();
+    setState(() {
+      ulogaResult = response;
+    });
+  }
+  
+  String getRoleName(Korisnik korisnik) {
+    // Dodajte ispis za debugging
+    print('Korisnik ${korisnik.username} uloge: ${korisnik.uloge}');
+    print('Korisnik ${korisnik.username} korisnikUlogas: ${korisnik.korisnikUlogas?.map((ku) => ku.uloga?.naziv).toList()}');
+    
+    // First try to get roles from korisnikUlogas
+    if (korisnik.korisnikUlogas != null && korisnik.korisnikUlogas!.isNotEmpty) {
+      List<String> roles = korisnik.korisnikUlogas!
+          .where((ku) => ku.uloga != null && ku.uloga!.naziv != null)
+          .map((ku) => ku.uloga!.naziv!)
+          .toList();
+      
+      if (roles.isNotEmpty) {
+        return roles.join(', ');
+      }
+    }
+    
+    // Fallback to uloge field
+    if (korisnik.uloge != null && korisnik.uloge!.isNotEmpty) {
+      return korisnik.uloge!.join(', ');
+    }
+    
+    return 'Nepoznato';
   }
 
   Future<void> _fetchGradData() async {
     final response = await _gradProvider.get();
-    gradResult = response;
-    setState(() {});
+    setState(() {
+      gradResult = response;
+    });
   }
 
   Future<void> _refreshData() async {
     setState(() => _isLoading = true);
-    var data = await _korisnikProvider.get();
-    setState(() {
-      result = data;
-      _isLoading = false;
-    });
+    try {
+      var data = await _korisnikProvider.get(filter:  {'IsUlogeIncluded':true});
+      setState(() {
+        result = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching users: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
     _imeController.clear();
     _prezimeController.clear();
   }
@@ -148,14 +195,24 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
 
   Future<void> _filterData() async {
     setState(() => _isLoading = true);
-    var data = await _korisnikProvider.get(filter: {
-      'ime': _imeControllerFilter.text,
-      'prezime': _prezimeControllerFilter.text,
-    });
-    setState(() {
-      result = data;
-      _isLoading = false;
-    });
+    try {
+      var data = await _korisnikProvider.get(
+        filter: {
+          'ime': _imeControllerFilter.text,
+          'prezime': _prezimeControllerFilter.text,
+          'IsUlogeIncluded': 'true',
+        },
+      );
+      setState(() {
+        result = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error filtering users: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   String getGradNazivById(String gradId) {
@@ -201,6 +258,10 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
             DataColumn(
+                label: Text('Uloga',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold))),
+            DataColumn(
                 label: Text('Akcije',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
@@ -234,6 +295,8 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                                   width: 50, height: 50, fit: BoxFit.cover))
                           : Icon(Icons.person, size: 50, color: Colors.white),
                     ),
+                    DataCell(Text(getRoleName(e),
+                        style: TextStyle(color: Colors.white))),
                     DataCell(
                       Row(
                         children: [
@@ -299,6 +362,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
 
   void _showUserDialog({Korisnik? korisnik}) {
     _selectedImage = null;
+    _selectedRoles = [];
 
     _imeController.clear();
     _prezimeController.clear();
@@ -324,13 +388,25 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       }
     }
 
+    if (korisnik != null && korisnik.korisnikUlogas != null && korisnik.korisnikUlogas!.isNotEmpty) {
+  _selectedRoles = korisnik.korisnikUlogas!
+    .where((ku) => ku.uloga != null && ku.uloga!.naziv != null)
+    .map((ku) => ku.uloga!.naziv!)
+    .toList();
+    
+  _selectedRoleIds = korisnik.korisnikUlogas!
+    .where((ku) => ku.uloga != null && ku.uloga!.ulogaId != null)
+    .map((ku) => ku.uloga!.ulogaId!)
+    .toList();
+}
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(korisnik == null ? "Dodaj korisnika" : "Uredi korisnika"),
         content: Container(
           width: 400,
-          height: 450,
+          height: 500,
           child: SingleChildScrollView(
             child: FormBuilder(
               key: _formKey,
@@ -386,11 +462,10 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   FormBuilderField(
                     name: 'slika',
                     validator: (value) {
+                      // Dozvoljavamo da slika može biti prazna pri ažuriranju korisnika
                       if (_selectedImage == null &&
-                          (korisnik == null ||
-                              korisnik?.slika == null ||
-                              korisnik!.slika!.isEmpty)) {
-                        return 'Slika je obavezna';
+                          korisnik == null) {
+                        return 'Slika je obavezna za novog korisnika';
                       }
                       return null;
                     },
@@ -398,8 +473,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                       return InputDecorator(
                         decoration: InputDecoration(
                           label: Text('Izaberite sliku'),
-                          errorText:
-                              field.errorText, // Prikazuje grešku ako postoji
+                          errorText: field.errorText,
                         ),
                         child: ListTile(
                           leading: Icon(Icons.photo),
@@ -429,7 +503,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                           trailing: Icon(Icons.file_upload),
                           onTap: () {
                             _pickImage();
-                            setState(() {});
                           },
                         ),
                       );
@@ -440,10 +513,13 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     name: 'password',
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(labelText: "Lozinka"),
+                    decoration: InputDecoration(
+                      labelText: "Lozinka",
+                      hintText: korisnik != null ? "Unesite lozinku" : null,
+                    ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lozinka je obavezna';
+                      if (korisnik == null && (value == null || value.isEmpty)) {
+                        return 'Ponovite lozinku';
                       }
                       return null;
                     },
@@ -453,10 +529,16 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     name: 'passwordPotvrda',
                     controller: _passwordPotvrdaController,
                     obscureText: true,
-                    decoration: InputDecoration(labelText: "Potvrda lozinke"),
+                    decoration: InputDecoration(
+                      labelText: "Potvrda lozinke",
+                      hintText: korisnik != null ? "Unesite lozinku" : null,
+                    ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Potvrda lozinke je obavezna';
+                      if (korisnik == null && (value == null || value.isEmpty)) {
+                        return 'Ponovite lozinku';
+                      }
+                      if (_passwordController.text != value && _passwordController.text.isNotEmpty) {
+                        return 'Lozinke se ne podudaraju';
                       }
                       return null;
                     },
@@ -485,6 +567,61 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                       return null;
                     },
                   ),
+
+                  FormBuilderField(
+                    name: 'uloge',
+                    validator: (value) {
+                      if (_selectedRoles.isEmpty) {
+                        return 'Barem jedna uloga je obavezna';
+                      }
+                      return null;
+                    },
+                    builder: (field) {
+                      return InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: "Uloge",
+                          errorText: field.errorText,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (ulogaResult?.result != null)
+                              ...ulogaResult!.result.map((uloga) {
+                                bool isSelected = _selectedRoles.contains(uloga.naziv);
+                                return StatefulBuilder(
+                                  builder: (context, setState) {
+                                    return CheckboxListTile(
+                                    title: Text(uloga.naziv ?? ''),
+                                    value: isSelected,
+                                    onChanged: (bool? selected) {
+                                      setState(() {
+                                        if (selected == true) {
+                                          if (!_selectedRoles.contains(uloga.naziv)) {
+                                            _selectedRoles.add(uloga.naziv!);
+                                            _selectedRoleIds.add(uloga.ulogaId!); // Add this line
+                                          }
+                                        } else {
+                                          _selectedRoles.remove(uloga.naziv);
+                                          _selectedRoleIds.remove(uloga.ulogaId); // Add this line
+                                        }
+                                        field.didChange(_selectedRoles);
+                                      });
+                                    },
+                                  );
+                                  }
+                                );
+                              }).toList(),
+                            SizedBox(height: 8),
+                            Text(
+                              'Odabrane uloge: ${_selectedRoles.join(", ")}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    
+                  ),
                 ],
               ),
             ),
@@ -492,42 +629,71 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
         ),
         actions: [
           TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Odustani"),
+          ),
+          TextButton(
             onPressed: () async {
               if (_formKey.currentState?.saveAndValidate() ?? false) {
                 final formData = _formKey.currentState?.value;
-
-                if (korisnik == null) {
-                  await _korisnikProvider.insert({
+                
+                try {
+                  // Priprema zajedničkih podataka za insert i update
+                  Map<String, dynamic> userData = {
                     'Ime': formData?['ime'],
                     'Prezime': formData?['prezime'],
                     'Email': formData?['email'],
                     'Username': formData?['username'],
-                    'Password': formData?['password'],
-                    'PasswordPotvrda': formData?['passwordPotvrda'],
-                    'Slika': _slikaController.text,
                     'GradId': formData?['gradId'],
+                    'UlogeIdList': _selectedRoleIds,
+                    // Dodaj request parametar za oba slučaja
                     'request': 'some_value',
-                  });
-                } else {
-                  if (korisnik.korisnikId != null) {
-                    await _korisnikProvider.update(
-                      korisnik.korisnikId!,
-                      {
-                        'Ime': formData?['ime'],
-                        'Prezime': formData?['prezime'],
-                        'Email': formData?['email'],
-                        'Username': formData?['username'],
-                        'Password': formData?['password'],
-                        'PasswordPotvrda': formData?['passwordPotvrda'],
-                        'Slika': _slikaController.text,
-                        'GradId': formData?['gradId']
-                      },
-                    );
+                  };
+                  
+                  // Dodaj lozinku samo ako je popunjena
+                  if (_passwordController.text.isNotEmpty) {
+                    userData['Password'] = formData?['password'];
+                    userData['PasswordPotvrda'] = formData?['passwordPotvrda'];
                   }
-                }
+                  
+                  // Dodaj sliku samo ako je odabrana ili već postoji
+                  if (_slikaController.text.isNotEmpty) {
+                    userData['Slika'] = _slikaController.text;
+                  } else if (korisnik?.slika != null && korisnik!.slika!.isNotEmpty) {
+                    userData['Slika'] = korisnik!.slika;
+                  }
 
-                await _refreshData();
-                Navigator.pop(context);
+                  if (korisnik == null) {
+                    // Osiguraj da lozinka postoji za novi unos
+                    if (!userData.containsKey('Password')) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lozinka je obavezna za novog korisnika'))
+                      );
+                      return;
+                    }
+                    
+                    print('Inserting user with data: $userData');
+                    await _korisnikProvider.insert(userData);
+                  } else {
+                    if (korisnik.korisnikId != null) {
+                      print('Updating user ${korisnik.korisnikId} with data: $userData');
+                      await _korisnikProvider.update(korisnik.korisnikId!, userData);
+                    }
+                  }
+
+                  await _refreshData();
+                  Navigator.pop(context);
+                  
+                  // Dodavanje povratne informacije
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(korisnik == null ? 'Korisnik uspješno dodan' : 'Korisnik uspješno ažuriran'))
+                  );
+                } catch (e) {
+                  print('Error saving user: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Greška: $e'))
+                  );
+                }
               }
             },
             child: Text("Sačuvaj"),

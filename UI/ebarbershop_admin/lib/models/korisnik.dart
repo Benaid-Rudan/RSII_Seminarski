@@ -1,3 +1,5 @@
+import 'package:ebarbershop_admin/models/korisnikuloga.dart';
+import 'package:ebarbershop_admin/models/uloga.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'korisnik.g.dart';
@@ -11,7 +13,12 @@ class Korisnik {
   String? username;
   String? slika;
   int? gradId;
-  String? uloge;
+  
+  // Change the type to List<String>? to match the API response
+  @JsonKey(defaultValue: <String>[])
+  List<String>? uloge;
+  
+  List<KorisnikUloga>? korisnikUlogas;
 
   Korisnik({
     this.korisnikId,
@@ -22,8 +29,9 @@ class Korisnik {
     this.slika,
     this.gradId,
     this.uloge,
+    this.korisnikUlogas,
   });
-  factory Korisnik.fromJson(Map<String, dynamic> json) =>
-      _$KorisnikFromJson(json);
+  
+  factory Korisnik.fromJson(Map<String, dynamic> json) => _$KorisnikFromJson(json);
   Map<String, dynamic> toJson() => _$KorisnikToJson(this);
 }

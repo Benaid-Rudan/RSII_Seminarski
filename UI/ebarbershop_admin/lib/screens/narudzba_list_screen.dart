@@ -22,7 +22,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
   late NarudzbaProvider _narudzbaProvider;
   SearchResult<Narudzba>? result;
   bool _isLoading = false;
-
+  
   TextEditingController _korisnikIdController = TextEditingController();
   TextEditingController _narudzbaIdController = TextEditingController();
 

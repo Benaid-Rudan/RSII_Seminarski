@@ -16,8 +16,10 @@ namespace eBarbershop.Model
         public string Slika { get; set; }
 
         public int GradId { get; set; }
-        public string Uloge => string.Join(", ", KorisnikUlogas?.Select(x => x.Uloga?.Naziv)?.ToList());
-        public virtual ICollection<KorisnikUloga> KorisnikUlogas { get; set; } = new List<KorisnikUloga>();
+        public List<string> Uloge => KorisnikUlogas?
+                .Select(x => x.Uloga?.Naziv)
+                .Where(naziv => !string.IsNullOrEmpty(naziv))
+                .ToList(); public virtual ICollection<KorisnikUloga> KorisnikUlogas { get; set; } = new List<KorisnikUloga>();
     }
     
 }
