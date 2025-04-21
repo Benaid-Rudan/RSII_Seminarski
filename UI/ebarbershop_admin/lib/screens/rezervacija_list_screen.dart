@@ -33,6 +33,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
     var data = await _rezervacijaProvider.get(filter: {
       "IncludeKorisnik": true,
       "IncludeUsluga": true,
+      "IncludeKlijent": true,
       "imePrezime": _imePrezimeController.text,
       "datumRezervacije": _datumRezervacijeController.text
     });
@@ -170,7 +171,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                     DataCell(Text(e.rezervacijaId.toString() ?? "",
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(
-                        "${e.korisnik?.ime ?? ''} ${e.korisnik?.prezime ?? ''}",
+                        "${e.klijent?.ime ?? ''} ${e.klijent?.prezime ?? ''}",
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(e.datumRezervacije?.toIso8601String() ?? "",
                         style: TextStyle(color: Colors.white))),

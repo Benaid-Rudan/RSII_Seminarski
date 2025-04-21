@@ -14,7 +14,8 @@ class Termin {
   bool? isBooked;
   int? korisnikID;
   Korisnik? korisnik;
-
+   int? klijentId; // logirani korisnik
+  Korisnik? klijent;
   Termin({
     this.terminId,
     this.terminUposelnik,
@@ -24,6 +25,8 @@ class Termin {
     this.isBooked,
     this.korisnikID,
     this.korisnik,
+    this.klijentId,
+    this.klijent,
   });
 
   factory Termin.fromJson(Map<String, dynamic> json) => _$TerminFromJson(json);

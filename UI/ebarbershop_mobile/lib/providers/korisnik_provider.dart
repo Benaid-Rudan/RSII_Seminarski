@@ -10,7 +10,9 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   Korisnik fromJson(data) {
     return Korisnik.fromJson(data);
   }
-
+  Future<Korisnik> authenticate(String username, String password) async {
+  return await login(username, password);
+}
    Future<SearchResult<Korisnik>> getEmployees() async {
   var filter = {
     'IsUlogeIncluded': true,
@@ -25,4 +27,7 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   
   return result;
 }
+
+  
+
 }

@@ -11,16 +11,18 @@ class RezervacijaProvider extends BaseProvider<Rezervacija> {
     return Rezervacija.fromJson(data);
   }
   Future<Rezervacija> createReservation({
-    required DateTime datumRezervacije,
-    required int korisnikId,
-    required int uslugaId,
-  }) async {
-    var request = {
-      'datumRezervacije': datumRezervacije.toIso8601String(),
-      'korisnikId': korisnikId,
-      'uslugaId': uslugaId,
-    };
-    
-    return await insert(request);
-  }
+  required DateTime datumRezervacije,
+  required int korisnikId, // frizer
+  required int klijentId, // logirani korisnik
+  required int uslugaId,
+}) async {
+  var request = {
+    'datumRezervacije': datumRezervacije.toIso8601String(),
+    'korisnikId': korisnikId,
+    'klijentId': klijentId,
+    'uslugaId': uslugaId,
+  };
+  
+  return await insert(request);
+}
 }

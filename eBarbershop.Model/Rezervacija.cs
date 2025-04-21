@@ -7,18 +7,22 @@ using System.Threading.Tasks;
 namespace eBarbershop.Model
 {
     public class Rezervacija
-    {
-        public int RezervacijaId { get; set; }
-        public DateTime DatumRezervacije { get; set; }
-        //public DateTime Termin { get; set; }
+{
+    public int RezervacijaId { get; set; }
 
-        // Veza sa korisnikom
-        public int KorisnikId { get; set; }
-        public Korisnik Korisnik { get; set; }
+    public DateTime DatumRezervacije { get; set; }
 
-        // Veza sa uslugom
-        public int UslugaId { get; set; }
-        public Usluga Usluga { get; set; }
-    }
+    // Frizer koji izvodi uslugu
+    public int KorisnikId { get; set; }
+    public Korisnik Korisnik { get; set; }
+
+    // Klijent koji naručuje termin
+    public int KlijentId { get; set; }
+    public Korisnik Klijent { get; set; }
+
+    public int UslugaId { get; set; }
+    public Usluga Usluga { get; set; }
+
+}
 
 }

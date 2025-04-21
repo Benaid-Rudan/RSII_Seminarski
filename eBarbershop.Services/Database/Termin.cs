@@ -15,4 +15,8 @@ public  class Termin
     public bool isBooked { get; set; }
     public int KorisnikID { get; set; }
     public virtual Korisnik Korisnik { get; set; } = null!;
+    public int KlijentId { get; set; }
+
+    public virtual Korisnik Klijent { get; set; } = null!;
+
 }

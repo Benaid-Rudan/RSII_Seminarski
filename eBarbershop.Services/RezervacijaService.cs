@@ -14,18 +14,25 @@ namespace eBarbershop.Services
 {
     public class RezervacijaService : BaseCRUDService<Model.Rezervacija, Database.Rezervacija, RezervacijaSearchObject , RezervacijaInsertRequest, RezervacijaUpdateRequest>, IRezervacijaService 
     {
-        
-        public RezervacijaService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
-           
+        private readonly ICurrentUserService _currentUserService;
+
+        public RezervacijaService(EBarbershop1Context context, IMapper mapper, ICurrentUserService currentUserService)
+            : base(context, mapper)
+        {
+            _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
         }
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
         {
+            // Get the currently logged-in user's ID from Authorization
+            int loggedInUserId = _currentUserService.GetUserId(); // You'll need to inject a service to get the current user
+
             // Kreiraj novu rezervaciju
             var entity = new Database.Rezervacija
             {
-                KorisnikId = request.KorisnikId,
-                DatumRezervacije = request.DatumRezervacije, // Možeš koristiti trenutan datum ili onaj poslan u requestu
+                KorisnikId = request.KorisnikId, // Barber/employee ID
+                KlijentId = loggedInUserId, // Set customer ID to logged-in user
+                DatumRezervacije = request.DatumRezervacije,
                 UslugaId = request.UslugaId
             };
 
@@ -42,11 +49,11 @@ namespace eBarbershop.Services
             entity.Usluga = usluga;
 
             // Spremi rezervaciju
-            _context.Rezervacijas.Add(entity);
+            _context.Rezervacija.Add(entity);
             await _context.SaveChangesAsync();
 
             // Postavi isBooked na true za sve termine (ako je potrebno)
-            foreach (var termin in _context.Termins)
+            foreach (var termin in _context.Termin)
             {
                 termin.isBooked = true;
             }
@@ -87,6 +94,10 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezime || x.Korisnik.Prezime == obj.imePrezime);
             }
+            if (obj.IncludeKlijent == true && !string.IsNullOrEmpty(obj.imePrezime))
+            {
+                entity = entity.Where(x => x.Klijent.Ime == obj.imePrezime || x.Klijent.Prezime == obj.imePrezime);
+            }
             if (obj.datumRezervacije.HasValue)
             {
                 entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
@@ -98,6 +109,10 @@ namespace eBarbershop.Services
             if (obj.DatumDo.HasValue)
             {
                 entity = entity.Where(x => x.Termins.Any(t => t.Vrijeme.Date <= obj.DatumDo.Value.Date));
+            }
+            if (obj.KlijentId.HasValue)
+            {
+                entity = entity.Where(x => x.KlijentId == obj.KlijentId);
             }
             return entity;
         }
@@ -113,6 +128,10 @@ namespace eBarbershop.Services
             if (obj.IncludeUsluga == true)
             {
                 entity = entity.Include(y => y.Usluga);
+            }
+            if (obj.IncludeKlijent == true)
+            {
+                entity = entity.Include(y => y.Klijent);
             }
 
             return entity;

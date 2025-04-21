@@ -4,6 +4,7 @@ import 'package:ebarbershop_mobile/providers/product_provider.dart';
 import 'package:ebarbershop_mobile/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
+import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   static const String routeName = "/product_details";
@@ -58,46 +59,46 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text("${_product!.naziv} dodan u korpu"),
-          ],
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: EdgeInsets.all(10),
-        backgroundColor: Colors.white,
-      ),
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text("${_product!.naziv} dodan u korpu"),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+            backgroundColor: Colors.white,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Row(
-        children: [
-          Icon(Icons.error_outline, color: Colors.white),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text("Greška pri dodavanju u korpu: ${e.toString()}"),
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text("Greška pri dodavanju u korpu: ${e.toString()}"),
+                ),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+            backgroundColor: Colors.red[700], 
+            elevation: 6, 
           ),
-        ],
-      ),
-      duration: Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      margin: EdgeInsets.all(10),
-      backgroundColor: Colors.red[700], 
-      elevation: 6, 
-    ),
-  );
+        );
       }
     } finally {
       if (mounted) {
@@ -117,6 +118,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(context, CartScreen.routeName);
+            },
+          ),
+        ],
       ),
       body: _product == null
           ? const Center(child: CircularProgressIndicator())

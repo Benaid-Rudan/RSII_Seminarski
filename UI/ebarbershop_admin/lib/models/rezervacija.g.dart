@@ -19,9 +19,17 @@ Rezervacija _$RezervacijaFromJson(Map<String, dynamic> json) => Rezervacija(
       json['korisnik'] == null
           ? null
           : Korisnik.fromJson(json['korisnik'] as Map<String, dynamic>),
-    )..termini = (json['termini'] as List<dynamic>?)
-        ?.map((e) => Termin.fromJson(e as Map<String, dynamic>))
-        .toList();
+      (json['klijentId'] as num?)?.toInt(),
+      json['klijent'] == null
+          ? null
+          : Korisnik.fromJson(json['klijent'] as Map<String, dynamic>),
+      json['termin'] == null
+          ? null
+          : Termin.fromJson(json['termin'] as Map<String, dynamic>),
+      (json['termini'] as List<dynamic>?)
+          ?.map((e) => Termin.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
 Map<String, dynamic> _$RezervacijaToJson(Rezervacija instance) =>
     <String, dynamic>{
@@ -31,5 +39,8 @@ Map<String, dynamic> _$RezervacijaToJson(Rezervacija instance) =>
       'korisnik': instance.korisnik,
       'uslugaId': instance.uslugaId,
       'usluga': instance.usluga,
+      'termin': instance.termin,
       'termini': instance.termini,
+      'klijentId': instance.klijentId,
+      'klijent': instance.klijent,
     };

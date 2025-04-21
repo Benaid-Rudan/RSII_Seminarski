@@ -15,30 +15,30 @@ public partial class EBarbershop1Context : DbContext
     {
     }
 
-    public virtual DbSet<Drzava> Drzavas { get; set; }
+    public virtual DbSet<Drzava> Drzava { get; set; }
 
-    public virtual DbSet<Grad> Grads { get; set; }
+    public virtual DbSet<Grad> Grad { get; set; }
 
-    public virtual DbSet<Korisnik> Korisniks { get; set; }
+    public virtual DbSet<Korisnik> Korisnik { get; set; }
 
-    public virtual DbSet<KorisnikUloga> KorisnikUlogas { get; set; }
+    public virtual DbSet<KorisnikUloga> KorisnikUloga { get; set; }
 
-    public virtual DbSet<Narudzba> Narudzbas { get; set; }
+    public virtual DbSet<Narudzba> Narudzba { get; set; }
 
-    public virtual DbSet<NarudzbaProizvodi> NarudzbaProizvodis { get; set; }
+    public virtual DbSet<NarudzbaProizvodi> NarudzbaProizvodi { get; set; }
 
-    public virtual DbSet<Novost> Novosts { get; set; }
+    public virtual DbSet<Novost> Novost { get; set; }
 
-    public virtual DbSet<Proizvod> Proizvods { get; set; }
+    public virtual DbSet<Proizvod> Proizvod { get; set; }
 
-    public virtual DbSet<Recenzija> Recenzijas { get; set; }
+    public virtual DbSet<Recenzija> Recenzija { get; set; }
 
-    public virtual DbSet<Rezervacija> Rezervacijas { get; set; }
+    public virtual DbSet<Rezervacija> Rezervacija { get; set; }
 
 
-    public virtual DbSet<Termin> Termins { get; set; }
+    public virtual DbSet<Termin> Termin { get; set; }
 
-    public virtual DbSet<Uloga> Ulogas { get; set; }
+    public virtual DbSet<Uloga> Uloga { get; set; }
 
     public virtual DbSet<Uplatum> Uplata { get; set; }
 
@@ -197,34 +197,61 @@ public partial class EBarbershop1Context : DbContext
             entity.ToTable("Rezervacija");
 
             entity.Property(e => e.DatumRezervacije).HasColumnType("datetime");
-            //entity.Property(e => e.Termin).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Korisnik).WithMany(p => p.Rezervacijas)
+            // Veza sa frizerom (korisnik koji izvodi uslugu)
+            entity.HasOne(d => d.Korisnik)
+                .WithMany(p => p.RezervacijeKaoFrizer)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
                 .HasConstraintName("FK__Rezervaci__Koris__3F466844");
 
-            entity.HasOne(d => d.Usluga).WithMany(p => p.Rezervacijas)
-                .HasForeignKey(d => d.UslugaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
-        });
+            // Veza sa klijentom (korisnik koji rezerviše termin)
+            entity.HasOne(d => d.Klijent)
+                .WithMany(p => p.RezervacijeKaoKlijent)
+                .HasForeignKey(d => d.KlijentId)
+                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
+                .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
-        
+            // Veza sa uslugom
+            entity.HasOne(d => d.Usluga)
+                .WithMany(p => p.Rezervacijas)
+                .HasForeignKey(d => d.UslugaId)
+                .OnDelete(DeleteBehavior.ClientSetNull) // As per your requirement
+                .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
+
+             entity.HasMany(r => r.Termins)
+            .WithOne(t => t.Rezervacija)
+            .HasForeignKey(t => t.RezervacijaId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        });
 
         modelBuilder.Entity<Termin>(entity =>
         {
-            entity.HasKey(e => e.TerminId).HasName("PK__Termin__42126C951DAEB8D7");
+            entity.HasKey(e => e.TerminId);
 
-            entity.ToTable("Termin");
+            // Veza sa frizerom
+            entity.HasOne(d => d.Korisnik)
+                .WithMany()
+                .HasForeignKey(d => d.KorisnikID)
+                .OnDelete(DeleteBehavior.Cascade) // You can change this to Cascade if needed
+                .HasConstraintName("FK_Termin_Korisnik_Frizer");
 
-            entity.Property(e => e.Vrijeme).HasColumnType("datetime");
+            // Veza sa klijentom
+            entity.HasOne(d => d.Klijent)
+                .WithMany()
+                .HasForeignKey(d => d.KlijentId)
+                .OnDelete(DeleteBehavior.Cascade) // You can change this to Cascade if needed
+                .HasConstraintName("FK_Termin_Korisnik_Klijent");
 
-            entity.HasOne(d => d.Rezervacija).WithMany(p => p.Termins)
-                .HasForeignKey(d => d.RezervacijaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Termin__Rezervac__4D94879B");
+            entity.HasOne(t => t.Rezervacija)
+                .WithMany(r => r.Termins)
+                .HasForeignKey(t => t.RezervacijaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         });
+
 
         modelBuilder.Entity<Uloga>(entity =>
         {

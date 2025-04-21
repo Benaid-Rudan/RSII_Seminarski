@@ -1,6 +1,8 @@
 import 'package:ebarbershop_admin/models/rezervacija.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
+import 'package:ebarbershop_admin/models/termin.dart';
 import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
+import 'package:ebarbershop_admin/providers/termin_provider.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +16,9 @@ class TerminListScreen extends StatefulWidget {
 
 class _TerminListScreenState extends State<TerminListScreen> {
   late RezervacijaProvider _rezervacijaProvider;
-  SearchResult<Rezervacija>? result;
+  late TerminProvider _terminProvider;
+
+  SearchResult<Termin>? result;
   bool _isLoading = false;
 
   TextEditingController _imePrezimeController = TextEditingController();
@@ -24,18 +28,21 @@ class _TerminListScreenState extends State<TerminListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _rezervacijaProvider = context.read<RezervacijaProvider>();
+    _terminProvider = context.read<TerminProvider>();
     _loadData();
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
-    var data = await _rezervacijaProvider.get(filter: {
+    var data = await _terminProvider.get(filter: {
       "IncludeKorisnik": true,
+      "IncludeRezervacija": true,
+      "isBooked": true,
       "imePrezime": _imePrezimeController.text,
-      "datumRezervacije": _datumRezervacijeController.text
     });
-
+    var termin = await _terminProvider.get(
+    );
     setState(() {
       result = data;
       _isLoading = false;
@@ -137,7 +144,7 @@ class _TerminListScreenState extends State<TerminListScreen> {
           ],
           rows: result?.result.asMap().entries.map((entry) {
                 int index = entry.key;
-                Rezervacija e = entry.value;
+                Termin e = entry.value;
 
                 return DataRow(
                   color: MaterialStateColor.resolveWith(
@@ -145,13 +152,13 @@ class _TerminListScreenState extends State<TerminListScreen> {
                         index % 2 == 0 ? Colors.grey[850]! : Colors.grey[800]!,
                   ),
                   cells: [
-                    DataCell(Text(e.korisnikId?.toString() ?? "",
+                    DataCell(Text(e.korisnik?.korisnikId.toString() ?? "",
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(
                         "${e.korisnik?.ime ?? 'Nepoznato'} ${e.korisnik?.prezime ?? ''}",
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(
-                        e.datumRezervacije?.toIso8601String() ?? "N/A",
+                        e.vrijeme?.toIso8601String() ?? "N/A",
                         style: TextStyle(color: Colors.white))),
                     DataCell(
                       IconButton(
@@ -179,9 +186,9 @@ class _TerminListScreenState extends State<TerminListScreen> {
 
                           if (potvrda == true) {
                             try {
-                              if (e.rezervacijaId != null) {
-                                await _rezervacijaProvider
-                                    .delete(e.rezervacijaId!);
+                              if (e.terminId != null) {
+                                await _terminProvider
+                                    .delete(e.terminId!);
 
                                 await _loadData();
                               } else {

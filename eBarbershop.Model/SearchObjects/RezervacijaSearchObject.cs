@@ -9,6 +9,8 @@ namespace eBarbershop.Model.SearchObjects
     public class RezervacijaSearchObject : BaseSearchObject
     {
         public int? KorisnikID { get; set; }
+        public int? KlijentId { get; set; }
+
         public string? imePrezime { get; set; }
         public DateTime? datumRezervacije { get; set; }
 
@@ -20,6 +22,8 @@ namespace eBarbershop.Model.SearchObjects
         public DateTime? DatumOd { get; set; }
         public DateTime? DatumDo { get; set; }
         public bool? IncludeKorisnik { get; set; }
+        public bool? IncludeKlijent { get; set; }
+
         public bool? IncludeUsluga { get; set; }
         public string? Usluga { get; set; }
     }

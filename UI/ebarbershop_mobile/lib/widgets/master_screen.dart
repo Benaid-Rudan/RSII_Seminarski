@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ebarbershop_mobile/main.dart';
 import 'package:ebarbershop_mobile/providers/korisnik_provider.dart';
+import 'package:ebarbershop_mobile/screens/appointment_list_screen.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 import 'package:ebarbershop_mobile/screens/employee_selection_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
@@ -38,19 +39,19 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
         widget.child = ProductListScreen();
       }
       else if (currentIndex == 2) {
-        widget.child = CartScreen();
-      }
-      else if (currentIndex == 3) {
         widget.child = ChangeNotifierProvider(
           create: (context) => KorisnikProvider(),
           child: EmployeeSelectionScreen(),
         );
       }
-      else if (currentIndex == 4) {
+      else if (currentIndex == 3) {
         widget.child = ReviewsScreen();
       }
-      else if (currentIndex == 5) {
+      else if (currentIndex == 4) {
         widget.child = UserProfileScreen();
+      }
+      else if (currentIndex == 5) {
+        widget.child = AppointmentListScreen();
       }
     });
   }
@@ -153,10 +154,6 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
             label: 'Shop',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.cut),
             label: 'Services',
           ),
@@ -167,6 +164,10 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.date_range),
+            label: 'Appo',
           ),
         ],
         selectedItemColor: Colors.amber[800],

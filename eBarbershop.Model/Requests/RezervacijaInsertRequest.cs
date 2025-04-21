@@ -16,8 +16,12 @@ namespace eBarbershop.Model.Requests
         public DateTime DatumRezervacije { get; set; }
 
         [Required]
-        public int KorisnikId { get; set; }
-        [Required] 
+        public int KorisnikId { get; set; } // This remains as the barber/employee ID
+
+        [Required]
         public int UslugaId { get; set; }
+
+        // Optionally add KupacId - will be overridden with logged-in user ID
+        public int? KupacId { get; set; }
     }
 }

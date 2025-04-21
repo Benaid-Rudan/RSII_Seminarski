@@ -34,42 +34,57 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
       body: Row(
         children: [
           Container(
-            width: 250,
-            color: Colors.blueGrey[900],
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                Icon(Icons.cut, size: 50, color: Colors.white),
-                const SizedBox(height: 20),
-                Text(
+  width: 250,
+  color: Colors.blueGrey[900],
+  child: SafeArea(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              const Icon(Icons.cut, size: 50, color: Colors.white),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
                   "Hello, $username",
                   style: const TextStyle(color: Colors.white, fontSize: 18),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 20),
-                menuItem("Zaposlenici", Icons.people, KorisnikListScreen()),
-                menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
-                menuItem("Rezervacije", Icons.calendar_today,
-                    RezervacijaListScreen()),
-                menuItem("Novosti", Icons.article, NovostListScreen()),
-                menuItem("Termini", Icons.schedule, TerminListScreen()),
-                menuItem("Narudžbe", Icons.shopping_cart, NarudzbaListScreen()),
-                menuItem("Usluge", Icons.design_services, UslugaListScreen()),
-                menuItem("Arhiva", Icons.archive, ArhivaListScreen()),
-                const Spacer(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.white),
-                  title: const Text("Odjava",
-                      style: TextStyle(color: Colors.white)),
-                  onTap: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+              menuItem("Zaposlenici", Icons.people, KorisnikListScreen()),
+              menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
+              menuItem("Rezervacije", Icons.calendar_today, RezervacijaListScreen()),
+              menuItem("Novosti", Icons.article, NovostListScreen()),
+              menuItem("Termini", Icons.schedule, TerminListScreen()),
+              menuItem("Narudžbe", Icons.shopping_cart, NarudzbaListScreen()),
+              menuItem("Usluge", Icons.design_services, UslugaListScreen()),
+              menuItem("Arhiva", Icons.archive, ArhivaListScreen()),
+              const SizedBox(height: 30),
+              const Divider(color: Colors.white54),
+            ],
           ),
+        ),
+      ),
+      ListTile(
+        leading: const Icon(Icons.logout, color: Colors.white),
+        title: const Text("Odjava", style: TextStyle(color: Colors.white)),
+        onTap: () {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        },
+      ),
+      const SizedBox(height: 10),
+    ],
+  ),
+),
+
+),
           Expanded(
             child: Column(
               children: [

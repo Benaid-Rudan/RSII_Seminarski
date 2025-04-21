@@ -1,4 +1,6 @@
+import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/models/korisnik.dart';
 import 'package:ebarbershop_mobile/models/usluga.dart';
@@ -9,12 +11,13 @@ class AppointmentTimeScreen extends StatefulWidget {
   final Korisnik employee;
   final Usluga service;
   final DateTime selectedDate;
-
+  final Korisnik klijent;
   const AppointmentTimeScreen({
     Key? key, 
     required this.employee, 
     required this.service,
     required this.selectedDate,
+    required this.klijent,
   }) : super(key: key);
 
   @override
@@ -26,43 +29,61 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   bool isCreatingReservation = false;
   List<TimeSlot> availableTimeSlots = [];
   TimeSlot? selectedTimeSlot;
+  late TerminProvider _terminProvider;
 
   @override
   void initState() {
     super.initState();
+    _terminProvider = context.read<TerminProvider>();
     loadAvailableTimeSlots();
   }
 
   Future<void> loadAvailableTimeSlots() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     
     try {
-      // Simulate API call to get available time slots
-      await Future.delayed(Duration(seconds: 1));
-      
-      // Example time slots (in real app, this would come from API)
-      final slots = [
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 9, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 10, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 11, 0), false),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 12, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 13, 0), false),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 14, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 15, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 16, 0), true),
-        TimeSlot(DateTime(widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day, 17, 0), false),
-      ];
-      
+      // 1. Get all existing appointments for this employee on selected date
+      final appointments = await _terminProvider.get(filter: {
+        'korisnikId': widget.employee.korisnikId.toString(),
+        'datum': DateFormat('yyyy-MM-dd').format(widget.selectedDate),
+      });
+
+      // 2. Generate all possible time slots (9:00-17:00)
+      final allSlots = List.generate(9, (index) {
+        final hour = 9 + index;
+        return TimeSlot(
+          DateTime(
+            widget.selectedDate.year,
+            widget.selectedDate.month,
+            widget.selectedDate.day,
+            hour,
+            0,
+          ),
+          true, // Initially available
+        );
+      });
+
+      // 3. Mark slots as unavailable if they exist in database
+      if (appointments?.result != null) {
+        for (final appointment in appointments!.result!) {
+          if (appointment.vrijeme != null) {
+            final appointmentTime = appointment.vrijeme!;
+            for (final slot in allSlots) {
+              if (slot.time.hour == appointmentTime.hour) {
+                slot.isAvailable = false;
+                break;
+              }
+            }
+          }
+        }
+      }
+
       setState(() {
-        availableTimeSlots = slots;
+        availableTimeSlots = allSlots;
         isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Greška pri učitavanju termina: $e')),
       );
@@ -72,6 +93,14 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   Future<void> _createReservation() async {
     if (selectedTimeSlot == null) return;
 
+    widget.klijent.korisnikId = Authorization.userId;
+
+    if (widget.klijent.korisnikId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Morate biti prijavljeni da biste rezervisali termin')),
+    );
+    return;
+  }
     setState(() {
       isCreatingReservation = true;
     });
@@ -88,11 +117,15 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
         selectedTimeSlot!.time.hour,
         selectedTimeSlot!.time.minute,
       );
-
+      print("Kreiram rezervaciju sa:");
+print("FrizerId: ${widget.employee.korisnikId}");
+print("KlijentId: ${widget.klijent.korisnikId}");
+print("UslugaId: ${widget.service.uslugaId}");
       // Step 1: Create reservation
       final createdReservation = await rezervacijaProvider.createReservation(
-        datumRezervacije: reservationDateTime,
+        datumRezervacije: DateTime.now(),
         korisnikId: widget.employee.korisnikId!,
+        klijentId: widget.klijent.korisnikId!,
         uslugaId: widget.service.uslugaId!,
       );
       
@@ -100,7 +133,8 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       await terminProvider.insert({
         "vrijeme": reservationDateTime.toIso8601String(),
         "rezervacijaId": createdReservation.rezervacijaId,
-        "korisnikID": widget.employee.korisnikId,
+        "korisnikId": widget.employee.korisnikId,
+        "klijentId": widget.klijent.korisnikId!,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -338,7 +372,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
 
 class TimeSlot {
   final DateTime time;
-  final bool isAvailable;
+  bool isAvailable;
 
   TimeSlot(this.time, this.isAvailable);
 }

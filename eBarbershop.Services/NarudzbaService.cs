@@ -63,7 +63,7 @@
             }
         public override async Task<Model.Narudzba> Update(int id, NarudzbaUpdateRequest request)
         {
-            var entity = await _context.Narudzbas
+            var entity = await _context.Narudzba
                 .Include(n => n.NarudzbaProizvodis) 
                 .FirstOrDefaultAsync(n => n.NarudzbaId == id);
 
@@ -86,7 +86,7 @@
             foreach (var proizvod in proizvodiZaBrisanje)
             {
                 entity.NarudzbaProizvodis.Remove(proizvod);
-                _context.NarudzbaProizvodis.Remove(proizvod); 
+                _context.NarudzbaProizvodi.Remove(proizvod); 
             }
             
             foreach (var proizvod in request.ListaProizvoda)

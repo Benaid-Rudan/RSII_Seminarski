@@ -13,11 +13,15 @@ namespace eBarbershop.Model.Requests
         [Required]
         [JsonConverter(typeof(JsonDateTimeConverter))]
         public DateTime DatumRezervacije { get; set; }
-        
+
         [Required]
-        public int KorisnikId { get; set; }
-        [Required] 
+        public int KorisnikId { get; set; } // Barber/employee ID
+
+        [Required]
         public int UslugaId { get; set; }
 
+        // Add the customer ID
+        [Required]
+        public int KupacId { get; set; }
     }
 }
