@@ -52,7 +52,7 @@
                     Proizvod.ProizvodId = proizvod.ProizvodID;
                     Proizvod.Kolicina = proizvod.Kolicina;
                     Proizvod.NarudzbaId = entity.NarudzbaId;
-                    Proizvod.Cijena = entity.UkupnaCijena;
+                    //Proizvod.Cijena = entity.UkupnaCijena;
 
                     _context.Add(Proizvod);
                 }

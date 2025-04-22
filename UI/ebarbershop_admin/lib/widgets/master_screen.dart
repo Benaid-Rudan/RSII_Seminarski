@@ -56,7 +56,7 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
                 ),
               ),
               const SizedBox(height: 20),
-              menuItem("Zaposlenici", Icons.people, KorisnikListScreen()),
+              menuItem("Korisnici", Icons.people, KorisnikListScreen()),
               menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
               menuItem("Rezervacije", Icons.calendar_today, RezervacijaListScreen()),
               menuItem("Novosti", Icons.article, NovostListScreen()),

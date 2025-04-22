@@ -134,7 +134,6 @@ public partial class EBarbershop1Context : DbContext
 
             entity.ToTable("NarudzbaProizvodi");
 
-            entity.Property(e => e.Cijena).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Narudzba).WithMany(p => p.NarudzbaProizvodis)
                 .HasForeignKey(d => d.NarudzbaId)

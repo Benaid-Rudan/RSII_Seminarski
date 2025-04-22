@@ -30,7 +30,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   File? _selectedImage;
   late UlogaProvider _ulogaProvider;
   SearchResult<Uloga>? ulogaResult;
-  List<String> _selectedRoles = [];
   TextEditingController _ulogeController = TextEditingController();
   TextEditingController _imeControllerFilter = TextEditingController();
   TextEditingController _prezimeControllerFilter = TextEditingController();
@@ -42,8 +41,8 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _passwordPotvrdaController = TextEditingController();
   TextEditingController _gradController = TextEditingController();
+  TextEditingController _ulogaControllerFilter = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-  List<int> _selectedRoleIds = [];
   Future<void> _pickImage() async {
     final XFile? pickedFile =
         await _picker.pickImage(source: ImageSource.gallery);
@@ -181,6 +180,23 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
               ),
             ),
             SizedBox(width: 16),
+             Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Uloga",
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.blueGrey[100],
+                  labelStyle: TextStyle(color: Colors.black),
+                ),
+                controller: _ulogaControllerFilter,
+                onChanged: (value) {
+                  _filterData();
+                },
+              ),
+            ),
+            SizedBox(width: 16),
+
             ElevatedButton(
               onPressed: () {
                 _showUserDialog();
@@ -201,6 +217,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
           'ime': _imeControllerFilter.text,
           'prezime': _prezimeControllerFilter.text,
           'IsUlogeIncluded': 'true',
+          'Uloga': _ulogaControllerFilter.text,
         },
       );
       setState(() {
@@ -345,6 +362,12 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                               if (confirmDelete) {
                                 await _korisnikProvider.delete(e.korisnikId!);
                                 _refreshData();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Korisnik uspješno obrisan'),
+                                    backgroundColor: Colors.red,
+                                  )
+                                );
                               }
                             },
                           ),
@@ -362,7 +385,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
 
   void _showUserDialog({Korisnik? korisnik}) {
     _selectedImage = null;
-    _selectedRoles = [];
 
     _imeController.clear();
     _prezimeController.clear();
@@ -388,17 +410,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       }
     }
 
-    if (korisnik != null && korisnik.korisnikUlogas != null && korisnik.korisnikUlogas!.isNotEmpty) {
-  _selectedRoles = korisnik.korisnikUlogas!
-    .where((ku) => ku.uloga != null && ku.uloga!.naziv != null)
-    .map((ku) => ku.uloga!.naziv!)
-    .toList();
     
-  _selectedRoleIds = korisnik.korisnikUlogas!
-    .where((ku) => ku.uloga != null && ku.uloga!.ulogaId != null)
-    .map((ku) => ku.uloga!.ulogaId!)
-    .toList();
-}
 
     showDialog(
       context: context,
@@ -568,60 +580,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     },
                   ),
 
-                  FormBuilderField(
-                    name: 'uloge',
-                    validator: (value) {
-                      if (_selectedRoles.isEmpty) {
-                        return 'Barem jedna uloga je obavezna';
-                      }
-                      return null;
-                    },
-                    builder: (field) {
-                      return InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: "Uloge",
-                          errorText: field.errorText,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (ulogaResult?.result != null)
-                              ...ulogaResult!.result.map((uloga) {
-                                bool isSelected = _selectedRoles.contains(uloga.naziv);
-                                return StatefulBuilder(
-                                  builder: (context, setState) {
-                                    return CheckboxListTile(
-                                    title: Text(uloga.naziv ?? ''),
-                                    value: isSelected,
-                                    onChanged: (bool? selected) {
-                                      setState(() {
-                                        if (selected == true) {
-                                          if (!_selectedRoles.contains(uloga.naziv)) {
-                                            _selectedRoles.add(uloga.naziv!);
-                                            _selectedRoleIds.add(uloga.ulogaId!); // Add this line
-                                          }
-                                        } else {
-                                          _selectedRoles.remove(uloga.naziv);
-                                          _selectedRoleIds.remove(uloga.ulogaId); // Add this line
-                                        }
-                                        field.didChange(_selectedRoles);
-                                      });
-                                    },
-                                  );
-                                  }
-                                );
-                              }).toList(),
-                            SizedBox(height: 8),
-                            Text(
-                              'Odabrane uloge: ${_selectedRoles.join(", ")}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    
-                  ),
+                  
                 ],
               ),
             ),
@@ -638,15 +597,13 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 final formData = _formKey.currentState?.value;
                 
                 try {
-                  // Priprema zajedničkih podataka za insert i update
                   Map<String, dynamic> userData = {
                     'Ime': formData?['ime'],
                     'Prezime': formData?['prezime'],
                     'Email': formData?['email'],
                     'Username': formData?['username'],
                     'GradId': formData?['gradId'],
-                    'UlogeIdList': _selectedRoleIds,
-                    // Dodaj request parametar za oba slučaja
+                    'UlogeID': [3], 
                     'request': 'some_value',
                   };
                   
@@ -686,7 +643,8 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   
                   // Dodavanje povratne informacije
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(korisnik == null ? 'Korisnik uspješno dodan' : 'Korisnik uspješno ažuriran'))
+                    SnackBar(content: Text(korisnik == null ? 'Korisnik uspješno dodan' : 'Korisnik uspješno ažuriran'),
+                    backgroundColor: Colors.green,)
                   );
                 } catch (e) {
                   print('Error saving user: $e');

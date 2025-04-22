@@ -16,7 +16,6 @@ namespace eBarbershop.Model
         public virtual Proizvod Proizvod { get; set; }
 
         public int Kolicina { get; set; }
-        public decimal Cijena { get; set; }
     }
 
 }

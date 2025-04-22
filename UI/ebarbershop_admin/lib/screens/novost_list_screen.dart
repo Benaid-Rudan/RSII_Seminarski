@@ -185,6 +185,12 @@ class _NovostListScreenState extends State<NovostListScreen> {
                               if (potvrda == true) {
                                 await _novostProvider.delete(e.novostId!);
                                 _loadData();
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Novost uspješno obrisana'),
+                                    backgroundColor: Colors.red,
+                                  )
+                                );
                               }
                             },
                           ),
@@ -344,6 +350,10 @@ class _NovostListScreenState extends State<NovostListScreen> {
                                 });
                               }
                               await _loadData();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(novost == null ? 'Novost uspješno dodana' : 'Novost uspješno ažurirana'),
+                              backgroundColor: Colors.green,)
+                            );
                             } catch (e) {
                               showDialog(
                                 context: context,

@@ -58,6 +58,7 @@ namespace eBarbershop.Services
         public void BeforeInsert(TerminInsertRequest insert, Database.Termin entity)
         {
             entity.Vrijeme = DateTime.Now;
+
         }
 
         public override IQueryable<Database.Termin> AddInclude(IQueryable<Database.Termin> entity, TerminSearchObject obj)

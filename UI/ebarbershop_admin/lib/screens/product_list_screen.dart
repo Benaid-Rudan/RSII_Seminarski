@@ -246,6 +246,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
       try {
         await _productProvider.delete(product.proizvodId!);
         await _fetchData();
+        ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Proizvod uspješno obrisan'),
+                                    backgroundColor: Colors.red,
+                                  )
+                                );
       } catch (e) {
         showDialog(
           context: context,
@@ -477,6 +483,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                               await _fetchData();
                               Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(product == null ? 'Proizvod uspješno dodan' : 'Proizvod uspješno ažuriran'),
+                              backgroundColor: Colors.green,)
+                            );
                             } catch (e) {
                               showDialog(
                                 context: context,

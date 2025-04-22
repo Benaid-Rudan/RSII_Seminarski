@@ -135,6 +135,7 @@ print("UslugaId: ${widget.service.uslugaId}");
         "rezervacijaId": createdReservation.rezervacijaId,
         "korisnikId": widget.employee.korisnikId,
         "klijentId": widget.klijent.korisnikId!,
+        "isBooked": true,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

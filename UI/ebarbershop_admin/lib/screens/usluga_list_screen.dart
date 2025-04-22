@@ -184,6 +184,12 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                                   if (e.uslugaId != null) {
                                     await _uslugaProvider.delete(e.uslugaId!);
                                     await _loadData();
+                                     ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Usluga uspješno obrisana'),
+                                    backgroundColor: Colors.red,
+                                  )
+                                );
                                   } else {
                                     throw Exception("Usluga ID je null.");
                                   }
@@ -285,6 +291,10 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                   }
                   await _loadData();
                   Navigator.pop(context);
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(usluga == null ? 'Usluga uspješno dodana' : 'Usluga uspješno ažurirana'),
+                    backgroundColor: Colors.green,)
+                  );
                 } catch (e) {
                   showDialog(
                     context: context,
