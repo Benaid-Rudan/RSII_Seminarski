@@ -396,6 +396,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             "slika": "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png",
                             "gradId": _selectedGradId,
                             "ulogeID": [3],
+                            "request":"register"
                           };
                 
                           try {

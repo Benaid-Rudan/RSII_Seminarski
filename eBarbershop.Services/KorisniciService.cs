@@ -151,7 +151,11 @@ namespace eBarbershop.Services
 
             if (!string.IsNullOrWhiteSpace(obj.Username))
             {
-                entity = entity.Where(x => x.Username.StartsWith(obj.Username));
+                entity = entity.Where(x => x.Username.StartsWith(obj.Username.ToLower()));
+            }
+            if (!string.IsNullOrWhiteSpace(obj.Uloga))
+            {
+                entity = entity.Where(x => x.KorisnikUlogas.Any(ku => ku.Uloga.Naziv.ToLower().StartsWith(obj.Uloga.ToLower())));
             }
 
             return entity;

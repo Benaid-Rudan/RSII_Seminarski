@@ -64,40 +64,35 @@ namespace eBarbershop.Services
         }
 
 
-        //public async Task<List<Database.Usluga>> GetUslugeForDateAsync(DateTime datumRezervacije)
-        //{
-        //    var usluge = await _context.Uslugas
-        //        .Where(u => u.Datum == datumRezervacije)
-        //        .ToListAsync();
-
-        //    return usluge;
-        //}
-
 
         public override IQueryable<Database.Rezervacija> AddFilter(IQueryable<Database.Rezervacija> entity, RezervacijaSearchObject obj)
         {
 
-            if (obj.KorisnikID.HasValue)
+            if (obj.KlijentId.HasValue)
             {
-                entity = entity.Where(x => x.KorisnikId == obj.KorisnikID);
+                entity = entity.Where(x => x.KlijentId == obj.KlijentId);
             }
-            if (!string.IsNullOrWhiteSpace(obj.imePrezime))
+            if (!string.IsNullOrWhiteSpace(obj.imePrezimeKlijenta))
             {
-                entity = entity.Where(x => x.Korisnik.Ime.ToLower().Contains(obj.imePrezime.ToLower()) || x.Korisnik.Prezime.ToLower().Contains(obj.imePrezime.ToLower()));
+                entity = entity.Where(x => x.Klijent.Ime.ToLower().Contains(obj.imePrezimeKlijenta.ToLower()) || x.Klijent.Prezime.ToLower().Contains(obj.imePrezimeKlijenta.ToLower()));
             }
-            if(!string.IsNullOrWhiteSpace(obj.Usluga))
+            if (!string.IsNullOrWhiteSpace(obj.imePrezimeFrizera))
+            {
+                entity = entity.Where(x => x.Korisnik.Ime.ToLower().Contains(obj.imePrezimeFrizera.ToLower()) || x.Korisnik.Prezime.ToLower().Contains(obj.imePrezimeFrizera.ToLower()));
+            }
+            if (!string.IsNullOrWhiteSpace(obj.Usluga))
             {
                 entity = entity.Where(x => x.Usluga.Naziv.ToLower().Contains(obj.Usluga.ToLower()));
             }
 
-            if (obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezime))
-            {
-                entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezime || x.Korisnik.Prezime == obj.imePrezime);
-            }
-            if (obj.IncludeKlijent == true && !string.IsNullOrEmpty(obj.imePrezime))
-            {
-                entity = entity.Where(x => x.Klijent.Ime == obj.imePrezime || x.Klijent.Prezime == obj.imePrezime);
-            }
+            //if (obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezimeFrizera))
+            //{
+            //    entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezimeFrizera || x.Korisnik.Prezime == obj.imePrezimeFrizera);
+            //}
+            //if (obj.IncludeKlijent == true && !string.IsNullOrEmpty(obj.imePrezimeKlijenta))
+            //{
+            //    entity = entity.Where(x => x.Klijent.Ime == obj.imePrezimeKlijenta || x.Klijent.Prezime == obj.imePrezimeKlijenta);
+            //}
             if (obj.datumRezervacije.HasValue)
             {
                 entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
@@ -134,7 +129,46 @@ namespace eBarbershop.Services
                 entity = entity.Include(y => y.Klijent);
             }
 
+
+
             return entity;
         }
+        public override async Task<Model.Rezervacija> Delete(int rezervacijaId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var rezervacija = await _context.Rezervacija
+                    .Include(r => r.Termins) // Uključimo termine povezane sa rezervacijom
+                    .FirstOrDefaultAsync(r => r.RezervacijaId == rezervacijaId);
+
+                if (rezervacija != null)
+                {
+                    // Prvo brišemo sve termine povezane sa rezervacijom
+                    foreach (var termin in rezervacija.Termins.ToList())
+                    {
+                        termin.isBooked = false; // Oslobađamo termin
+                        _context.Termin.Remove(termin);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    // Zatim brišemo samu rezervaciju
+                    _context.Rezervacija.Remove(rezervacija);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                    return _mapper.Map<Model.Rezervacija>(rezervacija);
+                }
+
+                return null;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
     }
 }

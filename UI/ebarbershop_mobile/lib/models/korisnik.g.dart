@@ -14,7 +14,12 @@ Korisnik _$KorisnikFromJson(Map<String, dynamic> json) => Korisnik(
   username: json['username'] as String?,
   slika: json['slika'] as String?,
   gradId: (json['gradId'] as num?)?.toInt(),
-  uloge: json['uloge'] as String?,
+  uloge: json['uloge'] is List
+    ? (json['uloge'] as List).map((e) => e.toString()).toList()
+    : json['uloge'] != null
+        ? [json['uloge'].toString()]
+        : [],
+
   korisnikUlogas:
       (json['korisnikUlogas'] as List<dynamic>?)
           ?.map((e) => KorisnikUloga.fromJson(e as Map<String, dynamic>))

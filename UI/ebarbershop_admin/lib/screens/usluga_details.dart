@@ -29,7 +29,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     _initialValue = {
       'naziv': widget.usluga?.naziv ?? '',
       'opis': widget.usluga?.opis ?? '',
-      'cijena': widget.usluga?.cijena?.toString() ?? '0.0',
+      'cijena': widget.usluga?.cijena?.toString() ?? '0.00',
     };
 
     setState(() {
@@ -60,7 +60,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                             final formData = Map<String, dynamic>.from(
                                 _formKey.currentState!.value);
                             formData['cijena'] =
-                                double.tryParse(formData['cijena'] ?? '0.0');
+                                double.tryParse(formData['cijena'] ?? '0.00');
 
                             if (widget.usluga == null) {
                               await _uslugaProvider.insert(formData);

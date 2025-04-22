@@ -11,7 +11,9 @@ namespace eBarbershop.Model.SearchObjects
         public int? KorisnikID { get; set; }
         public int? KlijentId { get; set; }
 
-        public string? imePrezime { get; set; }
+        public string? imePrezimeKlijenta { get; set; }
+        public string? imePrezimeFrizera { get; set; }
+
         public DateTime? datumRezervacije { get; set; }
 
         public DateTime? DatumRezervacijeBezVremena

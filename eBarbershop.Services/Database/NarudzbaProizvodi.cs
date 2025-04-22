@@ -13,8 +13,6 @@ public  class NarudzbaProizvodi
 
     public int Kolicina { get; set; }
 
-    public decimal Cijena { get; set; }
-
     public virtual Narudzba Narudzba { get; set; } = null!;
 
     public virtual Proizvod Proizvod { get; set; } = null!;

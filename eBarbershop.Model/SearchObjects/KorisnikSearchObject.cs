@@ -11,6 +11,8 @@ namespace eBarbershop.Model.SearchObjects
         public string? Ime { get; set; }
         public string? Prezime { get; set; }
         public string? Username { get; set; }
+        public string? Uloga { get; set; }
+
         public bool? IsUlogeIncluded { get; set; }
     }
 }

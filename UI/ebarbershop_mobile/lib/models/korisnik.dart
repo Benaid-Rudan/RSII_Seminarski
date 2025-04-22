@@ -13,7 +13,8 @@ class Korisnik {
   String? username;
   String? slika;
   int? gradId;
-  String? uloge;
+  @JsonKey(defaultValue: <String>[])
+  List<String>? uloge;
   List<KorisnikUloga>? korisnikUlogas;
 
   Korisnik({

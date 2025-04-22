@@ -6,6 +6,7 @@ import 'package:ebarbershop_admin/providers/novost_provider.dart';
 import 'package:ebarbershop_admin/providers/product_provider.dart';
 import 'package:ebarbershop_admin/providers/rezervacija_provider.dart';
 import 'package:ebarbershop_admin/providers/termin_provider.dart';
+import 'package:ebarbershop_admin/providers/uloga_provider.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
 import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
@@ -27,6 +28,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => NovostProvider()),
       ChangeNotifierProvider(create: (_) => TerminProvider()),
       ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
+      ChangeNotifierProvider(create: (_) => UlogaProvider()),
     ],
     child: const MyMaterialApp(),
   ));
@@ -158,20 +160,28 @@ class LoginPage extends StatelessWidget {
                         Authorization.password = password;
 
                         try {
-                          // Dohvati podatke o korisniku
-                           var korisnik = await _korisnikProvider.authenticate(username, password);
+  // Dohvati podatke o korisniku
+  var korisnik = await _korisnikProvider.authenticate(username, password);
 
-                          // Provjeri ima li korisnik ulogu "Administrator"
-                          if (korisnik.uloge != "Administrator") {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    "Samo korisnici s ulogom Administrator mogu se prijaviti."),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
+  // Provjeri ima li korisnik ulogu "Administrator" ili "Uposlenik"
+  bool isAuthorized = false;
+  
+  if (korisnik.uloge != null && korisnik.uloge!.isNotEmpty) {
+    isAuthorized = korisnik.uloge!.contains("Administrator") || 
+                  korisnik.uloge!.contains("Uposlenik");
+  }
+
+  if (!isAuthorized) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Samo korisnici s ulogom Administrator ili Uposlenik mogu se prijaviti."),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
 
                           // Ako je korisnik administrator, preusmjeri na MasterScreen
                           Navigator.of(context).pushReplacement(
