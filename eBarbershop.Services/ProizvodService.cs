@@ -48,5 +48,21 @@ namespace eBarbershop.Services
             }
             return entity;
         }
+        public async Task<List<Model.Proizvod>> GetRecommendedProducts()
+        {
+            var query = _context.Proizvod
+                .Include(p => p.NarudzbaProizvodis) // Uključi vezu s narudžbama
+                .Select(p => new
+                {
+                    Proizvod = p,
+                    OrderCount = p.NarudzbaProizvodis.Sum(np => np.Kolicina) // Suma količina narudžbi
+                })
+                .OrderByDescending(x => x.OrderCount)
+                .Take(3) // Top 5 proizvoda
+                .Select(x => x.Proizvod);
+
+            var list = await query.ToListAsync();
+            return _mapper.Map<List<Model.Proizvod>>(list);
+        }
     }
 }

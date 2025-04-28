@@ -360,9 +360,11 @@ print("UslugaId: ${widget.service.uslugaId}");
         child: Text(
           '$hour:$minute',
           style: TextStyle(
-            color: !slot.isAvailable
-                ? Colors.grey
-                : Colors.white,
+             color: !slot.isAvailable
+              ? Colors.grey
+              : isSelected
+                  ? Colors.black  // ✅ crni tekst za selektovani slot
+                  : Colors.white,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),

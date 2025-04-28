@@ -24,19 +24,16 @@ namespace eBarbershop.Services
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
         {
-            // Get the currently logged-in user's ID from Authorization
             int loggedInUserId = _currentUserService.GetUserId(); // You'll need to inject a service to get the current user
 
-            // Kreiraj novu rezervaciju
             var entity = new Database.Rezervacija
             {
-                KorisnikId = request.KorisnikId, // Barber/employee ID
-                KlijentId = loggedInUserId, // Set customer ID to logged-in user
+                KorisnikId = request.KorisnikId, 
+                KlijentId = loggedInUserId, 
                 DatumRezervacije = request.DatumRezervacije,
                 UslugaId = request.UslugaId
             };
 
-            // Dohvati uslugu koja je povezana s rezervacijom
             var usluga = await _context.Uslugas
                                         .FirstOrDefaultAsync(u => u.UslugaId == request.UslugaId);
 
@@ -45,14 +42,11 @@ namespace eBarbershop.Services
                 throw new Exception("Usluga nije pronađena.");
             }
 
-            // Poveži uslugu sa rezervacijom
             entity.Usluga = usluga;
 
-            // Spremi rezervaciju
             _context.Rezervacija.Add(entity);
             await _context.SaveChangesAsync();
 
-            // Postavi isBooked na true za sve termine (ako je potrebno)
             foreach (var termin in _context.Termin)
             {
                 termin.isBooked = true;
@@ -85,17 +79,10 @@ namespace eBarbershop.Services
                 entity = entity.Where(x => x.Usluga.Naziv.ToLower().Contains(obj.Usluga.ToLower()));
             }
 
-            //if (obj.IncludeKorisnik == true && !string.IsNullOrEmpty(obj.imePrezimeFrizera))
-            //{
-            //    entity = entity.Where(x => x.Korisnik.Ime == obj.imePrezimeFrizera || x.Korisnik.Prezime == obj.imePrezimeFrizera);
-            //}
-            //if (obj.IncludeKlijent == true && !string.IsNullOrEmpty(obj.imePrezimeKlijenta))
-            //{
-            //    entity = entity.Where(x => x.Klijent.Ime == obj.imePrezimeKlijenta || x.Klijent.Prezime == obj.imePrezimeKlijenta);
-            //}
+            
             if (obj.datumRezervacije.HasValue)
             {
-                entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
+                entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date);
             }
             if (obj.DatumOd.HasValue)
             {
@@ -139,21 +126,19 @@ namespace eBarbershop.Services
             try
             {
                 var rezervacija = await _context.Rezervacija
-                    .Include(r => r.Termins) // Uključimo termine povezane sa rezervacijom
+                    .Include(r => r.Termins) 
                     .FirstOrDefaultAsync(r => r.RezervacijaId == rezervacijaId);
 
                 if (rezervacija != null)
                 {
-                    // Prvo brišemo sve termine povezane sa rezervacijom
                     foreach (var termin in rezervacija.Termins.ToList())
                     {
-                        termin.isBooked = false; // Oslobađamo termin
+                        termin.isBooked = false;
                         _context.Termin.Remove(termin);
                     }
 
                     await _context.SaveChangesAsync();
 
-                    // Zatim brišemo samu rezervaciju
                     _context.Rezervacija.Remove(rezervacija);
                     await _context.SaveChangesAsync();
 

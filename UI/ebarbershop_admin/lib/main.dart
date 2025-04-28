@@ -160,30 +160,31 @@ class LoginPage extends StatelessWidget {
                         Authorization.password = password;
 
                         try {
-  // Dohvati podatke o korisniku
-  var korisnik = await _korisnikProvider.authenticate(username, password);
+                          // Dohvati podatke o korisniku
+                          var korisnik = await _korisnikProvider.authenticate(username, password);
 
-  // Provjeri ima li korisnik ulogu "Administrator" ili "Uposlenik"
-  bool isAuthorized = false;
-  
-  if (korisnik.uloge != null && korisnik.uloge!.isNotEmpty) {
-    isAuthorized = korisnik.uloge!.contains("Administrator") || 
-                  korisnik.uloge!.contains("Uposlenik");
-  }
+                          // Provjeri ima li korisnik ulogu "Administrator" ili "Uposlenik"
+                          bool isAuthorized = false;
+                          
+                          if (korisnik.uloge != null && korisnik.uloge!.isNotEmpty) {
+                            // Store user roles in Authorization class
+                            Authorization.roles = korisnik.uloge;
+                            isAuthorized = korisnik.uloge!.contains("Administrator") || 
+                                          korisnik.uloge!.contains("Uposlenik");
+                          }
 
-  if (!isAuthorized) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Samo korisnici s ulogom Administrator ili Uposlenik mogu se prijaviti."),
-        backgroundColor: Colors.red,
-      ),
-    );
-    return;
-  }
+                          if (!isAuthorized) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "Samo korisnici s ulogom Administrator ili Uposlenik mogu se prijaviti."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
 
-
-                          // Ako je korisnik administrator, preusmjeri na MasterScreen
+                          // Ako je korisnik administrator ili uposlenik, preusmjeri na MasterScreen
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => MasterScreenWidget(

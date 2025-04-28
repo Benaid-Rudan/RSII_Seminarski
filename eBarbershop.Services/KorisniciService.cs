@@ -48,23 +48,22 @@ namespace eBarbershop.Services
                 Slika = request.Slika
             };
 
-            await _context.Korisnik.AddAsync(entity); // Asinkrono dodavanje korisnika
-            await _context.SaveChangesAsync(); // Asinkrono spremanje korisnika da bismo dobili njegov ID
+            await _context.Korisnik.AddAsync(entity); 
+            await _context.SaveChangesAsync(); 
 
-            // Dodavanje uloga za korisnika
             foreach (var ulogaId in request.UlogeID)
             {
                 var korisnikUloga = new Database.KorisnikUloga
                 {
-                    KorisnikId = entity.KorisnikId, // Povezujemo korisnika s ulogom
+                    KorisnikId = entity.KorisnikId, 
                     UlogaId = ulogaId,
                     DatumDodjele = DateTime.Now
                 };
 
-                await _context.KorisnikUloga.AddAsync(korisnikUloga); // Asinkrono dodavanje korisnik-uloze
+                await _context.KorisnikUloga.AddAsync(korisnikUloga); 
             }
 
-            await _context.SaveChangesAsync(); // Asinkrono spremanje uloga u bazu
+            await _context.SaveChangesAsync(); 
 
             // Vraćanje rezultata
             return new Model.Korisnik
@@ -110,7 +109,6 @@ namespace eBarbershop.Services
 
         public async Task<Model.Korisnik> Update(int id, KorisniciUpdateRequest request)
         {
-            // Pronalaženje entiteta asinkrono
             var entity = await _context.Korisnik.FindAsync(id);
 
             if (entity == null)
@@ -118,15 +116,30 @@ namespace eBarbershop.Services
                 throw new Exception("Korisnik nije pronađen!");
             }
 
-            // Mapiranje podataka iz request objekta u entitet
+            // Mapiraj osnovne podatke (ime, prezime, email itd.)
             _mapper.Map(request, entity);
 
-            // Asinkrono čuvanje izmena u bazi
+            // Ako korisnik želi promijeniti šifru
+            if (!string.IsNullOrWhiteSpace(request.Password) || !string.IsNullOrWhiteSpace(request.PasswordPotvrda))
+            {
+                if (request.Password != request.PasswordPotvrda)
+                {
+                    throw new Exception("Password i PasswordPotvrda se ne podudaraju!");
+                }
+
+                // Generiši novi salt i hash
+                var salt = GenerateSalt();
+                var hash = GenerateHash(salt, request.Password);
+
+                entity.PasswordSalt = salt;
+                entity.PasswordHash = hash;
+            }
+
             await _context.SaveChangesAsync();
 
-            // Mapiranje ažuriranog entiteta nazad u model i vraćanje rezultata
             return _mapper.Map<Model.Korisnik>(entity);
         }
+
 
         public IQueryable<Korisnik> AddInclude(IQueryable<Korisnik> query, KorisnikSearchObject? search = null)
         {
@@ -163,21 +176,17 @@ namespace eBarbershop.Services
 
         public eBarbershop.Model.Korisnik AddUloga(int id, KorisniciUlogaUpdateRequest request)
         {
-            // Pronađi korisnika
             var user = _context.Korisnik.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
             if (user == null)
                 throw new Exception("Korisnik nije pronađen.");
 
-            // Pronađi ulogu
             var uloga = _context.Uloga.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
             if (uloga == null)
                 throw new Exception("Uloga nije pronađena.");
 
-            // Provjeri da li korisnik već ima ovu ulogu
             if (user.KorisnikUlogas.Any(x => x.UlogaId == uloga.UlogaId))
                 throw new Exception("Korisnik već ima ovu ulogu.");
 
-            // Dodaj novu ulogu korisniku
             var nova = new eBarbershop.Services.Database.KorisnikUloga()
             {
                 DatumDodjele = DateTime.Now,
@@ -187,31 +196,25 @@ namespace eBarbershop.Services
             _context.KorisnikUloga.Add(nova);
             _context.SaveChanges();
                 
-            // Vrati ažuriranog korisnika
             return _mapper.Map<eBarbershop.Model.Korisnik>(user);
         }
         public eBarbershop.Model.Korisnik DeleteUloga(int id, KorisniciUlogaUpdateRequest request)
         {
-            // Pronađi korisnika
             var user = _context.Korisnik.Include("KorisnikUlogas.Uloga").FirstOrDefault(x => x.KorisnikId == id);
             if (user == null)
                 throw new Exception("Korisnik nije pronađen.");
 
-            // Pronađi ulogu
             var uloga = _context.Uloga.FirstOrDefault(x => x.Naziv.ToLower() == request.Uloga.ToLower());
             if (uloga == null)
                 throw new Exception("Uloga nije pronađena.");
 
-            // Provjeri da li korisnik ima ovu ulogu
             var korisnikUloga = user.KorisnikUlogas.FirstOrDefault(x => x.UlogaId == uloga.UlogaId);
             if (korisnikUloga == null)
                 throw new Exception("Korisnik nema ovu ulogu.");
 
-            // Izbriši ulogu
             _context.KorisnikUloga.Remove(korisnikUloga);
             _context.SaveChanges();
 
-            // Vrati ažuriranog korisnika
             return _mapper.Map<eBarbershop.Model.Korisnik>(user);
         }
         public Model.Korisnik Login(string username, string password)

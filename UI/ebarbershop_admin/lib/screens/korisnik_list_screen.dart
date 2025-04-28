@@ -5,6 +5,7 @@ import 'package:ebarbershop_admin/models/grad.dart';
 import 'package:ebarbershop_admin/models/uloga.dart';
 import 'package:ebarbershop_admin/providers/grad_provider.dart';
 import 'package:ebarbershop_admin/providers/uloga_provider.dart';
+import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:ebarbershop_admin/models/korisnik.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
@@ -79,11 +80,9 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   }
   
   String getRoleName(Korisnik korisnik) {
-    // Dodajte ispis za debugging
     print('Korisnik ${korisnik.username} uloge: ${korisnik.uloge}');
     print('Korisnik ${korisnik.username} korisnikUlogas: ${korisnik.korisnikUlogas?.map((ku) => ku.uloga?.naziv).toList()}');
     
-    // First try to get roles from korisnikUlogas
     if (korisnik.korisnikUlogas != null && korisnik.korisnikUlogas!.isNotEmpty) {
       List<String> roles = korisnik.korisnikUlogas!
           .where((ku) => ku.uloga != null && ku.uloga!.naziv != null)
@@ -95,7 +94,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       }
     }
     
-    // Fallback to uloge field
     if (korisnik.uloge != null && korisnik.uloge!.isNotEmpty) {
       return korisnik.uloge!.join(', ');
     }
@@ -140,7 +138,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
     );
   }
 
-  Widget _buildSearch() {
+   Widget _buildSearch() {
     return Card(
       margin: EdgeInsets.all(8.0),
       color: Colors.blueGrey,
@@ -180,7 +178,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
               ),
             ),
             SizedBox(width: 16),
-             Expanded(
+            Expanded(
               child: TextField(
                 decoration: InputDecoration(
                   labelText: "Uloga",
@@ -196,13 +194,14 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
               ),
             ),
             SizedBox(width: 16),
-
-            ElevatedButton(
-              onPressed: () {
-                _showUserDialog();
-              },
-              child: Text("Dodaj"),
-            ),
+            
+            if (Authorization.isAdmin()) 
+              ElevatedButton(
+                onPressed: () {
+                  _showUserDialog();
+                },
+                child: Text("Dodaj"),
+              ),
           ],
         ),
       ),
@@ -278,10 +277,11 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 label: Text('Uloga',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
-            DataColumn(
-                label: Text('Akcije',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold))),
+            if (Authorization.isAdmin()) 
+              DataColumn(
+                  label: Text('Akcije',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold))),
           ],
           rows: result?.result.asMap().entries.map((entry) {
                 int index = entry.key;
@@ -314,66 +314,68 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     ),
                     DataCell(Text(getRoleName(e),
                         style: TextStyle(color: Colors.white))),
-                    DataCell(
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _showUserDialog(korisnik: e),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              bool confirmDelete = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        backgroundColor: Colors.grey[900],
-                                        title: Text("Potvrdi brisanje",
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                        content: Text(
-                                            "Želite li obrisati korisnika?",
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                        actions: [
-                                          TextButton(
-                                            child: Text("Odustani",
-                                                style: TextStyle(
-                                                    color: Colors.grey)),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: Text("Obriši",
-                                                style: TextStyle(
-                                                    color: Colors.red)),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ) ??
-                                  false;
+                    
+                    if (Authorization.isAdmin())
+                      DataCell(
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _showUserDialog(korisnik: e),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                bool confirmDelete = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          backgroundColor: Colors.grey[900],
+                                          title: Text("Potvrdi brisanje",
+                                              style:
+                                                  TextStyle(color: Colors.white)),
+                                          content: Text(
+                                              "Želite li obrisati korisnika?",
+                                              style:
+                                                  TextStyle(color: Colors.white)),
+                                          actions: [
+                                            TextButton(
+                                              child: Text("Odustani",
+                                                  style: TextStyle(
+                                                      color: Colors.grey)),
+                                              onPressed: () {
+                                                Navigator.of(context).pop(false);
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: Text("Obriši",
+                                                  style: TextStyle(
+                                                      color: Colors.red)),
+                                              onPressed: () {
+                                                Navigator.of(context).pop(true);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ) ??
+                                    false;
 
-                              if (confirmDelete) {
-                                await _korisnikProvider.delete(e.korisnikId!);
-                                _refreshData();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Korisnik uspješno obrisan'),
-                                    backgroundColor: Colors.red,
-                                  )
-                                );
-                              }
-                            },
-                          ),
-                        ],
+                                if (confirmDelete) {
+                                  await _korisnikProvider.delete(e.korisnikId!);
+                                  _refreshData();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Korisnik uspješno obrisan'),
+                                      backgroundColor: Colors.red,
+                                    )
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 );
               }).toList() ??
@@ -382,6 +384,8 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       ),
     );
   }
+
+
 
   void _showUserDialog({Korisnik? korisnik}) {
     _selectedImage = null;
@@ -474,7 +478,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   FormBuilderField(
                     name: 'slika',
                     validator: (value) {
-                      // Dozvoljavamo da slika može biti prazna pri ažuriranju korisnika
                       if (_selectedImage == null &&
                           korisnik == null) {
                         return 'Slika je obavezna za novog korisnika';
@@ -522,39 +525,46 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   ),
                   SizedBox(height: 8),
                   FormBuilderTextField(
-                    name: 'password',
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Lozinka",
-                      hintText: korisnik != null ? "Unesite lozinku" : null,
-                    ),
-                    validator: (value) {
-                      if (korisnik == null && (value == null || value.isEmpty)) {
-                        return 'Ponovite lozinku';
-                      }
-                      return null;
-                    },
+                  name: 'password',
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Lozinka",
+                    hintText: korisnik != null
+                        ? "Ostavi prazno ako ne želiš promijeniti lozinku"
+                        : "Unesi lozinku",
                   ),
+                  validator: (value) {
+                    if (korisnik == null && (value == null || value.isEmpty)) {
+                      return 'Lozinka je obavezna';
+                    }
+                    return null;
+                  },
+                ),
+
                   SizedBox(height: 8),
                   FormBuilderTextField(
-                    name: 'passwordPotvrda',
-                    controller: _passwordPotvrdaController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Potvrda lozinke",
-                      hintText: korisnik != null ? "Unesite lozinku" : null,
-                    ),
-                    validator: (value) {
-                      if (korisnik == null && (value == null || value.isEmpty)) {
-                        return 'Ponovite lozinku';
-                      }
-                      if (_passwordController.text != value && _passwordController.text.isNotEmpty) {
-                        return 'Lozinke se ne podudaraju';
-                      }
-                      return null;
-                    },
+                  name: 'passwordPotvrda',
+                  controller: _passwordPotvrdaController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Potvrda lozinke",
+                    hintText: korisnik != null
+                        ? "Ostavi prazno ako ne mijenjaš lozinku"
+                        : "Ponovi lozinku",
                   ),
+                  validator: (value) {
+                    if (korisnik == null && (value == null || value.isEmpty)) {
+                      return 'Potvrda lozinke je obavezna';
+                    }
+                    if (_passwordController.text != value &&
+                        _passwordController.text.isNotEmpty) {
+                      return 'Lozinke se ne podudaraju';
+                    }
+                    return null;
+                  },
+                ),
+
                   SizedBox(height: 8),
                   FormBuilderDropdown<String>(
                     name: 'gradId',
@@ -607,13 +617,11 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     'request': 'some_value',
                   };
                   
-                  // Dodaj lozinku samo ako je popunjena
                   if (_passwordController.text.isNotEmpty) {
                     userData['Password'] = formData?['password'];
                     userData['PasswordPotvrda'] = formData?['passwordPotvrda'];
                   }
                   
-                  // Dodaj sliku samo ako je odabrana ili već postoji
                   if (_slikaController.text.isNotEmpty) {
                     userData['Slika'] = _slikaController.text;
                   } else if (korisnik?.slika != null && korisnik!.slika!.isNotEmpty) {
@@ -621,7 +629,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   }
 
                   if (korisnik == null) {
-                    // Osiguraj da lozinka postoji za novi unos
                     if (!userData.containsKey('Password')) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Lozinka je obavezna za novog korisnika'))
@@ -641,7 +648,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                   await _refreshData();
                   Navigator.pop(context);
                   
-                  // Dodavanje povratne informacije
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(korisnik == null ? 'Korisnik uspješno dodan' : 'Korisnik uspješno ažuriran'),
                     backgroundColor: Colors.green,)

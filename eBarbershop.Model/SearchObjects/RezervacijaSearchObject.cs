@@ -18,8 +18,8 @@ namespace eBarbershop.Model.SearchObjects
 
         public DateTime? DatumRezervacijeBezVremena
         {
-            get { return datumRezervacije?.Date; } // Uzimamo samo datum bez vremena
-            set { datumRezervacije = value?.Date; } // Postavljamo samo datum
+            get { return datumRezervacije?.Date; } 
+            set { datumRezervacije = value?.Date; } 
         }
         public DateTime? DatumOd { get; set; }
         public DateTime? DatumDo { get; set; }

@@ -69,7 +69,7 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
 
     for (var rezervacija in result!.result) {
       if (rezervacija.datumRezervacije != null) {
-        // Strip time part to get just the date
+        
         final date = DateTime(
           rezervacija.datumRezervacije!.year,
           rezervacija.datumRezervacije!.month,
@@ -83,7 +83,6 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
       }
     }
 
-    // If a date is selected, update the selected day reservations
     if (_selectedDay != null) {
       _updateSelectedDayReservations();
     }
@@ -509,7 +508,6 @@ class _RezervacijaListScreenState extends State<RezervacijaListScreen> {
                 int index = entry.key;
                 Rezervacija e = entry.value;
 
-                // Format date in a user-friendly way
                 String formattedDate = "";
                 if (e.datumRezervacije != null) {
                   formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(e.datumRezervacije!);

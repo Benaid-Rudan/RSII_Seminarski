@@ -18,10 +18,10 @@ namespace eBarbershop.Model.Requests
         [Required]
         public string Username { get; set; }
 
-        [Required]
-        public string Password { get; set; }
-        [Required]
-        public string PasswordPotvrda { get; set; }
+        
+        public string? Password { get; set; }
+        
+        public string? PasswordPotvrda { get; set; }
         [Required]
         public string Slika { get; set; }
 
