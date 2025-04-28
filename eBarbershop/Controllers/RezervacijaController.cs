@@ -14,19 +14,7 @@ namespace eBarbershop.Controllers
             service = _service;
         }
 
-        //[HttpGet("api/usluge/{datum}")]
-        //public async Task<IActionResult> GetUslugeForDate(DateTime datum)
-        //{
-        //    try
-        //    {
-        //        var usluge = await _service.GetUslugeForDateAsync(datum);
-        //        return Ok(usluge); // Vraća listu usluga sa opisima i cijenama
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //}
+        
 
     }
 }

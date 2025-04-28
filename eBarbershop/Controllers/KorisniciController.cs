@@ -62,35 +62,28 @@ namespace eBarbershop.Controllers
         {
             try
             {
-                // Dohvat Authorization header-a iz zahteva
                 string authorization = HttpContext.Request.Headers["Authorization"];
 
-                // Provera da li je zaglavlje prisutno
                 if (string.IsNullOrEmpty(authorization) || !authorization.StartsWith("Basic "))
                 {
                     return Unauthorized("Authorization header missing or invalid.");
                 }
 
-                // Izdvajanje korisničkog imena i lozinke iz Base64 kodiranog stringa
                 string encodedHeader = authorization["Basic ".Length..].Trim();
                 Encoding encoding = Encoding.GetEncoding("iso-8859-1");
                 string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedHeader));
 
                 int seperatorIndex = usernamePassword.IndexOf(':');
 
-                // Izdvajanje korisničkog imena i lozinke
                 string username = usernamePassword.Substring(0, seperatorIndex);
                 string password = usernamePassword.Substring(seperatorIndex + 1);
 
-                // Pozivanje metode iz servisa za login
                 var user = ((IKorisniciService)_service).Login(username, password);
 
-                // Vraćanje korisničkog objekta kao JSON odgovora
                 return Ok(user);
             }
             catch (Exception ex)
             {
-                // U slučaju greške (npr. ako lozinka nije tačna ili korisnik ne postoji), vraćamo grešku
                 return Unauthorized(new { message = ex.Message });
             }
         }

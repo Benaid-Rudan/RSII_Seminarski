@@ -122,10 +122,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             ),
             SizedBox(width: 16),
-            ElevatedButton(
-              onPressed: () => _showProductDialog(),
-              child: Text("Dodaj"),
-            ),
+            if(Authorization.isAdmin())
+                ElevatedButton(
+                  onPressed: () => _showProductDialog(),
+                  child: Text("Dodaj"),
+                ),
           ],
         ),
       ),
@@ -162,6 +163,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 label: Text('Slika',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
+            if (Authorization.isAdmin()) 
             DataColumn(
                 label: Text('Akcije',
                     style: TextStyle(
@@ -200,6 +202,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             size: 50,
                             color: Colors.white,
                           )),
+                    if (Authorization.isAdmin()) 
                     DataCell(
                       Row(
                         children: [
@@ -319,16 +322,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
                   SizedBox(height: 8),
                   FormBuilderTextField(
-                    name: 'cijena',
-                    decoration: InputDecoration(labelText: "Cijena"),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Cijena je obavezna';
-                      }
-                      return null;
-                    },
-                  ),
+                  name: 'cijena',
+                  decoration: InputDecoration(labelText: "Cijena"),
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Cijena je obavezna';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Unesite validan broj (npr. 10.99)';
+                    }
+                    return null;
+                  },
+                ),
                   SizedBox(height: 8),
                   FormBuilderField(
                     name: 'slika',
@@ -346,7 +352,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         decoration: InputDecoration(
                           label: Text('Izaberite sliku'),
                           errorText:
-                              field.errorText, // Prikazuje grešku ako postoji
+                              field.errorText,
                         ),
                         child: ListTile(
                           leading: Icon(Icons.photo),
@@ -384,16 +390,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
                   SizedBox(height: 8),
                   FormBuilderTextField(
-                    name: 'zalihe',
-                    decoration: InputDecoration(labelText: "Zalihe"),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Zalihe su obavezne';
-                      }
-                      return null;
-                    },
-                  ),
+                  name: 'zalihe',
+                  decoration: InputDecoration(labelText: "Zalihe"),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Zalihe su obavezne';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Unesite cijeli broj (npr. 5)';
+                    }
+                    return null;
+                  },
+                ),
                   SizedBox(height: 8),
                   FormBuilderDropdown<String>(
                     name: 'vrstaProizvodaId',
@@ -427,7 +436,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               false) {
                             final formData = _formKey.currentState?.value;
 
-                            // Check if at least one parameter is entered
+                            // Check if at least one parameter is entred
                             if (formData?['naziv'].isEmpty &&
                                 formData?['opis'].isEmpty &&
                                 formData?['cijena'].isEmpty &&

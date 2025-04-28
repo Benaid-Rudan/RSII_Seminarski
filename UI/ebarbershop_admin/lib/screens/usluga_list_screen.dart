@@ -1,7 +1,6 @@
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/models/usluga.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
-import 'package:ebarbershop_admin/screens/usluga_details.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
@@ -88,6 +87,7 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
             ),
             SizedBox(width: 16),
             SizedBox(width: 16),
+            if (Authorization.isAdmin())
             ElevatedButton(
               onPressed: () {
                 _showUslugaDialog();
@@ -125,6 +125,7 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                 label: Text('Cijena',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
+            if (Authorization.isAdmin())
             DataColumn(
                 label: Text('Akcije',
                     style: TextStyle(
@@ -148,6 +149,7 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(e.cijena.toString() ?? "",
                         style: TextStyle(color: Colors.white))),
+                    if (Authorization.isAdmin())
                     DataCell(
                       Row(
                         children: [
@@ -226,96 +228,111 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
   }
 
   void _showUslugaDialog({Usluga? usluga}) {
-    _nazivController.clear();
-    _opisController.clear();
-    _cijenaController.clear();
+  _nazivController.clear();
+  _opisController.clear();
+  _cijenaController.clear();
 
-    if (usluga != null) {
-      _nazivController.text = usluga.naziv ?? "";
-      _opisController.text = usluga.opis ?? "";
-      _cijenaController.text = usluga.cijena.toString() ?? "";
-    }
+  if (usluga != null) {
+    _nazivController.text = usluga.naziv ?? "";
+    _opisController.text = usluga.opis ?? "";
+    _cijenaController.text = usluga.cijena.toString() ?? "";
+  }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(usluga == null ? "Dodaj uslugu" : "Uredi uslugu"),
-        content: Container(
-          width: 400,
-          child: SingleChildScrollView(
-            child: FormBuilder(
-              child: Column(
-                children: [
-                  FormBuilderTextField(
-                    name: 'naziv',
-                    controller: _nazivController,
-                    decoration: InputDecoration(labelText: "Naziv usluge"),
-                  ),
-                  SizedBox(height: 8),
-                  FormBuilderTextField(
-                    name: 'opis',
-                    controller: _opisController,
-                    decoration: InputDecoration(labelText: "Opis usluge"),
-                  ),
-                  SizedBox(height: 8),
-                  FormBuilderTextField(
-                    name: 'cijena',
-                    controller: _cijenaController,
-                    decoration: InputDecoration(labelText: "Cijena"),
-                    keyboardType: TextInputType.number,
-                  ),
-                ],
-              ),
+  final _formKey = GlobalKey<FormBuilderState>();
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(usluga == null ? "Dodaj uslugu" : "Uredi uslugu"),
+      content: Container(
+        width: 400,
+        child: SingleChildScrollView(
+          child: FormBuilder(
+            key: _formKey,
+            child: Column(
+              children: [
+                FormBuilderTextField(
+                  name: 'naziv',
+                  controller: _nazivController,
+                  decoration: InputDecoration(labelText: "Naziv usluge"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Naziv usluge je obavezan';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 8),
+                FormBuilderTextField(
+                  name: 'opis',
+                  controller: _opisController,
+                  decoration: InputDecoration(labelText: "Opis usluge"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Opis usluge je obavezan';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 8),
+                FormBuilderTextField(
+                  name: 'cijena',
+                  controller: _cijenaController,
+                  decoration: InputDecoration(labelText: "Cijena"),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Cijena je obavezna';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Unesite validan broj (npr. 10.99)';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              if (_nazivController.text.isNotEmpty &&
-                  _opisController.text.isNotEmpty &&
-                  _cijenaController.text.isNotEmpty) {
-                try {
-                  if (usluga == null) {
-                    await _uslugaProvider.insert({
-                      'naziv': _nazivController.text,
-                      'opis': _opisController.text,
-                      'cijena': double.parse(_cijenaController.text),
-                    });
-                  } else {
-                    await _uslugaProvider.update(usluga.uslugaId!, {
-                      'naziv': _nazivController.text,
-                      'opis': _opisController.text,
-                      'cijena': double.parse(_cijenaController.text),
-                    });
-                  }
-                  await _loadData();
-                  Navigator.pop(context);
-                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(usluga == null ? 'Usluga uspješno dodana' : 'Usluga uspješno ažurirana'),
-                    backgroundColor: Colors.green,)
-                  );
-                } catch (e) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text("Greška"),
-                      content: Text(e.toString()),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("OK"),
-                        ),
-                      ],
-                    ),
-                  );
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text("Odustani"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            if (_formKey.currentState?.saveAndValidate() ?? false) {
+              try {
+                if (usluga == null) {
+                  await _uslugaProvider.insert({
+                    'naziv': _nazivController.text,
+                    'opis': _opisController.text,
+                    'cijena': double.parse(_cijenaController.text),
+                  });
+                } else {
+                  await _uslugaProvider.update(usluga.uslugaId!, {
+                    'naziv': _nazivController.text,
+                    'opis': _opisController.text,
+                    'cijena': double.parse(_cijenaController.text),
+                  });
                 }
-              } else {
+                await _loadData();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(usluga == null 
+                      ? 'Usluga uspješno dodana' 
+                      : 'Usluga uspješno ažurirana'),
+                    backgroundColor: Colors.green,
+                  )
+                );
+              } catch (e) {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text("Greška"),
-                    content: Text("Sva polja su obavezna."),
+                    content: Text(e.toString()),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -325,11 +342,12 @@ class _UslugaListScreenState extends State<UslugaListScreen> {
                   ),
                 );
               }
-            },
-            child: Text("Sačuvaj"),
-          ),
-        ],
-      ),
-    );
-  }
+            }
+          },
+          child: Text("Sačuvaj"),
+        ),
+      ],
+    ),
+  );
+}
 }

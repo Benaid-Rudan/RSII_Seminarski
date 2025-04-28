@@ -11,10 +11,18 @@ namespace eBarbershop.Controllers
         Model.Requests.ProizvodInsertRequest, 
         Model.Requests.ProizvodUpdateRequest>
     {
+        IProizvodService _service;
 
         public ProizvodController(IProizvodService service) : base(service)
         {
+            _service = service;
+        }
 
+        [HttpGet("recommended")]
+        public async Task<IActionResult> GetRecommendedProducts()
+        {
+            var recommendedProducts = await _service.GetRecommendedProducts();
+            return Ok(recommendedProducts);
         }
 
     }

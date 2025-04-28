@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ebarbershop_admin/models/novost.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/providers/novost_provider.dart';
+import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:image_picker/image_picker.dart';
@@ -81,6 +82,7 @@ class _NovostListScreenState extends State<NovostListScreen> {
               ),
             ),
             SizedBox(width: 16),
+            if (Authorization.isAdmin())
             ElevatedButton(
               onPressed: () {
                 _showNovostDialog(context);
@@ -115,6 +117,7 @@ class _NovostListScreenState extends State<NovostListScreen> {
                 label: Text('Tekst',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold))),
+            if (Authorization.isAdmin())
             DataColumn(
                 label: Text('Akcije',
                     style: TextStyle(
@@ -149,6 +152,7 @@ class _NovostListScreenState extends State<NovostListScreen> {
                           )),
                     DataCell(Text(e.sadrzaj ?? "",
                         style: TextStyle(color: Colors.white))),
+                    if(Authorization.isAdmin())
                     DataCell(
                       Row(
                         children: [

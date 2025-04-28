@@ -3,7 +3,6 @@ import 'package:ebarbershop_admin/models/product.dart';
 import 'package:ebarbershop_admin/models/search_result.dart';
 import 'package:ebarbershop_admin/providers/narudzba_provider.dart';
 import 'package:ebarbershop_admin/providers/product_provider.dart';
-import 'package:ebarbershop_admin/screens/narudzba_details.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:ebarbershop_admin/widgets/master_screen.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +96,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               ),
             ),
             SizedBox(width: 16),
+            if (Authorization.isAdmin())
             ElevatedButton(
               onPressed: () {
                 _showNarudzbaDialog(context);
@@ -164,6 +164,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                 ),
               ),
             ),
+            if (Authorization.isAdmin())
             const DataColumn(
               label: Expanded(
                 child: Text(
@@ -204,6 +205,7 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                             ? DateFormat('dd.MM.yyyy HH:mm').format(e.datum!) 
                             : "",
                         style: TextStyle(color: Colors.white))),
+                    if (Authorization.isAdmin())
                     DataCell(
                       Row(
                         children: [
@@ -283,11 +285,9 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
       {Narudzba? narudzba}) async {
     final _formKey = GlobalKey<FormBuilderState>();
     
-    // Lista za skladištenje odabranih proizvoda i njihovih količina
     List<Map<String, dynamic>> selectedProducts = [];
     double ukupnaCijena = 0.0;
     
-    // Ako uređujemo, popunimo već odabrane proizvode
     if (narudzba != null && narudzba.narudzbaProizvodis != null) {
       for (var np in narudzba.narudzbaProizvodis!) {
         if (np.proizvodId != null && np.kolicina != null && np.proizvod != null) {
@@ -316,7 +316,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
     Product? selectedProduct;
     int selectedQuantity = 1;
 
-    // Controller za prikaz trenutnog ukupnog iznosa
     TextEditingController _ukupnaCijenaController = TextEditingController();
     _ukupnaCijenaController.text = ukupnaCijena.toStringAsFixed(2);
 
@@ -325,7 +324,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            // Funkcija za ažuriranje ukupne cijene
             void updateUkupnaCijena() {
               ukupnaCijena = 0.0;
               for (var product in selectedProducts) {
@@ -334,15 +332,12 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
               _ukupnaCijenaController.text = ukupnaCijena.toStringAsFixed(2);
             }
 
-            // Funkcija za dodavanje proizvoda u listu
             void addProductToList() {
               if (selectedProduct != null && selectedQuantity > 0) {
-                // Provjeri da li proizvod već postoji u listi
                 int existingIndex = selectedProducts.indexWhere(
                     (p) => p['proizvodId'] == selectedProduct!.proizvodId);
 
                 if (existingIndex >= 0) {
-                  // Ako postoji, samo ažuriraj količinu
                   setDialogState(() {
                     selectedProducts[existingIndex]['kolicina'] += selectedQuantity;
                     selectedProducts[existingIndex]['ukupnaCijenaStavke'] = 
@@ -350,7 +345,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                     updateUkupnaCijena();
                   });
                 } else {
-                  // Ako ne postoji, dodaj novi proizvod
                   setDialogState(() {
                     selectedProducts.add({
                       'proizvodId': selectedProduct!.proizvodId,
@@ -363,7 +357,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                   });
                 }
                 
-                // Resetiraj odabir za sljedeći unos
                 selectedProduct = null;
                 selectedQuantity = 1;
               }
@@ -408,60 +401,75 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                         ),
                         SizedBox(height: 16),
                         
-                        // Sekcija za dodavanje proizvoda
                         Text("Dodaj proizvode:",
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         SizedBox(height: 8),
                         
-                        // Redak za odabir proizvoda i količine
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: DropdownButton<Product>(
-                                hint: Text("Odaberite proizvod"),
-                                isExpanded: true,
-                                value: selectedProduct,
-                                items: productResult?.result.map((Product product) {
-                                  return DropdownMenuItem<Product>(
-                                    value: product,
-                                    child: Text("${product.naziv} (${product.cijena?.toStringAsFixed(2)} KM)"),
-                                  );
-                                }).toList(),
-                                onChanged: (Product? value) {
-                                  setDialogState(() {
-                                    selectedProduct = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              flex: 1,
-                              child: TextField(
-                                decoration: InputDecoration(labelText: "Količina"),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  int? parsed = int.tryParse(value);
-                                  if (parsed != null && parsed > 0) {
-                                    setDialogState(() {
-                                      selectedQuantity = parsed;
-                                    });
-                                  }
-                                },
-                                controller: TextEditingController(text: selectedQuantity.toString()),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            IconButton(
-                              icon: Icon(Icons.add_circle, color: Colors.green),
-                              onPressed: addProductToList,
-                            ),
-                          ],
-                        ),
+                        Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: DropdownButtonFormField<Product>(
+            hint: Text("Odaberite proizvod"),
+            isExpanded: true,
+            value: selectedProduct,
+            items: productResult?.result.map((Product product) {
+              return DropdownMenuItem<Product>(
+                value: product,
+                child: Text("${product.naziv} (${product.cijena?.toStringAsFixed(2)} KM)"),
+              );
+            }).toList(),
+            onChanged: (Product? value) {
+              setDialogState(() {
+                selectedProduct = value;
+              });
+            },
+            validator: (value) {
+              if (selectedProducts.isEmpty && (value == null)) {
+                return 'Odaberite barem jedan proizvod';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+            ),
+          ),
+        ),
+        SizedBox(width: 16),
+        Expanded(
+          flex: 1,
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: "Količina",
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              int? parsed = int.tryParse(value);
+              if (parsed != null && parsed > 0) {
+                setDialogState(() {
+                  selectedQuantity = parsed;
+                });
+              }
+            },
+            controller: TextEditingController(text: selectedQuantity.toString()),
+          ),
+        ),
+        SizedBox(width: 8),
+        IconButton(
+          icon: Icon(Icons.add_circle, color: Colors.green),
+          onPressed: addProductToList,
+        ),
+      ],
+    ),
+  ],
+),
                         SizedBox(height: 16),
                         
-                        // Lista odabranih proizvoda
                         if (selectedProducts.isNotEmpty)
                           Container(
                             height: 200,
@@ -483,7 +491,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                                       IconButton(
                                         icon: Icon(Icons.edit, color: Colors.blue),
                                         onPressed: () {
-                                          // Prikazivanje dijaloga za uređivanje količine
                                           TextEditingController editController = TextEditingController(
                                               text: product['kolicina'].toString());
                                           
@@ -538,7 +545,6 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                           ),
                         SizedBox(height: 16),
                         
-                        // Ukupna cijena
                         TextField(
                           controller: _ukupnaCijenaController,
                           decoration: InputDecoration(
@@ -557,67 +563,64 @@ class _NarudzbaListScreenState extends State<NarudzbaListScreen> {
                   onPressed: () => Navigator.pop(context),
                   child: Text("Odustani"),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState?.saveAndValidate() ?? false) {
-                      if (selectedProducts.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Dodajte barem jedan proizvod'))
-                        );
-                        return;
-                      }
-                      
-                      final formData = Map<String, dynamic>.from(_formKey.currentState!.value);
+               ElevatedButton(
+  onPressed: () async {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      if (selectedProducts.isEmpty) {
+        _formKey.currentState?.fields['productDropdown']?.validate();
+        return;
+      }
+      
+      final formData = Map<String, dynamic>.from(_formKey.currentState!.value);
 
-                      // Pripremamo listu proizvoda za API
-                      List<Map<String, dynamic>> listaProizvoda = selectedProducts.map((p) => {
-                        "proizvodID": p['proizvodId'],
-                        "kolicina": p['kolicina'],
-                      }).toList();
+      List<Map<String, dynamic>> listaProizvoda = selectedProducts.map((p) => {
+        "proizvodID": p['proizvodId'],
+        "kolicina": p['kolicina'],
+      }).toList();
 
-                      Map<String, dynamic> requestData = {
-                        "datum": (formData['datum'] as DateTime).toIso8601String(),
-                        "ukupnaCijena": ukupnaCijena,
-                        "korisnikId": int.parse(formData['kupacId']),
-                        "listaProizvoda": listaProizvoda,
-                      };
+      Map<String, dynamic> requestData = {
+        "datum": (formData['datum'] as DateTime).toIso8601String(),
+        "ukupnaCijena": ukupnaCijena,
+        "korisnikId": int.parse(formData['kupacId']),
+        "listaProizvoda": listaProizvoda,
+      };
 
-                      try {
-                        if (narudzba == null) {
-                          await narudzbaProvider.insert(requestData);
-                        } else if (narudzba.narudzbaId != null) {
-                          await narudzbaProvider.update(
-                            narudzba.narudzbaId!,
-                            requestData,
-                          );
-                        }
-                        Navigator.pop(context);
-                        _loadData();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(narudzba == null ? 'Narudžba uspješno dodana' : 'Narudžba uspješno ažurirana'),
-                            backgroundColor: Colors.green,
-                          )
-                        );
-                      } catch (e) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) => AlertDialog(
-                            title: Text("Greška"),
-                            content: Text(e.toString()),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text("OK"),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: Text("Sačuvaj"),
-                ),
+      try {
+        if (narudzba == null) {
+          await narudzbaProvider.insert(requestData);
+        } else if (narudzba.narudzbaId != null) {
+          await narudzbaProvider.update(
+            narudzba.narudzbaId!,
+            requestData,
+          );
+        }
+        Navigator.pop(context);
+        _loadData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(narudzba == null ? 'Narudžba uspješno dodana' : 'Narudžba uspješno ažurirana'),
+            backgroundColor: Colors.green,
+          )
+        );
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: Text("Greška"),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  },
+  child: Text("Sačuvaj"),
+),
               ],
             );
           }

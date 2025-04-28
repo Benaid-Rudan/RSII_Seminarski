@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ebarbershop_mobile/models/search_result.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
+import 'package:ebarbershop_mobile/models/product.dart';
 import 'package:http/io_client.dart';  
 import 'dart:io';  
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     throw Exception("Authentication failed");
     }
   }
-
+  
   Future<SearchResult<T>> get({dynamic filter}) async {
   var url = "$_baseUrl$_endpoint";
   if (filter != null) {
@@ -86,6 +87,23 @@ abstract class BaseProvider<T> with ChangeNotifier {
     throw Exception("Neuspješan API poziv");
   }
 }
+
+  Future<List<Product>> getRecommended() async {
+  var url = "${BaseProvider._baseUrl}$_endpoint/recommended";
+  print("Calling recommended products API: $url");
+  var uri = Uri.parse(url);
+  var headers = createHeaders();
+
+  var ioClient = _createClient();
+  var response = await ioClient.get(uri, headers: headers);
+
+  if (isValidResponse(response)) {
+    var data = jsonDecode(response.body) as List;
+      return data.map((x) => Product.fromJson(x)).toList();  } else {
+    throw Exception("Failed to load recommended products");
+  }
+}
+
 
   Future<T> getById(int id) async {
   var url = "$_baseUrl$_endpoint/$id";
