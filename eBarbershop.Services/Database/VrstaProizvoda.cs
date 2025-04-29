@@ -4,7 +4,7 @@
 
     namespace eBarbershop.Services.Database;
 
-    public  class VrstaProizvodum
+    public  class VrstaProizvoda
     {
         public int VrstaProizvodaId { get; set; }
 

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP port
+    networks:
+      - ebarbershop-net
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: ebarbershop_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Benaid123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - db-data:/var/opt/mssql
+    networks:
+      - ebarbershop-net
+
+  ebarbershop_api:
+    build:
+      context: .
+      dockerfile: eBarbershop/Dockerfile
+    environment:
+      - ConnectionStrings:Main=Server=localhost,1433;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    ports:
+      - "7126:7126"
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - ebarbershop-net
+
+volumes:
+  db-data:
+
+networks:
+  ebarbershop-net:
+    driver: bridge

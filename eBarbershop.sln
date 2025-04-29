@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eBarbershop.Model", "eBarbe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eBarbershop.Services", "eBarbershop.Services\eBarbershop.Services.csproj", "{2DFB7828-4789-4C20-9C9C-1E49D5BA6A39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eBarbershop.RabbitMQ", "eBarbershop.RabbitMQ\eBarbershop.RabbitMQ.csproj", "{C85803ED-1446-462B-88D3-BA9A3C980A53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2DFB7828-4789-4C20-9C9C-1E49D5BA6A39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DFB7828-4789-4C20-9C9C-1E49D5BA6A39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DFB7828-4789-4C20-9C9C-1E49D5BA6A39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C85803ED-1446-462B-88D3-BA9A3C980A53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C85803ED-1446-462B-88D3-BA9A3C980A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C85803ED-1446-462B-88D3-BA9A3C980A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C85803ED-1446-462B-88D3-BA9A3C980A53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

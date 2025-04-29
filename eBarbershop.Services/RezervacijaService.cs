@@ -34,7 +34,7 @@ namespace eBarbershop.Services
                 UslugaId = request.UslugaId
             };
 
-            var usluga = await _context.Uslugas
+            var usluga = await _context.Usluga
                                         .FirstOrDefaultAsync(u => u.UslugaId == request.UslugaId);
 
             if (usluga == null)

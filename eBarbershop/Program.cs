@@ -1,4 +1,5 @@
 using eBarbershop;
+using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services;
 using eBarbershop.Services.Database;
@@ -6,6 +7,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,11 @@ builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
 builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<INovostService, NovostService>();
+builder.Services.AddTransient<NotificationRabbitService, NotificationRabbitService>();
+
+builder.Services.AddScoped<IKorisniciService, KorisniciService>();
+builder.Services.AddScoped<INotificationRabbitService, NotificationRabbitService>();
+
 // In Program.cs or Startup.cs
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
@@ -97,5 +107,77 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<EBarbershop1Context>();
+        context.Database.Migrate();
+        SeedDbInitializer.Seed(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Došlo je do greške prilikom popunjavanja baze podataka.");
+    }
+}
+
+
+string hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "127.0.0.1";
+string username = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest";
+string password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest";
+string virtualHost = Environment.GetEnvironmentVariable("RABBITMQ_VIRTUALHOST") ?? "/";
+
+var factory = new ConnectionFactory
+{
+    HostName = hostname,
+    UserName = username,
+    Password = password,
+    VirtualHost = virtualHost,
+};
+using var connection = factory.CreateConnection();
+using var channel = connection.CreateModel();
+
+channel.QueueDeclare(queue: "notification",
+    durable: false,
+    exclusive: false,
+    autoDelete: true,
+    arguments: null);
+
+Console.WriteLine(" [*] Waiting for messages.");
+
+var consumer = new AsyncEventingBasicConsumer(channel);
+consumer.Received += async (model, ea) =>
+{
+    var body = ea.Body.ToArray();
+    var message = Encoding.UTF8.GetString(body);
+    Console.WriteLine(message.ToString());
+    var notification = JsonSerializer.Deserialize<NotificationRabbitUpsertDto>(message);
+    using (var scope = app.Services.CreateScope())
+    {
+        var notificationsService = scope.ServiceProvider.GetRequiredService<INotificationRabbitService>();
+
+        if (notification != null)
+        {
+            try
+            {
+
+                await notificationsService.Insert(notification);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error ", e);
+            }
+        }
+    }
+    Console.WriteLine(Environment.GetEnvironmentVariable("Some"));
+};
+channel.BasicConsume(queue: "notification",
+    autoAck: true,
+    consumer: consumer);
+
+
 
 app.Run();

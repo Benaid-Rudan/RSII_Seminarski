@@ -1,0 +1,6 @@
+@eBarbershop.RabbitMQ_HostAddress = http://localhost:5201
+
+GET {{eBarbershop.RabbitMQ_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

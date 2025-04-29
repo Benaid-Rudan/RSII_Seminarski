@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using eBarbershop.Model;
+using eBarbershop.Model.Requests;
 using eBarbershop.Services.Database;
 namespace eBarbershop.Services
 {
@@ -28,9 +29,9 @@ namespace eBarbershop.Services
             CreateMap<Model.Requests.DrzavaInsertRequest, Database.Drzava>();
             CreateMap<Model.Requests.DrzavaUpdateRequest, Database.Drzava>();
 
-            CreateMap<Database.VrstaProizvodum, Model.VrstaProizvoda>();
-            CreateMap<Model.Requests.VrstaProizvodaInsertRequest, Database.VrstaProizvodum>();
-            CreateMap<Model.Requests.VrstaProizvodaUpdateRequest, Database.VrstaProizvodum>();
+            CreateMap<Database.VrstaProizvoda, Model.VrstaProizvoda>();
+            CreateMap<Model.Requests.VrstaProizvodaInsertRequest, Database.VrstaProizvoda>();
+            CreateMap<Model.Requests.VrstaProizvodaUpdateRequest, Database.VrstaProizvoda>();
 
             CreateMap<Database.Usluga, Model.Usluga>();
             CreateMap<Model.Requests.UslugaInsertRequest, Database.Usluga>();
@@ -68,7 +69,8 @@ namespace eBarbershop.Services
 
             CreateMap<Database.KorisnikUloga, Model.KorisnikUloga>();
 
-            
+            CreateMap<NotificationRabbitUpsertDto, NotificationRabbit>();
+
 
         }
     }
