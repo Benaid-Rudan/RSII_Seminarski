@@ -45,7 +45,7 @@ public partial class EBarbershop1Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=db;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true");
+        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=NovaBaza;User=sa;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -194,25 +194,23 @@ public partial class EBarbershop1Context : DbContext
 
             entity.Property(e => e.DatumRezervacije).HasColumnType("datetime");
 
-            // Veza sa frizerom (korisnik koji izvodi uslugu)
             entity.HasOne(d => d.Korisnik)
                 .WithMany(p => p.RezervacijeKaoFrizer)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK__Rezervaci__Koris__3F466844");
 
-            // Veza sa klijentom (korisnik koji rezerviše termin)
             entity.HasOne(d => d.Klijent)
                 .WithMany(p => p.RezervacijeKaoKlijent)
                 .HasForeignKey(d => d.KlijentId)
-                .OnDelete(DeleteBehavior.Restrict) // Keep as Restrict or change to Cascade if you want cascading delete
+                .OnDelete(DeleteBehavior.Restrict) 
                 .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
             // Veza sa uslugom
             entity.HasOne(d => d.Usluga)
                 .WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.UslugaId)
-                .OnDelete(DeleteBehavior.ClientSetNull) // As per your requirement
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
 
              entity.HasMany(r => r.Termins)
@@ -232,17 +230,15 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(d => d.Korisnik)
                 .WithMany()
                 .HasForeignKey(d => d.KorisnikID)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Termin_Korisnik_Frizer");
 
-            // Veza sa klijentom
             entity.HasOne(d => d.Klijent)
                 .WithMany()
                 .HasForeignKey(d => d.KlijentId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Termin_Korisnik_Klijent");
 
-            // Veza sa rezervacijom (already defined in Rezervacija)
             entity.HasOne(d => d.Rezervacija)
                 .WithMany(r => r.Termins)
                 .HasForeignKey(d => d.RezervacijaId)

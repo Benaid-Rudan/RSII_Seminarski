@@ -12,6 +12,11 @@ services:
       - "5672:5672"    # AMQP port
     networks:
       - ebarbershop-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -26,13 +31,19 @@ services:
       - db-data:/var/opt/mssql
     networks:
       - ebarbershop-net
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Benaid123!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ebarbershop_api:
     build:
       context: .
       dockerfile: eBarbershop/Dockerfile
+    container_name: ebarbershop_api
     environment:
-      - ConnectionStrings:Main=Server=localhost,1433;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Server=db;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true;Connect Timeout=60
       - ASPNETCORE_ENVIRONMENT=Development
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=guest
@@ -40,10 +51,13 @@ services:
     ports:
       - "7126:7126"
     depends_on:
-      - db
-      - rabbitmq
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - ebarbershop-net
+    restart: on-failure
 
 volumes:
   db-data:

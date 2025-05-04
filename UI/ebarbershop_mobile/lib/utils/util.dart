@@ -42,7 +42,7 @@ String base64String(Uint8List data) {
 }
 
 String formatNumber(dynamic) {
-  var f = NumberFormat('###,00');
+   var f = NumberFormat('#,##0.00', 'bs_BA');
   if (dynamic == null) {
     return "";
   }

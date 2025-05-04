@@ -22,7 +22,7 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   
   // Filter only users with Uposlenik role
   result.result = result.result.where((k) => 
-    k.korisnikUlogas?.any((uloga) => uloga.uloga?.naziv == 'Uposlenik') ?? false
+    k.korisnikUlogas?.any((uloga) => uloga.uloga?.naziv == 'Frizer') ?? false
   ).toList();
   
   return result;

@@ -13,6 +13,7 @@ public static class SeedDbInitializer
 {
     public static void Seed(EBarbershop1Context context)
     {
+        context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
 
         if (context.Drzava.Any())

@@ -15,6 +15,7 @@ namespace eBarbershop.Model.Requests
         public int RezervacijaId { get; set; }
         [Required]
         public int KorisnikID { get; set; }
-
+        [Required]
+        public int KlijentId { get; set; }
     }
 }

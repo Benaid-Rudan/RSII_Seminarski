@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,9 +15,32 @@ namespace eBarbershop.Services
 {
     public class TerminService : BaseCRUDService<Model.Termin, Database.Termin, TerminSearchObject , TerminInsertRequest, TerminUpdateRequest>, ITerminService 
     {
-        
-        public TerminService(EBarbershop1Context context, IMapper mapper) : base(context,mapper) {
-           
+        private readonly INotificationService _notificationService;
+        public TerminService(EBarbershop1Context context, IMapper mapper, INotificationService notificationService)
+        : base(context, mapper)
+        {
+            _notificationService = notificationService;
+        }
+        public override async Task<Model.Termin> Insert(TerminInsertRequest request)
+        {
+            var frizer = await _context.Korisnik.FindAsync(request.KorisnikID);
+            if (frizer == null)
+                throw new Exception("Frizer nije pronađen");
+
+            var klijent = await _context.Korisnik.FindAsync(request.KlijentId);
+            if (klijent == null)
+                throw new Exception("Klijent nije pronađen");
+
+            var rezervacija = await _context.Rezervacija.FindAsync(request.RezervacijaId);
+            if (rezervacija == null)
+                throw new Exception("Rezervacija nije pronađena");
+
+            var entity = _mapper.Map<Database.Termin>(request);
+            entity.isBooked = true; 
+
+            await _context.Termin.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return _mapper.Map<Model.Termin>(entity);
         }
         public override async Task<Model.Termin> Delete(int terminId)
         {
@@ -57,7 +81,7 @@ namespace eBarbershop.Services
 
         public void BeforeInsert(TerminInsertRequest insert, Database.Termin entity)
         {
-            entity.Vrijeme = DateTime.Now;
+            entity.isBooked = true;
 
         }
 
@@ -74,8 +98,11 @@ namespace eBarbershop.Services
                     .ThenInclude(x=> x.Usluga);
 
             }
-            
-            
+            if (obj.IncludeKlijent == true) // Dodajte ovaj property u TerminSearchObject
+            {
+                entity = entity.Include(x => x.Klijent);
+            }
+
             return entity;
         }
 
