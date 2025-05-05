@@ -19,7 +19,7 @@ class RezervacijaProvider extends BaseProvider<Rezervacija> {
   var request = {
     'datumRezervacije': datumRezervacije.toIso8601String(),
     'korisnikId': korisnikId,
-    'klijentId': klijentId,
+    'kupacId': klijentId,
     'uslugaId': uslugaId,
   };
   

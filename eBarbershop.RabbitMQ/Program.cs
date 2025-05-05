@@ -1,0 +1,43 @@
+using eBarbershop;
+using eBarbershop.Services;
+using eBarbershop.Services.Database;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddTransient<IKorisniciService, KorisniciService>();
+builder.Services.AddAutoMapper(typeof(KorisniciService));
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+var konekcijskiString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<EBarbershop1Context>(
+  dbContextOpcije => dbContextOpcije
+    .UseSqlServer(konekcijskiString));
+
+builder.Services.AddAutoMapper(typeof(IKorisniciService));
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+endpoints.MapControllers(); });
+
+app.Run();

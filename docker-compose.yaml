@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP port
+    networks:
+      - ebarbershop-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: ebarbershop_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Benaid123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - db-data:/var/opt/mssql
+    networks:
+      - ebarbershop-net
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Benaid123!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ebarbershop_api:
+    build:
+      context: .
+      dockerfile: eBarbershop/Dockerfile
+    container_name: ebarbershop_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true;Connect Timeout=60
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+    ports:
+      - "7126:7126"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ebarbershop-net
+    restart: on-failure
+
+volumes:
+  db-data:
+
+networks:
+  ebarbershop-net:
+    driver: bridge

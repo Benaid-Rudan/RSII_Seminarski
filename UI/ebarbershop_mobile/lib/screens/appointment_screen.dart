@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -94,6 +96,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
     if (selectedTimeSlot == null) return;
 
     widget.klijent.korisnikId = Authorization.userId;
+    print("Authorization.userId: ${Authorization.userId}");
 
     if (widget.klijent.korisnikId == null) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +136,7 @@ print("UslugaId: ${widget.service.uslugaId}");
       await terminProvider.insert({
         "vrijeme": reservationDateTime.toIso8601String(),
         "rezervacijaId": createdReservation.rezervacijaId,
-        "korisnikId": widget.employee.korisnikId,
+        "korisnikID": widget.employee.korisnikId,
         "klijentId": widget.klijent.korisnikId!,
         "isBooked": true,
       });
@@ -236,9 +239,8 @@ print("UslugaId: ${widget.service.uslugaId}");
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundImage: widget.employee.slika != null 
-                            ? NetworkImage(widget.employee.slika!)
-                            : null,
+                        backgroundImage: widget.employee.slika != null && widget.employee.slika!.isNotEmpty ? MemoryImage(base64Decode(widget.employee.slika!)) : null,
+                           
                         child: widget.employee.slika == null 
                             ? Icon(Icons.person, color: Colors.white)
                             : null,
@@ -363,7 +365,7 @@ print("UslugaId: ${widget.service.uslugaId}");
              color: !slot.isAvailable
               ? Colors.grey
               : isSelected
-                  ? Colors.black  // ✅ crni tekst za selektovani slot
+                  ? Colors.black  
                   : Colors.white,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),

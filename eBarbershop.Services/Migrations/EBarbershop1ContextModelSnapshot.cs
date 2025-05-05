@@ -178,9 +178,6 @@ namespace eBarbershop.Services.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NarudzbaProizvodiId"));
 
-                    b.Property<decimal>("Cijena")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<int>("Kolicina")
                         .HasColumnType("int");
 
@@ -354,14 +351,15 @@ namespace eBarbershop.Services.Migrations
                     b.Property<bool>("isBooked")
                         .HasColumnType("bit");
 
-                    b.HasKey("TerminId")
-                        .HasName("PK__Termin__42126C951DAEB8D7");
+                    b.HasKey("TerminId");
+
+                    b.HasIndex("KlijentId");
 
                     b.HasIndex("KorisnikID");
 
                     b.HasIndex("RezervacijaId");
 
-                    b.ToTable("Termin", (string)null);
+                    b.ToTable("Termin");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Uloga", b =>
@@ -410,7 +408,7 @@ namespace eBarbershop.Services.Migrations
 
                     b.HasIndex("NarudzbaId");
 
-                    b.ToTable("Uplata", (string)null);
+                    b.ToTable("Uplata");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Usluga", b =>
@@ -440,7 +438,7 @@ namespace eBarbershop.Services.Migrations
                     b.ToTable("Usluga", (string)null);
                 });
 
-            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvodum", b =>
+            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvoda", b =>
                 {
                     b.Property<int>("VrstaProizvodaId")
                         .ValueGeneratedOnAdd()
@@ -456,7 +454,7 @@ namespace eBarbershop.Services.Migrations
                     b.HasKey("VrstaProizvodaId")
                         .HasName("PK__VrstaPro__7DC005E063976FC1");
 
-                    b.ToTable("VrstaProizvoda", (string)null);
+                    b.ToTable("VrstaProizvoda");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Grad", b =>
@@ -535,7 +533,7 @@ namespace eBarbershop.Services.Migrations
 
             modelBuilder.Entity("eBarbershop.Services.Database.Proizvod", b =>
                 {
-                    b.HasOne("eBarbershop.Services.Database.VrstaProizvodum", "VrstaProizvoda")
+                    b.HasOne("eBarbershop.Services.Database.VrstaProizvoda", "VrstaProizvoda")
                         .WithMany("Proizvods")
                         .HasForeignKey("VrstaProizvodaId")
                         .IsRequired()
@@ -587,17 +585,28 @@ namespace eBarbershop.Services.Migrations
 
             modelBuilder.Entity("eBarbershop.Services.Database.Termin", b =>
                 {
+                    b.HasOne("eBarbershop.Services.Database.Korisnik", "Klijent")
+                        .WithMany()
+                        .HasForeignKey("KlijentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Termin_Korisnik_Klijent");
+
                     b.HasOne("eBarbershop.Services.Database.Korisnik", "Korisnik")
                         .WithMany()
                         .HasForeignKey("KorisnikID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Termin_Korisnik_Frizer");
 
                     b.HasOne("eBarbershop.Services.Database.Rezervacija", "Rezervacija")
                         .WithMany("Termins")
                         .HasForeignKey("RezervacijaId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK__Termin__Rezervac__4D94879B");
+                        .HasConstraintName("FK_Termin_Rezervacija");
+
+                    b.Navigation("Klijent");
 
                     b.Navigation("Korisnik");
 
@@ -665,7 +674,7 @@ namespace eBarbershop.Services.Migrations
                     b.Navigation("Rezervacijas");
                 });
 
-            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvodum", b =>
+            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvoda", b =>
                 {
                     b.Navigation("Proizvods");
                 });

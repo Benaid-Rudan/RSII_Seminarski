@@ -10,11 +10,11 @@ class Authorization {
   static List<String>? roles;
   
   static bool isAdmin() {
-    return roles?.contains("Administrator") ?? false;
+    return roles?.contains("Admin") ?? false;
   }
   
   static bool isEmployee() {
-    return roles?.contains("Uposlenik") ?? false;
+    return roles?.contains("Frizer") ?? false;
   }
   
   static void clearCredentials() {

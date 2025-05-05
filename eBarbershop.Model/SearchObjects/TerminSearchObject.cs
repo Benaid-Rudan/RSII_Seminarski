@@ -12,7 +12,7 @@ namespace eBarbershop.Model.SearchObjects
         public string? imePrezime { get; set; }
         public bool? IncludeKorisnik { get; set; }
         public bool? IncludeRezervacija { get; set; }
-
+        public bool? IncludeKlijent { get; set; }
 
         public bool? isBooked { get; set; }
         public DateTime? Datum { get; set; }

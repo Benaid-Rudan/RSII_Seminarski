@@ -12,8 +12,8 @@ using eBarbershop.Services.Database;
 namespace eBarbershop.Services.Migrations
 {
     [DbContext(typeof(EBarbershop1Context))]
-    [Migration("20250408120559_rezervacijaupdate")]
-    partial class rezervacijaupdate
+    [Migration("20250430121549_initialdatabasesetup")]
+    partial class initialdatabasesetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -180,9 +180,6 @@ namespace eBarbershop.Services.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NarudzbaProizvodiId"));
-
-                    b.Property<decimal>("Cijena")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("Kolicina")
                         .HasColumnType("int");
@@ -357,14 +354,15 @@ namespace eBarbershop.Services.Migrations
                     b.Property<bool>("isBooked")
                         .HasColumnType("bit");
 
-                    b.HasKey("TerminId")
-                        .HasName("PK__Termin__42126C951DAEB8D7");
+                    b.HasKey("TerminId");
+
+                    b.HasIndex("KlijentId");
 
                     b.HasIndex("KorisnikID");
 
                     b.HasIndex("RezervacijaId");
 
-                    b.ToTable("Termin", (string)null);
+                    b.ToTable("Termin");
                 });
 
             modelBuilder.Entity("eBarbershop.Services.Database.Uloga", b =>
@@ -443,7 +441,7 @@ namespace eBarbershop.Services.Migrations
                     b.ToTable("Usluga", (string)null);
                 });
 
-            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvodum", b =>
+            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvoda", b =>
                 {
                     b.Property<int>("VrstaProizvodaId")
                         .ValueGeneratedOnAdd()
@@ -538,7 +536,7 @@ namespace eBarbershop.Services.Migrations
 
             modelBuilder.Entity("eBarbershop.Services.Database.Proizvod", b =>
                 {
-                    b.HasOne("eBarbershop.Services.Database.VrstaProizvodum", "VrstaProizvoda")
+                    b.HasOne("eBarbershop.Services.Database.VrstaProizvoda", "VrstaProizvoda")
                         .WithMany("Proizvods")
                         .HasForeignKey("VrstaProizvodaId")
                         .IsRequired()
@@ -590,17 +588,28 @@ namespace eBarbershop.Services.Migrations
 
             modelBuilder.Entity("eBarbershop.Services.Database.Termin", b =>
                 {
+                    b.HasOne("eBarbershop.Services.Database.Korisnik", "Klijent")
+                        .WithMany()
+                        .HasForeignKey("KlijentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Termin_Korisnik_Klijent");
+
                     b.HasOne("eBarbershop.Services.Database.Korisnik", "Korisnik")
                         .WithMany()
                         .HasForeignKey("KorisnikID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Termin_Korisnik_Frizer");
 
                     b.HasOne("eBarbershop.Services.Database.Rezervacija", "Rezervacija")
                         .WithMany("Termins")
                         .HasForeignKey("RezervacijaId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK__Termin__Rezervac__4D94879B");
+                        .HasConstraintName("FK_Termin_Rezervacija");
+
+                    b.Navigation("Klijent");
 
                     b.Navigation("Korisnik");
 
@@ -668,7 +677,7 @@ namespace eBarbershop.Services.Migrations
                     b.Navigation("Rezervacijas");
                 });
 
-            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvodum", b =>
+            modelBuilder.Entity("eBarbershop.Services.Database.VrstaProizvoda", b =>
                 {
                     b.Navigation("Proizvods");
                 });

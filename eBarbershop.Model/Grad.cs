@@ -12,8 +12,6 @@ namespace eBarbershop.Model
 
         public string Naziv { get; set; }
 
-        // Veza sa drzavom
-        //public Drzava Drzava { get; set; }
 
     }
 

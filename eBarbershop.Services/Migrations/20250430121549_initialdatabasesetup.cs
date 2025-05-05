@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace eBarbershop.Services.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialdatabasesetup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -226,17 +226,24 @@ namespace eBarbershop.Services.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DatumRezervacije = table.Column<DateTime>(type: "datetime", nullable: false),
                     KorisnikId = table.Column<int>(type: "int", nullable: false),
+                    KlijentId = table.Column<int>(type: "int", nullable: false),
                     UslugaId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Rezervac__CABA44DD9B589314", x => x.RezervacijaId);
                     table.ForeignKey(
+                        name: "FK__Rezervaci__Klijen__NOVI_CONSTRAINT",
+                        column: x => x.KlijentId,
+                        principalTable: "Korisnik",
+                        principalColumn: "KorisnikId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK__Rezervaci__Koris__3F466844",
                         column: x => x.KorisnikId,
                         principalTable: "Korisnik",
                         principalColumn: "KorisnikId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK__Rezervaci__Uslug__403A8C7D",
                         column: x => x.UslugaId,
@@ -252,8 +259,7 @@ namespace eBarbershop.Services.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NarudzbaId = table.Column<int>(type: "int", nullable: false),
                     ProizvodId = table.Column<int>(type: "int", nullable: false),
-                    Kolicina = table.Column<int>(type: "int", nullable: false),
-                    Cijena = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Kolicina = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -300,22 +306,28 @@ namespace eBarbershop.Services.Migrations
                     Vrijeme = table.Column<DateTime>(type: "datetime", nullable: false),
                     RezervacijaId = table.Column<int>(type: "int", nullable: false),
                     isBooked = table.Column<bool>(type: "bit", nullable: false),
-                    KorisnikID = table.Column<int>(type: "int", nullable: false)
+                    KorisnikID = table.Column<int>(type: "int", nullable: false),
+                    KlijentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Termin__42126C951DAEB8D7", x => x.TerminId);
+                    table.PrimaryKey("PK_Termin", x => x.TerminId);
                     table.ForeignKey(
-                        name: "FK_Termin_Korisnik_KorisnikID",
+                        name: "FK_Termin_Korisnik_Frizer",
                         column: x => x.KorisnikID,
                         principalTable: "Korisnik",
-                        principalColumn: "KorisnikId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "KorisnikId");
                     table.ForeignKey(
-                        name: "FK__Termin__Rezervac__4D94879B",
+                        name: "FK_Termin_Korisnik_Klijent",
+                        column: x => x.KlijentId,
+                        principalTable: "Korisnik",
+                        principalColumn: "KorisnikId");
+                    table.ForeignKey(
+                        name: "FK_Termin_Rezervacija",
                         column: x => x.RezervacijaId,
                         principalTable: "Rezervacija",
-                        principalColumn: "RezervacijaId");
+                        principalColumn: "RezervacijaId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -364,6 +376,11 @@ namespace eBarbershop.Services.Migrations
                 column: "KorisnikId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Rezervacija_KlijentId",
+                table: "Rezervacija",
+                column: "KlijentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Rezervacija_KorisnikId",
                 table: "Rezervacija",
                 column: "KorisnikId");
@@ -372,6 +389,11 @@ namespace eBarbershop.Services.Migrations
                 name: "IX_Rezervacija_UslugaId",
                 table: "Rezervacija",
                 column: "UslugaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Termin_KlijentId",
+                table: "Termin",
+                column: "KlijentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Termin_KorisnikID",

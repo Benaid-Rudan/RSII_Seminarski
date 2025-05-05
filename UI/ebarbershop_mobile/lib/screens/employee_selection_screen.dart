@@ -1,4 +1,7 @@
 // employee_selection_screen.dart
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ebarbershop_mobile/models/korisnik.dart';
 import 'package:ebarbershop_mobile/models/search_result.dart';
 import 'package:ebarbershop_mobile/providers/korisnik_provider.dart';
@@ -83,13 +86,13 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: employee.slika != null 
-                  ? NetworkImage(employee.slika!)
-                  : null,
-              child: employee.slika == null 
-                  ? Text(employee.ime?.substring(0, 1) ?? '')
-                  : null,
-            ),
+            backgroundImage: employee.slika != null && employee.slika!.isNotEmpty
+                ? MemoryImage(base64Decode(employee.slika!))
+                : null,
+            child: employee.slika == null || employee.slika!.isEmpty
+                ? Text(employee.ime?.substring(0, 1) ?? '')
+                : null,
+          ),
             title: Text(
               employee.fullName,
               style: TextStyle(fontWeight: FontWeight.bold),
