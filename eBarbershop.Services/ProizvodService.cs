@@ -58,7 +58,7 @@ namespace eBarbershop.Services
                     OrderCount = p.NarudzbaProizvodis.Sum(np => np.Kolicina) // Suma količina narudžbi
                 })
                 .OrderByDescending(x => x.OrderCount)
-                .Take(3) // Top 5 proizvoda
+                .Take(3) 
                 .Select(x => x.Proizvod);
 
             var list = await query.ToListAsync();

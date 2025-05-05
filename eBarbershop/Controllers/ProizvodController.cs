@@ -1,5 +1,6 @@
 using eBarbershop.Model;
 using eBarbershop.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBarbershop.Controllers
@@ -19,6 +20,7 @@ namespace eBarbershop.Controllers
         }
 
         [HttpGet("recommended")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRecommendedProducts()
         {
             var recommendedProducts = await _service.GetRecommendedProducts();
