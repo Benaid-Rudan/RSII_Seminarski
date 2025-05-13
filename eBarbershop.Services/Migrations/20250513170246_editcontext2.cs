@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace eBarbershop.Services.Migrations
 {
     /// <inheritdoc />
-    public partial class initialdatabasesetup : Migration
+    public partial class editcontext2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -268,7 +268,8 @@ namespace eBarbershop.Services.Migrations
                         name: "FK__NarudzbaP__Narud__3B75D760",
                         column: x => x.NarudzbaId,
                         principalTable: "Narudzba",
-                        principalColumn: "NarudzbaId");
+                        principalColumn: "NarudzbaId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK__NarudzbaP__Proiz__3C69FB99",
                         column: x => x.ProizvodId,

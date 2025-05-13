@@ -12,8 +12,8 @@ using eBarbershop.Services.Database;
 namespace eBarbershop.Services.Migrations
 {
     [DbContext(typeof(EBarbershop1Context))]
-    [Migration("20250430121549_initialdatabasesetup")]
-    partial class initialdatabasesetup
+    [Migration("20250513170246_editcontext2")]
+    partial class editcontext2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -520,6 +520,7 @@ namespace eBarbershop.Services.Migrations
                     b.HasOne("eBarbershop.Services.Database.Narudzba", "Narudzba")
                         .WithMany("NarudzbaProizvodis")
                         .HasForeignKey("NarudzbaId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK__NarudzbaP__Narud__3B75D760");
 

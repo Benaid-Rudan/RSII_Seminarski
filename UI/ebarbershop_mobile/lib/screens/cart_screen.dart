@@ -201,70 +201,60 @@ Widget _buildProductImage(String? image) {
     ),
   );
 }
-Future<void> _payWithPayPal(BuildContext context) async {
+Future<bool> _payWithPayPal(BuildContext context) async {
   if (_cartProvider.cart.items.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Košarica je prazna")),
     );
-    return;
+    return false;
   }
 
   if (Authorization.userId == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Morate biti prijavljeni")),
     );
-    return;
+    return false;
   }
 
-  // Izračunaj ukupnu cijenu i konvertiraj u USD
   double ukupnaCijenaKM = _cartProvider.cart.items.fold(
     0,
     (total, item) => total + (item.product.cijena! * item.count),
   );
-  double ukupnaCijenaUSD = ukupnaCijenaKM * 0.56; // Pretpostavka 1 KM = 0.56 USD
+  double ukupnaCijenaUSD = ukupnaCijenaKM * 0.56;
 
   final listaProizvoda = _cartProvider.cart.items.map((item) {
     return {
       "proizvodID": item.product.proizvodId,
       "kolicina": item.count,
       "naziv": item.product.naziv ?? "Proizvod",
-      "cijena": item.product.cijena! * 0.56, // Konvertiraj u USD
+      "cijena": item.product.cijena! * 0.56,
     };
   }).toList();
 
-  try {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PaypalPaymentScreen(
-          totalPrice: ukupnaCijenaUSD,
-          listaProizvoda: listaProizvoda,
-          korisnikId: Authorization.userId!,
-          onPaymentSuccess: () async {
-            await _completeOrderAfterPayment(ukupnaCijenaKM, listaProizvoda);
-            if (!mounted) return;
-            {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Plaćanje uspješno izvršeno"),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-          },
-        ),
+  final result = await Navigator.of(context).push<bool>(
+    MaterialPageRoute(
+      builder: (context) => PaypalPaymentScreen(
+        totalPrice: ukupnaCijenaUSD,
+        listaProizvoda: listaProizvoda,
+        korisnikId: Authorization.userId!,
+        onPaymentSuccess: () async {
+          await _completeOrderAfterPayment(ukupnaCijenaKM, listaProizvoda);
+          return true;
+        },
+      ),
+    ),
+  );
+
+  if (result == true && mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Plaćanje uspješno izvršeno"),
+        backgroundColor: Colors.green,
       ),
     );
-  } catch (e) {
-    if (!mounted) return;
-    {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Greška: ${e.toString()}"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    return true;
   }
+  return false;
 }
 
 Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dynamic>> listaProizvoda) async {
@@ -274,16 +264,19 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
       "ukupnaCijena": ukupnaCijena,
       "korisnikId": Authorization.userId,
       "listaProizvoda": listaProizvoda,
-      // "status": "Plaćeno",
+      "status": "Plaćeno",
       "nacinPlacanja": "PayPal",
     };
 
     await _orderProvider.insert(order);
-    _cartProvider.cart.items.clear();
-    if (!mounted) return; 
-    {
-      setState(() {});
-    }
+    _cartProvider.clearCart(); 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Narudžba uspješno kreirana"),
+        backgroundColor: Colors.green,
+      ),
+    );
+    // Koristite clearCart metodu umjesto direktnog pristupa
   } catch (e) {
     print("Greška pri spremanju narudžbe nakon plaćanja: $e");
     throw e;
@@ -310,7 +303,7 @@ Future<void> _processOrder() async {
       "korisnikId": Authorization.userId,
       "listaProizvoda": listaProizvoda,
       // "status": "Na čekanju",
-      "nacinPlacanja": "Gotovina",
+      // "nacinPlacanja": "Gotovina",
     };
 
     await _orderProvider.insert(order);
@@ -320,7 +313,7 @@ Future<void> _processOrder() async {
       setState(() {});
     }
 
-    if (!mounted) return;
+    if (mounted) 
     {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -331,7 +324,7 @@ Future<void> _processOrder() async {
     }
   } catch (e) {
     print("Greška pri narudžbi: $e"); 
-    if (!mounted) return;
+    if (mounted) 
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
