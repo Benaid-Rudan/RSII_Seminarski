@@ -12,12 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 namespace eBarbershop.Services
 {
-    public class KorisniciService : IKorisniciService
+    public class KorisniciService : BaseCRUDService<Model.Korisnik, Database.Korisnik, KorisnikSearchObject, KorisniciInsertRequest, KorisniciUpdateRequest>, IKorisniciService
     {
         EBarbershop1Context _context;
         IMapper _mapper;
            
-        public KorisniciService(EBarbershop1Context context, IMapper mapper) 
+        public KorisniciService(EBarbershop1Context context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -248,18 +248,47 @@ namespace eBarbershop.Services
             var entity = await _context.Set<Korisnik>().FindAsync(id);
             return _mapper.Map<Model.Korisnik>(entity);
         }
-        public async Task<Model.Korisnik> Delete(int id)
+        public override async Task<Model.Korisnik> Delete(int korisnikId)
         {
-            var set = _context.Set<Korisnik>();
-            var entity = await set.FindAsync(id);
-            var temp = entity;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var korisnik = await _context.Korisnik
+                    .Include(k => k.Narudzbas) // Lista narudžbi
+                        .ThenInclude(n => n.NarudzbaProizvodis) // Lista proizvoda po narudžbi
+                    .FirstOrDefaultAsync(k => k.KorisnikId == korisnikId);
 
-            if (entity != null)
-                _context.Remove(entity);
+                if (korisnik != null)
+                {
+                    foreach (var narudzba in korisnik.Narudzbas.ToList())
+                    {
+                        foreach (var np in narudzba.NarudzbaProizvodis.ToList())
+                        {
+                            _context.NarudzbaProizvodi.Remove(np);
+                        }
 
-            await _context.SaveChangesAsync();
-            return _mapper.Map<Model.Korisnik>(temp);
+                        await _context.SaveChangesAsync();
+
+                        _context.Narudzba.Remove(narudzba);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.Korisnik.Remove(korisnik);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                    return _mapper.Map<Model.Korisnik>(korisnik);
+                }
+
+                return null;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
     }
 }
 

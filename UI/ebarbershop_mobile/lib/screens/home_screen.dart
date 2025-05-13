@@ -50,9 +50,11 @@ Future<void> _loadData() async {
 
 Future<void> _loadRecommendedProducts() async {
   try {
-    print("Fetching recommended products...");
-    var data = await _productProvider.getRecommended();
-    print("Received recommended products: ${data.length}");
+    print("Fetching recommended products for user: ${Authorization.userId}");
+    var data = await _productProvider.getRecommended(Authorization.userId!);
+    print("API returned ${data.length} products:");
+    data.forEach((p) => print(" - ${p.naziv} (ID: ${p.proizvodId})"));
+    
     if (_mounted) {
       setState(() {
         recommendedProducts = data;
@@ -60,6 +62,11 @@ Future<void> _loadRecommendedProducts() async {
     }
   } catch (e) {
     print("Error loading recommended products: $e");
+    if (_mounted) {
+      setState(() {
+        recommendedProducts = []; // Clear recommendations on error
+      });
+    }
   }
 }
 
@@ -243,13 +250,16 @@ Widget build(BuildContext context) {
     );
   }
   Widget _buildRecommendedProductsSection() {
+  // Don't show section if no recommendations
+  if (recommendedProducts.isEmpty) return SizedBox.shrink();
+  
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Text(
-          'Preporučeni proizvodi',
+          'Preporučeni proizvodi (${recommendedProducts.length})',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
@@ -257,7 +267,7 @@ Widget build(BuildContext context) {
         height: 180,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: recommendedProducts.length,
+          itemCount: recommendedProducts.length, // Use exact count from API
           padding: EdgeInsets.symmetric(horizontal: 10),
           itemBuilder: (context, index) {
             return _buildRecommendedProductCard(recommendedProducts[index]);

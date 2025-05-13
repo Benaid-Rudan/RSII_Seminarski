@@ -15,7 +15,11 @@ class CartProvider with ChangeNotifier {
     }
     notifyListeners();
   }
-
+  // U vaš CartProvider dodajte:
+  void clearCart() {
+    cart.items.clear();
+    notifyListeners(); // Ovo će osvježiti sve widgete koji osluškuju promjene
+  }
   void removeFromCart(Product product) {
     cart.items.removeWhere((item) => item.product.proizvodId == product.proizvodId);
     notifyListeners();

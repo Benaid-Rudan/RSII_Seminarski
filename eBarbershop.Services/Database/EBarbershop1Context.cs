@@ -123,6 +123,11 @@ public partial class EBarbershop1Context : DbContext
                 .HasForeignKey(d => d.KorisnikId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Narudzba__Korisn__38996AB5");
+
+                entity.HasOne(n => n.Korisnik)
+           .WithMany(k => k.Narudzbas)
+           .HasForeignKey(n => n.KorisnikId)
+           .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<NarudzbaProizvodi>(entity =>
@@ -135,7 +140,8 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(d => d.Narudzba).WithMany(p => p.NarudzbaProizvodis)
                 .HasForeignKey(d => d.NarudzbaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__NarudzbaP__Narud__3B75D760");
+                .HasConstraintName("FK__NarudzbaP__Narud__3B75D760")
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.Proizvod).WithMany(p => p.NarudzbaProizvodis)
                 .HasForeignKey(d => d.ProizvodId)

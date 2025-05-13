@@ -1,11 +1,6 @@
-import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_paypal/flutter_paypal.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class PaypalPaymentScreen extends StatefulWidget {
   final double totalPrice;
@@ -27,36 +22,29 @@ class PaypalPaymentScreen extends StatefulWidget {
 
 class _PaypalPaymentScreenState extends State<PaypalPaymentScreen> {
   bool _isLoading = true;
-  Timer? _loadingTimer;
-
-  // Helper method to safely set state if component is still mounted
-  void _setStateIfMounted(VoidCallback fn) {
-    if (mounted) setState(fn);
-  }
+  bool _showPaypal = true;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
-    
-    // Initialize platform-specific WebView implementations
-    if (WebViewPlatform.instance == null) {
-      if (Platform.isAndroid) {
-        WebViewPlatform.instance = AndroidWebViewPlatform();
-      } else if (Platform.isIOS) {
-        WebViewPlatform.instance = WebKitWebViewPlatform();
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!_isDisposed && mounted) {
+        setState(() => _isLoading = false);
       }
-    }
-    
-    _loadingTimer = Timer(const Duration(seconds: 5), () {
-      if (!mounted) return;
-      _setStateIfMounted(() => _isLoading = false);
     });
   }
 
   @override
   void dispose() {
-    _loadingTimer?.cancel();
+    _isDisposed = true;
     super.dispose();
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (!_isDisposed && mounted) {
+      setState(fn);
+    }
   }
 
   @override
@@ -64,60 +52,80 @@ class _PaypalPaymentScreenState extends State<PaypalPaymentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("PayPal Plaćanje"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Stack(
         children: [
-          UsePaypal(
-            sandboxMode: true,
-            clientId: "ARcssvsRFCLA8PWBWibfbavITBnMbk_fiXMNswC-a_bT35QubNjwpRx_giINqdBzPftk2dMaGyOCwBJb",
-            secretKey: "EJFRMr41sTLuBbDWW7qblSh6mZPC5hyTG4GCTrEmJJoWXYKMWD2zmPGyousmmAtAAO9ixZUMFONo7U6v",
-            returnURL: "success.snip.tech",
-            cancelURL: "cancel.snip.tech",
-            transactions: [
-              {
-                "amount": {
-                  "total": widget.totalPrice.toStringAsFixed(2),
-                  "currency": "USD",
-                  "details": {
-                    "subtotal": widget.totalPrice.toStringAsFixed(2),
-                    "shipping": '0',
-                    "shipping_discount": 0
+          if (_showPaypal)
+            UsePaypal(
+              sandboxMode: true,
+              clientId: "Adv3cKi9QFe_LSGXHPSmKUJXI68XVcrZzK2fkIJ4TngVHQp6tBzOF7cumhwhmIPAfyCpSdyfCgY2Xcs0",
+               secretKey: "EOzSKNmduSHrwii_D-_9Cp9n-tN0_e1G4IWfEk7mNdKhBZ0RBWcoSZKPZWP3xCuD6iKPOou8iHChd1xY",
+              returnURL: "success.snip.tech",
+              cancelURL: "cancel.snip.tech",
+              transactions: [
+                {
+                  "amount": {
+                    "total": widget.totalPrice.toStringAsFixed(2),
+                    "currency": "USD",
+                    "details": {
+                      "subtotal": widget.totalPrice.toStringAsFixed(2),
+                      "shipping": '0',
+                      "shipping_discount": 0
+                    }
+                  },
+                  "description": "eBarbershop narudžba",
+                  "item_list": {
+                    "items": widget.listaProizvoda.map((e) {
+                      return {
+                        "name": e['naziv'] ?? "Proizvod ${e['proizvodID']}",
+                        "quantity": e['kolicina'].toString(),
+                        "price": (e['cijena'] ?? (widget.totalPrice / widget.listaProizvoda.length)).toStringAsFixed(2),
+                        "currency": "USD"
+                      };
+                    }).toList()
                   }
-                },
-                "description": "eBarbershop narudžba",
-                "item_list": {
-                  "items": widget.listaProizvoda.map((e) {
-                    return {
-                      "name": e['naziv'] ?? "Proizvod ${e['proizvodID']}",
-                      "quantity": e['kolicina'].toString(),
-                      "price": (e['cijena'] ?? (widget.totalPrice / widget.listaProizvoda.length)).toStringAsFixed(2),
-                      "currency": "USD"
-                    };
-                  }).toList()
+                }
+              ],
+              note: "Hvala vam na kupnji u eBarbershop!",
+              onSuccess: (Map params) async {
+              _safeSetState(() => _showPaypal = false);
+              try {
+                await widget.onPaymentSuccess();
+                if (!_isDisposed && mounted) {
+                  Navigator.of(context).pop(true); // Vraćamo true kao rezultat
+                }
+              } catch (e) {
+                if (!_isDisposed && mounted) {
+                  Navigator.of(context).pop(false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Greška pri obradi narudžbe: $e")),
+                  );
                 }
               }
-            ],
-            note: "Hvala vam na kupnji u eBarbershop!",
-            onSuccess: (Map params) async {
-              if (!mounted) return;
-              widget.onPaymentSuccess();
-              Navigator.of(context).pop();
             },
-            onError: (error) async {
-              if (!mounted) return;
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Greška pri plaćanju: $error")),
-              );
-            },
-            onCancel: (params) async {
-              if (!mounted) return;
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Plaćanje otkazano")),
-              );
-            },
-          ),
+              onError: (error) {
+                _safeSetState(() => _showPaypal = false);
+                if (!_isDisposed && mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Greška pri plaćanju: $error")),
+                  );
+                }
+              },
+              onCancel: (params) {
+                _safeSetState(() => _showPaypal = false);
+                if (!_isDisposed && mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Plaćanje otkazano")),
+                  );
+                }
+              },
+            ),
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),

@@ -88,8 +88,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 }
 
-  Future<List<Product>> getRecommended() async {
-  var url = "${BaseProvider._baseUrl}$_endpoint/recommended";
+  Future<List<Product>> getRecommended(int userId) async {
+  var url = "${BaseProvider._baseUrl}$_endpoint/recommended?userId=$userId";
   print("Calling recommended products API: $url");
   var uri = Uri.parse(url);
   var headers = createHeaders();
@@ -99,11 +99,11 @@ abstract class BaseProvider<T> with ChangeNotifier {
 
   if (isValidResponse(response)) {
     var data = jsonDecode(response.body) as List;
-      return data.map((x) => Product.fromJson(x)).toList();  } else {
+    return data.map((x) => Product.fromJson(x)).toList();
+  } else {
     throw Exception("Failed to load recommended products");
   }
 }
-
 
   Future<T> getById(int id) async {
   var url = "$_baseUrl$_endpoint/$id";

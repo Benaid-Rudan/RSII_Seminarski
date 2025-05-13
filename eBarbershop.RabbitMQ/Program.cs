@@ -3,41 +3,56 @@ using eBarbershop.Services;
 using eBarbershop.Services.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
+using System.Text;
+using Newtonsoft.Json;
+using RabbitMQ;
 
-var builder = WebApplication.CreateBuilder(args);
+var hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+var username = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest";
+var password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "guest";
 
-// Add services to the container.
-builder.Services.AddTransient<IKorisniciService, KorisniciService>();
-builder.Services.AddAutoMapper(typeof(KorisniciService));
+var factory = new ConnectionFactory { HostName = hostname, UserName = username, Password = password };
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-var konekcijskiString = builder.Configuration.GetConnectionString("DefaultConnection");
+using var connection = factory.CreateConnection();
 
-builder.Services.AddDbContext<EBarbershop1Context>(
-  dbContextOpcije => dbContextOpcije
-    .UseSqlServer(konekcijskiString));
+using var channel = connection.CreateModel();
 
-builder.Services.AddAutoMapper(typeof(IKorisniciService));
-builder.Services.AddAuthentication("BasicAuthentication")
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
-var app = builder.Build();
+channel.QueueDeclare(queue: "email_sending",
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+                     durable: false,
+
+                     exclusive: false,
+
+                     autoDelete: false,
+
+                     arguments: null);
+
+Console.WriteLine("Listening to messages....");
+
+var consumer = new EventingBasicConsumer(channel);
+
+consumer.Received += (model, ea) =>
+
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseHttpsRedirection();
+    var body = ea.Body.ToArray();
 
-app.UseAuthorization();
+    var message = Encoding.UTF8.GetString(body);
 
-app.UseEndpoints(endpoints =>
-{
-endpoints.MapControllers(); });
+    var entitet = JsonConvert.DeserializeObject<MailObjekat>(message);
 
-app.Run();
+    MailSending.posaljiMail(entitet!);
+
+};
+
+channel.BasicConsume(queue: "email_sending",
+
+                     autoAck: true,
+
+                     consumer: consumer);
+
+Thread.Sleep(Timeout.Infinite);
+
+Console.ReadLine();

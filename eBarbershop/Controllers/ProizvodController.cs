@@ -21,9 +21,9 @@ namespace eBarbershop.Controllers
 
         [HttpGet("recommended")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetRecommendedProducts()
+        public async Task<IActionResult> GetRecommendedProducts(int userId)
         {
-            var recommendedProducts = await _service.GetRecommendedProducts();
+            var recommendedProducts = await _service.GetRecommendedProducts(userId);
             return Ok(recommendedProducts);
         }
 
