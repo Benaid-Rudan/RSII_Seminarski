@@ -26,35 +26,55 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showGallery = false; 
 
   @override
-  void initState() {
-    super.initState();
-    _novostProvider = context.read<NovostProvider>();
-    _productProvider = context.read<ProductProvider>();
-    _loadNovosti();
-    _loadRecommendedProducts();
-  }
-  Future<void> _loadRecommendedProducts() async {
-    try {
-      print("Fetching recommended products...");
-      var data = await _productProvider.getRecommended();
-      print("Received recommended products: ${data.length}");
+void initState() {
+  super.initState();
+  _novostProvider = context.read<NovostProvider>();
+  _productProvider = context.read<ProductProvider>();
+  _loadData();
+}
+
+bool _mounted = true;
+
+@override
+void dispose() {
+  _mounted = false;
+  super.dispose();
+}
+
+Future<void> _loadData() async {
+  await Future.wait([
+    _loadNovosti(),
+    _loadRecommendedProducts()
+  ]);
+}
+
+Future<void> _loadRecommendedProducts() async {
+  try {
+    print("Fetching recommended products...");
+    var data = await _productProvider.getRecommended();
+    print("Received recommended products: ${data.length}");
+    if (_mounted) {
       setState(() {
         recommendedProducts = data;
       });
-    } catch (e) {
-      print("Error loading recommended products: $e");
     }
+  } catch (e) {
+    print("Error loading recommended products: $e");
   }
-  Future<void> _loadNovosti() async {
-    try {
-      var data = await _novostProvider.get();
+}
+
+Future<void> _loadNovosti() async {
+  try {
+    var data = await _novostProvider.get();
+    if (_mounted) {
       setState(() {
         novosti = data.result;
       });
-    } catch (e) {
-      print("Error loading novosti: $e");
     }
+  } catch (e) {
+    print("Error loading novosti: $e");
   }
+}
 
  @override
 Widget build(BuildContext context) {

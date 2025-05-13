@@ -84,7 +84,7 @@ public static class SeedDbInitializer
                 PasswordHash = GenerateHash(adminSalt, "admin123"),
                 PasswordSalt = adminSalt,
                 GradId = cities.Single(g => g.Naziv == "Sarajevo").GradId,
-                Slika = ""
+                Slika = "https://cdn-icons-png.flaticon.com/512/2942/2942813.png"
             },
             new Korisnik
             {
@@ -95,7 +95,7 @@ public static class SeedDbInitializer
                 PasswordHash = GenerateHash(frizerSalt, "frizer123"),
                 PasswordSalt = frizerSalt,
                 GradId = cities.Single(g => g.Naziv == "Sarajevo").GradId,
-                Slika = ""
+                Slika = "https://spng.pngfind.com/pngs/s/314-3146924_barber-shop-logo-png-barber-shop-vector-png.png"
             },
             new Korisnik
             {
@@ -106,7 +106,7 @@ public static class SeedDbInitializer
                 PasswordHash = GenerateHash(klijentSalt, "klijent123"),
                 PasswordSalt = klijentSalt,
                 GradId = cities.Single(g => g.Naziv == "Mostar").GradId,
-                Slika = ""
+                Slika = "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
             }
         };
 
@@ -170,7 +170,7 @@ public static class SeedDbInitializer
                 Cijena = 16.00m,
                 Zalihe = 50,
                 VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Šamponi").VrstaProizvodaId,
-                Slika = ""
+                Slika = "https://www.biramzdravlje.hr/storage/upload/products/Pantogar-sampon-protiv-opadanja-kose-za-muskarce_133819.png"
             },
             new Proizvod
             {
@@ -179,7 +179,7 @@ public static class SeedDbInitializer
                 Cijena = 12.50m,
                 Zalihe = 30,
                 VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Krema za brijanje").VrstaProizvodaId,
-                Slika = ""
+                Slika = "https://www.just.hr/wp-content/uploads/2020/08/just-proizvodi-za-muskarce-gel-za-brijanje-819x1024.png"
             },
             new Proizvod
             {
@@ -188,7 +188,7 @@ public static class SeedDbInitializer
                 Cijena = 9.00m,
                 Zalihe = 40,
                 VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Gel za kosu").VrstaProizvodaId,
-                Slika = ""
+                Slika = "https://w7.pngwing.com/pngs/394/339/png-transparent-lotion-nivea-hair-styling-products-hairstyle-hair-gel-hair-gel.png"
             }
         };
 
@@ -234,14 +234,14 @@ public static class SeedDbInitializer
                 Naslov = "Dobrodošli u eBarbershop",
                 Sadrzaj = "Radujemo se vašim posjetama u našem novom salonu!",
                 DatumObjave = DateTime.Now.AddDays(-10),
-                Slika = ""
+                Slika = "https://png.pngtree.com/png-vector/20220818/ourmid/pngtree-barbershop-pole-decoration-png-image_6115703.png"
             },
             new Novost
             {
                 Naslov = "Nova linija proizvoda",
                 Sadrzaj = "Uveli smo nove profesionalne proizvode za njegu kose i brade",
                 DatumObjave = DateTime.Now.AddDays(-5),
-                Slika = ""
+                Slika = "https://parspng.com/wp-content/uploads/2023/04/Barbershopbeautysalonpng.parspng.com-13.png"
             }
         };
 

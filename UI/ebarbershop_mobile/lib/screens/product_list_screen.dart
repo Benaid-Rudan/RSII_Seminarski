@@ -22,11 +22,12 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  ProductProvider? _productProvider = null;
+   ProductProvider? _productProvider = null;
   CartProvider? _cartProvider = null;
   List<Product> data = [];
   TextEditingController _searchController = TextEditingController();
   bool _sortAscending = true;
+  bool _mounted = true;
 
   @override
   void initState() {
@@ -37,19 +38,38 @@ class _ProductListScreenState extends State<ProductListScreen> {
     loadData();
   }
 
+  @override
+  void dispose() {
+    _mounted = false; // Postavljamo na false prije poziva super.dispose()
+    _searchController.dispose(); // Ne zaboravite osloboditi controller
+    super.dispose();
+  }
+
   Future loadData() async {
-    var tmpData = await _productProvider?.get();
-    setState(() {
-      data = tmpData?.result ?? [];
-    });
+    try {
+      var tmpData = await _productProvider?.get();
+      if (_mounted) { // Provjeravamo je li komponenta još montirana
+        setState(() {
+          data = tmpData?.result ?? [];
+        });
+      }
+    } catch (e) {
+      print("Error loading products: $e");
+    }
   }
 
   Future<void> _searchProducts(String value) async {
-    var tmpData = await _productProvider?.get(filter: {'naziv': value});
-    setState(() {
-      data = tmpData?.result ?? [];
-      _sortAscending = true;
-    });
+    try {
+      var tmpData = await _productProvider?.get(filter: {'naziv': value});
+      if (_mounted) { // Provjeravamo je li komponenta još montirana
+        setState(() {
+          data = tmpData?.result ?? [];
+          _sortAscending = true;
+        });
+      }
+    } catch (e) {
+      print("Error searching products: $e");
+    }
   }
 
   @override
@@ -180,29 +200,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   Text("Cijena: ${formatNumber(x.cijena)} KM"),
                   IconButton(
                     icon: Icon(Icons.shopping_cart),
-                    onPressed: () {
-                      _cartProvider?.addToCart(x);
-                      setState(() {
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.green),
-                              SizedBox(width: 8),
-                              Text("${x.naziv} dodan u korpu"),
-                            ],
-                          ),
-                          duration: Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          margin: EdgeInsets.all(10),
-                          backgroundColor: Colors.white,
-                        ),
-                      );
-                    },
+                    onPressed: () => _cartProvider?.addToCart(x), // Korištenje nove metode
                   ),
                 ],
               ),
@@ -212,6 +210,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return list;
   }
+}
 
   Widget _buildProductImage(String? image) {
     if (image == null || image.isEmpty) {
@@ -224,4 +223,3 @@ class _ProductListScreenState extends State<ProductListScreen> {
       return imageFromBase64String(image);
     }
   }
-}

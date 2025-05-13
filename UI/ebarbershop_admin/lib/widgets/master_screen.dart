@@ -1,4 +1,5 @@
 import 'package:ebarbershop_admin/main.dart';
+import 'package:ebarbershop_admin/screens/admindashboard.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:ebarbershop_admin/screens/arhiv.dart';
@@ -56,6 +57,7 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
                 ),
               ),
               const SizedBox(height: 20),
+              menuItem("Dashboard", Icons.people, AdminDashboard()),
               menuItem("Korisnici", Icons.people, KorisnikListScreen()),
               menuItem("Proizvodi", Icons.shopping_bag, ProductListScreen()),
               menuItem("Rezervacije", Icons.calendar_today, RezervacijaListScreen()),

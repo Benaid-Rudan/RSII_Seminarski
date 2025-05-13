@@ -41,7 +41,8 @@ dependencies:
   flutter_form_builder: ^9.2.0
   image_picker: ^1.1.2
   table_calendar: ^3.0.9
-  
+  path_provider: ^2.0.15
+  pdf: ^3.10.1
 dev_dependencies:
   json_serializable: ^6.7.0
   build_runner: ^2.4.4

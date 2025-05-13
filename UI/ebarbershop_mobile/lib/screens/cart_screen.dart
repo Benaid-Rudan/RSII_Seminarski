@@ -241,7 +241,8 @@ Future<void> _payWithPayPal(BuildContext context) async {
           korisnikId: Authorization.userId!,
           onPaymentSuccess: () async {
             await _completeOrderAfterPayment(ukupnaCijenaKM, listaProizvoda);
-            if (mounted) {
+            if (!mounted) return;
+            {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text("Plaćanje uspješno izvršeno"),
@@ -254,7 +255,8 @@ Future<void> _payWithPayPal(BuildContext context) async {
       ),
     );
   } catch (e) {
-    if (mounted) {
+    if (!mounted) return;
+    {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Greška: ${e.toString()}"),
@@ -278,7 +280,8 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
 
     await _orderProvider.insert(order);
     _cartProvider.cart.items.clear();
-    if (mounted) {
+    if (!mounted) return; 
+    {
       setState(() {});
     }
   } catch (e) {
@@ -312,11 +315,13 @@ Future<void> _processOrder() async {
 
     await _orderProvider.insert(order);
     _cartProvider.cart.items.clear();
-    if (mounted) {
+    if (!mounted) return;
+    {
       setState(() {});
     }
 
-    if (mounted) {
+    if (!mounted) return;
+    {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Narudžba uspješno kreirana"),
@@ -326,7 +331,8 @@ Future<void> _processOrder() async {
     }
   } catch (e) {
     print("Greška pri narudžbi: $e"); 
-    if (mounted) {
+    if (!mounted) return;
+    {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Greška: ${e.toString()}"),
