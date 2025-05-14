@@ -178,35 +178,46 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ];
     }
 
-    List<Widget> list = data
-        .map((x) => Container(
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        "${ProductDetailsScreen.routeName}/${x.proizvodId}",
-                        arguments: x.proizvodId,
-                      );
-                    },
-                    child: Container(
-                      height: 100,
-                      width: 100,
-                      child: _buildProductImage(x.slika), 
-                    ),
-                  ),
-                  Text(x.naziv ?? ""),
-                  Text("Cijena: ${formatNumber(x.cijena)} KM"),
-                  IconButton(
-                    icon: Icon(Icons.shopping_cart),
-                    onPressed: () => _cartProvider?.addToCart(x), // Korištenje nove metode
-                  ),
-                ],
-              ),
-            ))
-        .cast<Widget>()
-        .toList();
+    List<Widget> list = data.map((x) => Container(
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                "${ProductDetailsScreen.routeName}/${x.proizvodId}",
+                arguments: x.proizvodId,
+              );
+            },
+            child: Container(
+              height: 100,
+              width: 100,
+              child: _buildProductImage(x.slika), 
+            ),
+          ),
+          Text(x.naziv ?? ""),
+          Text("Cijena: ${formatNumber(x.cijena)} KM"),
+          Text(
+          "Zalihe: ${x.zalihe ?? 0}",
+          style: TextStyle(
+            color: (x.zalihe ?? 0) > 0 ? Colors.green : Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        if ((x.zalihe ?? 0) > 0) 
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: () => _cartProvider?.addToCart(x, context),
+          )
+        else
+          Text(
+            "Nema na stanju",
+            style: TextStyle(color: Colors.red),
+          ),
+      ],
+    ),
+  )).cast<Widget>().toList();
 
     return list;
   }

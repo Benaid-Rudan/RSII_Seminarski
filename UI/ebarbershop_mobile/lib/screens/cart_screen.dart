@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ebarbershop_mobile/models/cart.dart';
 import 'package:ebarbershop_mobile/providers/cart_provider.dart';
+import 'package:ebarbershop_mobile/providers/product_provider.dart';
 import 'package:ebarbershop_mobile/screens/paypal_payment_screen.dart';
 import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
 import 'package:ebarbershop_mobile/widgets/master_screen.dart';
@@ -109,37 +110,60 @@ Widget build(BuildContext context) {
   }
 
   Widget _buildProductCard(CartItem item) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-    child: ListTile(
-      leading: SizedBox(
-        width: 50,
-        height: 50,
-        child: _buildProductImage(item.product.slika),
-      ),
-      title: Text(item.product.naziv ?? ""),
-      subtitle: Text("${formatNumber(item.product.cijena)} KM"),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.remove),
-            onPressed: () {
-              if (item.count > 1) {
-                _cartProvider.decrementCount(item.product);
-              } else {
-                _cartProvider.removeFromCart(item.product);
-              }
-            },
+  return FutureBuilder(
+    future: context.read<ProductProvider>().getById(item.product.proizvodId!),
+    builder: (context, snapshot) {
+      final isOutOfStock = snapshot.hasData && (snapshot.data!.zalihe ?? 0) < item.count;
+      
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: isOutOfStock ? Colors.red.withOpacity(0.2) : null,
+        child: ListTile(
+          leading: SizedBox(
+            width: 50,
+            height: 50,
+            child: _buildProductImage(item.product.slika),
           ),
-          Text(item.count.toString()),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _cartProvider.incrementCount(item.product),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item.product.naziv ?? ""),
+              if (isOutOfStock)
+                Text(
+                  "Nema dovoljno zaliha",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
-    ),
+          subtitle: Text("${formatNumber(item.product.cijena)} KM"),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: () {
+                  if (item.count > 1) {
+                    _cartProvider.decrementCount(item.product);
+                  } else {
+                    _cartProvider.removeFromCart(item.product);
+                  }
+                },
+              ),
+              Text(item.count.toString()),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: isOutOfStock 
+                    ? null // Onemogući dodavanje ako nema zaliha
+                    : () => _cartProvider.incrementCount(item.product,context),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -216,6 +240,18 @@ Future<bool> _payWithPayPal(BuildContext context) async {
     return false;
   }
 
+  final outOfStockProducts = await _checkProductAvailability();
+  if (outOfStockProducts.isNotEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            "Sljedeći proizvodi nemaju dovoljno zaliha: ${outOfStockProducts.join(', ')}"),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return false;
+  }
+
   double ukupnaCijenaKM = _cartProvider.cart.items.fold(
     0,
     (total, item) => total + (item.product.cijena! * item.count),
@@ -268,23 +304,75 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
       "nacinPlacanja": "PayPal",
     };
 
+    // Prvo kreiramo narudžbu
     await _orderProvider.insert(order);
+    
+    // Zatim ažuriramo zalihe za svaki proizvod
+    await _updateProductStocks(listaProizvoda);
+    
+    // Očistimo košaricu
     _cartProvider.clearCart(); 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Narudžba uspješno kreirana"),
-        backgroundColor: Colors.green,
-      ),
-    );
-    // Koristite clearCart metodu umjesto direktnog pristupa
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Narudžba uspješno kreirana i zalihe ažurirane"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   } catch (e) {
     print("Greška pri spremanju narudžbe nakon plaćanja: $e");
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Greška: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
     throw e;
   }
 }
-
+Future<void> _updateProductStocks(List<Map<String, dynamic>> listaProizvoda) async {
+  try {
+    final productProvider = context.read<ProductProvider>();
+    
+    for (var item in listaProizvoda) {
+      final proizvodId = item['proizvodID'];
+      final kolicina = item['kolicina'];
+      
+      // Dohvatimo trenutni proizvod da vidimo koliko ima zaliha
+      final proizvod = await productProvider.getById(proizvodId);
+      
+      if (proizvod != null) {
+        final noveZalihe = (proizvod.zalihe ?? 0) - kolicina;
+        
+        // Ažuriramo proizvod sa novim zalihama
+        await productProvider.update(proizvodId, {
+          'zalihe': noveZalihe,
+          // Ovdje možete dodati i ostale podatke ako je potrebno
+          'naziv': proizvod.naziv,
+          'opis': proizvod.opis,
+          'cijena': proizvod.cijena,
+          'slika': proizvod.slika,
+          'vrstaProizvodaId': proizvod.vrstaProizvodaId,
+        });
+      }
+    }
+  } catch (e) {
+    print("Greška pri ažuriranju zaliha: $e");
+    throw Exception("Došlo je do greške pri ažuriranju zaliha");
+  }
+}
 Future<void> _processOrder() async {
   try {
+     final outOfStockProducts = await _checkProductAvailability();
+    if (outOfStockProducts.isNotEmpty) {
+      throw Exception(
+          "Sljedeći proizvodi nemaju dovoljno zaliha: ${outOfStockProducts.join(', ')}");
+    }
+
     double ukupnaCijena = _cartProvider.cart.items.fold(
       0,
       (total, item) => total + (item.product.cijena! * item.count),
@@ -294,6 +382,8 @@ Future<void> _processOrder() async {
       return {
         "proizvodID": item.product.proizvodId,
         "kolicina": item.count,
+        "naziv": item.product.naziv ?? "Proizvod",
+        "cijena": item.product.cijena!,
       };
     }).toList();
 
@@ -302,19 +392,15 @@ Future<void> _processOrder() async {
       "ukupnaCijena": ukupnaCijena,
       "korisnikId": Authorization.userId,
       "listaProizvoda": listaProizvoda,
-      // "status": "Na čekanju",
-      // "nacinPlacanja": "Gotovina",
+      "status": "Na čekanju",
+      "nacinPlacanja": "Gotovina",
     };
 
     await _orderProvider.insert(order);
-    _cartProvider.cart.items.clear();
-    if (!mounted) return;
-    {
-      setState(() {});
-    }
-
-    if (mounted) 
-    {
+    await _updateProductStocks(listaProizvoda); // Dodajte ovu liniju
+    _cartProvider.clearCart();
+    
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Narudžba uspješno kreirana"),
@@ -324,8 +410,7 @@ Future<void> _processOrder() async {
     }
   } catch (e) {
     print("Greška pri narudžbi: $e"); 
-    if (mounted) 
-    {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Greška: ${e.toString()}"),
@@ -334,5 +419,23 @@ Future<void> _processOrder() async {
       );
     }
   }
+}
+Future<List<String>> _checkProductAvailability() async {
+  final productProvider = context.read<ProductProvider>();
+  List<String> outOfStockProducts = [];
+
+  for (var item in _cartProvider.cart.items) {
+    try {
+      final proizvod = await productProvider.getById(item.product.proizvodId!);
+      if (proizvod == null || (proizvod.zalihe ?? 0) < item.count) {
+        outOfStockProducts.add(item.product.naziv ?? "Proizvod ID: ${item.product.proizvodId}");
+      }
+    } catch (e) {
+      print("Greška pri provjeri zaliha za proizvod ${item.product.proizvodId}: $e");
+      outOfStockProducts.add(item.product.naziv ?? "Proizvod ID: ${item.product.proizvodId}");
+    }
+  }
+
+  return outOfStockProducts;
 }
 }

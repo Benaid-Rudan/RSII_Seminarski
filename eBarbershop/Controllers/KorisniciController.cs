@@ -20,28 +20,28 @@ namespace eBarbershop.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<Korisnik> Insert([FromBody] KorisniciInsertRequest request)
         {
             return await _service.Insert(request);
         }
 
         [HttpPut("{id}")]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<Korisnik> Update(int id, [FromBody] KorisniciUpdateRequest request)
         {
             return await _service.Update(id, request);
         }
 
         [HttpPut("{id}/AddUloga")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Admin")]
         public Korisnik AddUloga(int id, [FromBody] KorisniciUlogaUpdateRequest request)
         {
             return ((IKorisniciService)_service).AddUloga(id, request);
         }
 
         [HttpPut("{id}/DeleteUloga")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Admin")]
         public Korisnik DeleteUloga(int id, [FromBody] KorisniciUlogaUpdateRequest request)
         {
             return ((IKorisniciService)_service).DeleteUloga(id, request);

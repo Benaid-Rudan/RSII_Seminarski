@@ -45,21 +45,29 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   TextEditingController _ulogaControllerFilter = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
+  final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-
-      setState(() {
-        _selectedImage = imageFile;
-      });
-
-      List<int> imageBytes = await imageFile.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
-      _slikaController.text = base64Image;
+  if (pickedFile != null) {
+    File imageFile = File(pickedFile.path);
+    
+    // Provjeri veličinu slike (opcionalno)
+    final bytes = await imageFile.length();
+    if (bytes > 2 * 1024 * 1024) { // 2MB limit
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Slika je prevelika (max 2MB)'))
+      );
+      return;
     }
+
+    setState(() {
+      _selectedImage = imageFile;
+    });
+
+    List<int> imageBytes = await imageFile.readAsBytes();
+    String base64Image = base64Encode(imageBytes);
+    _slikaController.text = base64Image;
   }
+}
 
   @override
   void didChangeDependencies() {
@@ -303,15 +311,53 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                         style: TextStyle(color: Colors.white))),
                     DataCell(Text(getGradNazivById(e.gradId.toString()),
                         style: TextStyle(color: Colors.white))),
-                    DataCell(
-                      e.slika != null && e.slika!.isNotEmpty
-                          ? (e.slika!.startsWith('http') || e.slika!.startsWith('https')
-                              ? Image.network(e.slika!,
-                                  width: 50, height: 50, fit: BoxFit.cover)
-                              : Image.memory(base64Decode(e.slika!),
-                                  width: 50, height: 50, fit: BoxFit.cover))
-                          : Icon(Icons.person, size: 50, color: Colors.white),
-                    ),
+  DataCell(
+  e.slika != null && e.slika!.isNotEmpty
+      ? (() {
+          // Provjeri je li string vrlo kratak (poput riječi "string") ili ne izgleda kao Base64
+          if (e.slika!.length < 10 || 
+              e.slika! == "string" || 
+              RegExp(r'^[a-zA-Z]+$').hasMatch(e.slika!)) {
+            return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
+          }
+          
+          try {
+            if (e.slika!.startsWith('http') || e.slika!.startsWith('https')) {
+              return Image.network(e.slika!,
+                width: 50, height: 50, fit: BoxFit.cover);
+            } else {
+              try {
+                // Pokušaj prepoznati je li string validan Base64
+                final RegExp base64Regex = RegExp(r'^[A-Za-z0-9+/=]+$');
+                if (!base64Regex.hasMatch(e.slika!)) {
+                  return Icon(Icons.broken_image, size: 50, color: Colors.orange);
+                }
+                
+                // Fix potential Base64 padding issues
+                String fixedBase64 = e.slika!;
+                while (fixedBase64.length % 4 != 0) {
+                  fixedBase64 += '=';
+                }
+                
+                // Dodatna provjera - odbaci vrlo kratke stringove koji ne mogu biti slike
+                if (fixedBase64.length < 20) {
+                  return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
+                }
+                
+                return Image.memory(base64Decode(fixedBase64),
+                  width: 50, height: 50, fit: BoxFit.cover);
+              } catch (e) {
+                print('Error decoding base64 image: $e');
+                return Icon(Icons.broken_image, size: 50, color: Colors.red);
+              }
+            }
+              } catch (e) {
+                print('Error processing image: $e');
+                return Icon(Icons.error_outline, size: 50, color: Colors.red);
+              }
+              })()
+             : Icon(Icons.person, size: 50, color: Colors.white),
+            ),
                     DataCell(Text(getRoleName(e),
                         style: TextStyle(color: Colors.white))),
                     
@@ -476,53 +522,39 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     },
                   ),
                   FormBuilderField(
-                    name: 'slika',
-                    validator: (value) {
-                      if (_selectedImage == null &&
-                          korisnik == null) {
-                        return 'Slika je obavezna za novog korisnika';
-                      }
-                      return null;
+  name: 'slika',
+  validator: (value) {
+    if (_selectedImage == null && korisnik == null) {
+      return 'Slika je obavezna za novog korisnika';
+    }
+    return null;
+  },
+  builder: ((field) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        label: Text('Izaberite sliku'),
+        errorText: field.errorText,
+      ),
+      child: ListTile(
+        leading: Icon(Icons.photo),
+        title: _selectedImage != null
+            ? Image.file(
+                _selectedImage!,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              )
+            : (korisnik?.slika != null && korisnik!.slika!.isNotEmpty
+                ? _buildImageWidget(korisnik!.slika!)
+                : Text('Nema slike')),
+                    trailing: Icon(Icons.file_upload),
+                    onTap: () {
+                      _pickImage();
                     },
-                    builder: ((field) {
-                      return InputDecorator(
-                        decoration: InputDecoration(
-                          label: Text('Izaberite sliku'),
-                          errorText: field.errorText,
-                        ),
-                        child: ListTile(
-                          leading: Icon(Icons.photo),
-                          title: _selectedImage != null
-                              ? Image.file(
-                                  _selectedImage!,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                )
-                              : (korisnik?.slika != null &&
-                                      korisnik!.slika!.isNotEmpty
-                                  ? (korisnik!.slika!.startsWith('http') || korisnik!.slika!.startsWith('https')
-                                      ? Image.network(
-                                          korisnik!.slika!,
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Image.memory(
-                                          base64Decode(korisnik!.slika!),
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        ))
-                                  : Text('Nema slike')),
-                          trailing: Icon(Icons.file_upload),
-                          onTap: () {
-                            _pickImage();
-                          },
-                        ),
-                      );
-                    }),
                   ),
+                );
+              }),
+            ),
                   SizedBox(height: 8),
                   FormBuilderTextField(
                   name: 'password',
@@ -622,11 +654,15 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                     userData['PasswordPotvrda'] = formData?['passwordPotvrda'];
                   }
                   
-                  if (_slikaController.text.isNotEmpty) {
-                    userData['Slika'] = _slikaController.text;
-                  } else if (korisnik?.slika != null && korisnik!.slika!.isNotEmpty) {
-                    userData['Slika'] = korisnik!.slika;
-                  }
+                 if (_slikaController.text.isNotEmpty && _slikaController.text != "string") {
+                      userData['Slika'] = _slikaController.text;
+                    } else if (korisnik?.slika != null && 
+                              korisnik!.slika!.isNotEmpty && 
+                              korisnik!.slika! != "string") {
+                      userData['Slika'] = korisnik!.slika;
+                    } else {
+                      userData['Slika'] = ""; // ili null, ovisno o tome što back-end očekuje
+                    }
 
                   if (korisnik == null) {
                     if (!userData.containsKey('Password')) {
@@ -666,4 +702,45 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
       ),
     );
   }
+
+  Widget _buildImageWidget(String imageData) {
+  // Ako je samo tekst "string" ili prazno, prikaži ikonu umjesto slike
+  if (imageData == "string" || imageData.isEmpty) {
+    return Icon(Icons.person, size: 50, color: Colors.grey);
+  }
+
+  // Ako je URL slike
+  if (imageData.startsWith('http') || imageData.startsWith('https')) {
+    return Image.network(
+      imageData,
+      width: 50,
+      height: 50,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(Icons.broken_image, size: 50, color: Colors.red);
+      },
+    );
+  }
+
+  // Ako je Base64 slika
+  try {
+    // Provjeri da li izgleda kao Base64
+    if (!RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(imageData)) {
+      return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
+    }
+
+    return Image.memory(
+      base64Decode(imageData),
+      width: 50,
+      height: 50,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(Icons.broken_image, size: 50, color: Colors.red);
+      },
+    );
+  } catch (e) {
+    print('Error decoding image: $e');
+    return Icon(Icons.error_outline, size: 50, color: Colors.orange);
+  }
+}
 }

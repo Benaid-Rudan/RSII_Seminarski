@@ -275,6 +275,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   void _showProductDialog({Product? product}) {
     _selectedImage = null;
+    
+     if (product != null && product.slika != null && product.slika!.isNotEmpty) {
+      _slikaController.text = product.slika!;
+    } else {
+      _slikaController.text = "";
+    }
 
     final initialValues = {
       'naziv': product?.naziv ?? "",
