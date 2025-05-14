@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace eBarbershop.Services
 {
@@ -30,9 +31,24 @@ namespace eBarbershop.Services
 
             return entity;
         }
+        public override async Task<Model.Proizvod> Delete(int id)
+        {
+            var entity = await _context.Proizvod.FindAsync(id);
+
+            if (entity == null)
+                throw new Exception("Proizvod nije pronađen");
+
+            entity.IsDeleted = true;
+            entity.Zalihe = 
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<Model.Proizvod>(entity);
+        }
         public override IQueryable<Database.Proizvod> AddFilter(
             IQueryable<Database.Proizvod> entity, ProizvodSearchObject? obj = null)
         {
+            entity = base.AddFilter(entity, obj);
+            entity = entity.Where(x => !x.IsDeleted);
             if (obj.VrstaProizvodaID.HasValue)
             {
                 entity = entity.Where(x => x.VrstaProizvodaId == obj.VrstaProizvodaID);
@@ -50,22 +66,7 @@ namespace eBarbershop.Services
         }
         public async Task<List<Model.Proizvod>> GetRecommendedProducts(int userId)
         {
-            //var query = _context.Proizvod
-            //    .Include(p => p.NarudzbaProizvodis) // Uključi vezu s narudžbama
-            //    .Select(p => new
-            //    {
-            //        Proizvod = p,
-            //        OrderCount = p.NarudzbaProizvodis.Sum(np => np.Kolicina) // Suma količina narudžbi
-            //    })
-            //    .OrderByDescending(x => x.OrderCount)
-            //    .Take(3) 
-            //    .Select(x => x.Proizvod);
-
-            //var list = await query.ToListAsync();
-            //return _mapper.Map<List<Model.Proizvod>>(list);
-            // 1. Pronađi korisnike slične trenutnom korisniku (po historiji kupovine)
-            // 1. Find users similar to the current user (based on purchase history)
-            // First try to get personalized recommendations
+          
             var userProductIds = await _context.NarudzbaProizvodi
                 .Where(np => np.Narudzba.KorisnikId == userId)
                 .Select(np => np.ProizvodId)

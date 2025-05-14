@@ -247,7 +247,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     if (confirmDelete == true) {
       try {
-        await _productProvider.delete(product.proizvodId!);
+        await _productProvider.deleteProduct(product.proizvodId!);
         await _fetchData();
         ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

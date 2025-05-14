@@ -197,13 +197,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
           Text(x.naziv ?? ""),
           Text("Cijena: ${formatNumber(x.cijena)} KM"),
-          Text(
-          "Zalihe: ${x.zalihe ?? 0}",
-          style: TextStyle(
-            color: (x.zalihe ?? 0) > 0 ? Colors.green : Colors.red,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+          
         const SizedBox(height: 4),
         if ((x.zalihe ?? 0) > 0) 
           IconButton(

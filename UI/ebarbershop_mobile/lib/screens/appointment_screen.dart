@@ -238,13 +238,17 @@ print("UslugaId: ${widget.service.uslugaId}");
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 25,
-                        backgroundImage: widget.employee.slika != null && widget.employee.slika!.isNotEmpty ? MemoryImage(base64Decode(widget.employee.slika!)) : null,
-                           
-                        child: widget.employee.slika == null 
-                            ? Icon(Icons.person, color: Colors.white)
-                            : null,
-                      ),
+                      radius: 25,
+                      backgroundImage: widget.employee.slika != null && widget.employee.slika!.isNotEmpty
+                        ? (widget.employee.slika!.startsWith('http')
+                            ? NetworkImage(widget.employee.slika!)
+                            : MemoryImage(base64Decode(widget.employee.slika!))) as ImageProvider
+                        : null,
+                      child: widget.employee.slika == null 
+                        ? Icon(Icons.person, color: Colors.white)
+                        : null,
+                    ),
+
                       SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

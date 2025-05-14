@@ -21,5 +21,6 @@ public  class Proizvod
     public virtual ICollection<NarudzbaProizvodi> NarudzbaProizvodis { get; set; } = new List<NarudzbaProizvodi>();
 
     public string Slika { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public virtual VrstaProizvoda VrstaProizvoda { get; set; } = null!;
 }

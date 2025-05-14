@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eBarbershop.Services.Database;
 
@@ -11,9 +12,11 @@ using eBarbershop.Services.Database;
 namespace eBarbershop.Services.Migrations
 {
     [DbContext(typeof(EBarbershop1Context))]
-    partial class EBarbershop1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250514110922_isdeleted")]
+    partial class isdeleted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

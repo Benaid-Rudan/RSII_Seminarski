@@ -86,10 +86,8 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: CircleAvatar(
-            backgroundImage: employee.slika != null && employee.slika!.isNotEmpty
-                ? MemoryImage(base64Decode(employee.slika!))
-                : null,
-            child: employee.slika == null || employee.slika!.isEmpty
+            backgroundImage: _getImageProvider(employee.slika),
+            child: (employee.slika == null || employee.slika!.isEmpty)
                 ? Text(employee.ime?.substring(0, 1) ?? '')
                 : null,
           ),
@@ -113,4 +111,19 @@ class _EmployeeSelectionScreenState extends State<EmployeeSelectionScreen> {
       },
     );
   }
+  
+  ImageProvider? _getImageProvider(String? slika) {
+  if (slika == null || slika.isEmpty) return null;
+
+  if (slika.startsWith('http')) {
+    return CachedNetworkImageProvider(slika);
+  }
+
+  try {
+    return MemoryImage(base64Decode(slika));
+  } catch (e) {
+    return null;
+  }
+}
+
 }
