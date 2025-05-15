@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:ebarbershop_mobile/models/mail_object.dart';
+import 'package:ebarbershop_mobile/providers/mail_provider.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -93,70 +95,94 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   }
 
   Future<void> _createReservation() async {
-    if (selectedTimeSlot == null) return;
+  if (selectedTimeSlot == null || !mounted) return;
 
-    widget.klijent.korisnikId = Authorization.userId;
-    print("Authorization.userId: ${Authorization.userId}");
-
-    if (widget.klijent.korisnikId == null) {
+  widget.klijent.korisnikId = Authorization.userId;
+  
+  if (widget.klijent.korisnikId == null) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Morate biti prijavljeni da biste rezervisali termin')),
     );
     return;
   }
-    setState(() {
-      isCreatingReservation = true;
+
+  setState(() {
+    isCreatingReservation = true;
+  });
+
+  try {
+    final rezervacijaProvider = context.read<RezervacijaProvider>();
+    final terminProvider = context.read<TerminProvider>();
+    final mailProvider = context.read<MailProvider>();
+    
+    final reservationDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      selectedTimeSlot!.time.hour,
+      selectedTimeSlot!.time.minute,
+    );
+
+    // Kreiranje rezervacije
+    final createdReservation = await rezervacijaProvider.createReservation(
+      datumRezervacije: DateTime.now(),
+      korisnikId: widget.employee.korisnikId!,
+      klijentId: widget.klijent.korisnikId!,
+      uslugaId: widget.service.uslugaId!,
+    );
+    
+    // Kreiranje termina
+    await terminProvider.insert({
+      "vrijeme": reservationDateTime.toIso8601String(),
+      "rezervacijaId": createdReservation.rezervacijaId,
+      "korisnikID": widget.employee.korisnikId,
+      "klijentId": widget.klijent.korisnikId!,
+      "isBooked": true,
     });
 
-    try {
-      final rezervacijaProvider = context.read<RezervacijaProvider>();
-      final terminProvider = context.read<TerminProvider>();
-      
-      // Combine selected date with selected time
-      final reservationDateTime = DateTime(
-        widget.selectedDate.year,
-        widget.selectedDate.month,
-        widget.selectedDate.day,
-        selectedTimeSlot!.time.hour,
-        selectedTimeSlot!.time.minute,
-      );
-      print("Kreiram rezervaciju sa:");
-print("FrizerId: ${widget.employee.korisnikId}");
-print("KlijentId: ${widget.klijent.korisnikId}");
-print("UslugaId: ${widget.service.uslugaId}");
-      // Step 1: Create reservation
-      final createdReservation = await rezervacijaProvider.createReservation(
-        datumRezervacije: DateTime.now(),
-        korisnikId: widget.employee.korisnikId!,
-        klijentId: widget.klijent.korisnikId!,
-        uslugaId: widget.service.uslugaId!,
-      );
-      
-      // Step 2: Create termin with the same reservation details
-      await terminProvider.insert({
-        "vrijeme": reservationDateTime.toIso8601String(),
-        "rezervacijaId": createdReservation.rezervacijaId,
-        "korisnikID": widget.employee.korisnikId,
-        "klijentId": widget.klijent.korisnikId!,
-        "isBooked": true,
-      });
+    // // Slanje emaila
+    // final mail = MailObject(
+    //   widget.klijent.email, 
+    //   "Potvrda rezervacije",
+    //   "Poštovani ${widget.klijent.ime},\n\n"
+    //   "Uspješno ste rezervisali termin kod ${widget.employee.ime} ${widget.employee.prezime} "
+    //   "za uslugu '${widget.service.naziv}' na datum "
+    //   "${DateFormat('dd.MM.yyyy. HH:mm').format(reservationDateTime)}.\n\n"
+    //   "Hvala Vam na povjerenju.\n"
+    //   "eBarbershop tim",
+    // );
 
+    // await mailProvider.sendMail(mail);
+
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Rezervacija uspješno kreirana')),
+        SnackBar(content: Text('Email potvrde poslan na ${widget.klijent.email}')),
       );
-      
-      // Navigate back to home screen
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Rezervacija uspješno kreirana')),
+    );
+    
+    // Navigacija nakon kratkog kašnjenja
+    await Future.delayed(Duration(milliseconds: 500));
+    if (mounted) {
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Greška pri kreiranju rezervacije: $e')),
       );
-    } finally {
+    }
+  } finally {
+    if (mounted) {
       setState(() {
         isCreatingReservation = false;
       });
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +351,14 @@ print("UslugaId: ${widget.service.uslugaId}");
                       ),
                     ),
                     child: isCreatingReservation
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : Text(
                             'Potvrdi rezervaciju',
                             style: TextStyle(fontSize: 16),

@@ -27,9 +27,9 @@ builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
 builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<INovostService, NovostService>();
-builder.Services.AddTransient<NotificationRabbitService, NotificationRabbitService>();
-
-builder.Services.AddScoped<IKorisniciService, KorisniciService>();
+//builder.Services.AddTransient<NotificationRabbitService, NotificationRabbitService>();
+builder.Services.AddTransient<IMailService, MailService>();
+//builder.Services.AddScoped<IKorisniciService, KorisniciService>();
 builder.Services.AddScoped<INotificationRabbitService, NotificationRabbitService>();
 
 

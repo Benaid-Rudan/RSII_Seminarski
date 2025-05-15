@@ -13,8 +13,8 @@ namespace RabbitMQ
         public static void posaljiMail(MailObjekat obj)
         {
             string serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS") ?? "smtp.gmail.com";
-            string mailSender = Environment.GetEnvironmentVariable("MAIL_SENDER") ?? "emektebmail@gmail.com";
-            string mailPass = Environment.GetEnvironmentVariable("MAIL_PASS") ?? "dkbehufjdusohlpw";
+            string mailSender = Environment.GetEnvironmentVariable("MAIL_SENDER") ?? "ebarbershop2024@gmail.com";
+            string mailPass = Environment.GetEnvironmentVariable("MAIL_PASS") ?? "jovbskkfeqscedzn";
             int port = int.Parse(Environment.GetEnvironmentVariable("MAIL_PORT") ?? "587");
 
             string content = $"<p>{obj.poruka}</p>";

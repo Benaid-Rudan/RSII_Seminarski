@@ -1,4 +1,5 @@
 import 'package:ebarbershop_mobile/models/grad.dart';
+import 'package:ebarbershop_mobile/providers/mail_provider.dart';
 import 'package:ebarbershop_mobile/providers/reviews_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
@@ -34,6 +35,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => TerminProvider()),
       ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
       ChangeNotifierProvider(create: (_) => ReviewsProvider()),
+      ChangeNotifierProvider(create: (_) => MailProvider()),
 
     ],
     child: const MyMaterialApp(),

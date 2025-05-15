@@ -1,14 +1,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-COPY *.csproj ./
-RUN dotnet restore
+# Kopiraj samo potrebne .csproj fajlove
+COPY eBarbershop.RabbitMQ/eBarbershop.RabbitMQ.csproj eBarbershop.RabbitMQ/
+RUN dotnet restore eBarbershop.RabbitMQ/eBarbershop.RabbitMQ.csproj
 
-COPY . ./
-RUN dotnet build "RabbitMQ.csproj" -c Release -o /app/build
+# Kopiraj ostatak
+COPY . .
+
+# Build projekta
+WORKDIR /src/eBarbershop.RabbitMQ
+RUN dotnet build -c Release -o /app/build
 
 FROM mcr.microsoft.com/dotnet/runtime:6.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/build .
 
-ENTRYPOINT ["dotnet", "RabbitMQ.dll"]
+ENTRYPOINT ["dotnet", "eBarbershop.RabbitMQ.dll"]

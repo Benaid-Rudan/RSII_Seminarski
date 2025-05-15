@@ -15,17 +15,17 @@ namespace eBarbershop.Services
     public class RezervacijaService : BaseCRUDService<Model.Rezervacija, Database.Rezervacija, RezervacijaSearchObject , RezervacijaInsertRequest, RezervacijaUpdateRequest>, IRezervacijaService 
     {
         private readonly ICurrentUserService _currentUserService;
-
-        public RezervacijaService(EBarbershop1Context context, IMapper mapper, ICurrentUserService currentUserService)
+        private readonly IMailService _emailService;
+        public RezervacijaService(EBarbershop1Context context, IMapper mapper, ICurrentUserService currentUserService, IMailService emailService)
             : base(context, mapper)
         {
             _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
         {
-            int loggedInUserId = _currentUserService.GetUserId(); // You'll need to inject a service to get the current user
-
+            int loggedInUserId = _currentUserService.GetUserId(); 
             var entity = new Database.Rezervacija
             {
                 KorisnikId = request.KorisnikId, 
@@ -46,6 +46,22 @@ namespace eBarbershop.Services
 
             _context.Rezervacija.Add(entity);
             await _context.SaveChangesAsync();
+
+            var klijent = await _context.Korisnik.FindAsync(loggedInUserId);
+            
+            if (klijent != null && !string.IsNullOrEmpty(klijent.Email))
+            {
+                var subject = "Potvrda rezervacije";
+                var body = $"Poštovani {klijent.Ime},<br/><br/>Uspješno ste rezervisali uslugu: <strong>{usluga.Naziv}</strong> Provjerite aplikaciju za više detalja </strong>.<br/><br/>Hvala što koristite eBarbershop!";
+                var mailObject = new MailObject
+                {
+                    mailAdresa = klijent.Email,
+                    subject = subject,
+                    poruka = body
+                };
+                await _emailService.startConnection(mailObject);
+            }
+
 
             foreach (var termin in _context.Termin)
             {

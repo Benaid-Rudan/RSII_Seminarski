@@ -25,4 +25,5 @@ class RezervacijaProvider extends BaseProvider<Rezervacija> {
   
   return await insert(request);
 }
+
 }
