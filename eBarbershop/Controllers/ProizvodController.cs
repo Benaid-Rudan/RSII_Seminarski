@@ -19,12 +19,10 @@ namespace eBarbershop.Controllers
             _service = service;
         }
 
-        [HttpGet("recommended")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetRecommendedProducts(int userId)
+        [HttpGet("recommend")]
+        public virtual  List<Model.Proizvod> Recommend(int id)
         {
-            var recommendedProducts = await _service.GetRecommendedProducts(userId);
-            return Ok(recommendedProducts);
+            return (_service as IProizvodService).Recommend(id);
         }
 
     }

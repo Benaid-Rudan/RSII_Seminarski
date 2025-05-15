@@ -18,8 +18,8 @@ class ProductProvider extends BaseProvider<Product> {
     // TODO: implement fromJson
     return Product.fromJson(data);
   }
-  Future<List<Product>> getRecommended(int userId) async {
-    return await super.getRecommended(userId);
+  Future<List<Product>> recommend(int userId) async {
+    return await super.recommend(userId);
   }
   
 }

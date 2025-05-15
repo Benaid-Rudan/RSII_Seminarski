@@ -45,69 +45,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     }
   }
 
-  // Future<void> _addToCart() async {
-  //   if (_product == null) return;
-
-  //   setState(() {
-  //     _isAddingToCart = true;
-  //   });
-
-  //   try {
-  //     final cartProvider = context.read<CartProvider>();
-  //     cartProvider.addToCart(_product!,context);
-      
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Row(
-  //             children: [
-  //               Icon(Icons.check_circle, color: Colors.green),
-  //               SizedBox(width: 8),
-  //               Text("${_product!.naziv} dodan u korpu"),
-  //             ],
-  //           ),
-  //           duration: Duration(seconds: 2),
-  //           behavior: SnackBarBehavior.floating,
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           margin: EdgeInsets.all(10),
-  //           backgroundColor: Colors.white,
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Row(
-  //             children: [
-  //               Icon(Icons.error_outline, color: Colors.white),
-  //               SizedBox(width: 8),
-  //               Expanded(
-  //                 child: Text("Greška pri dodavanju u korpu: ${e.toString()}"),
-  //               ),
-  //             ],
-  //           ),
-  //           duration: Duration(seconds: 2),
-  //           behavior: SnackBarBehavior.floating,
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           margin: EdgeInsets.all(10),
-  //           backgroundColor: Colors.red[700], 
-  //           elevation: 6, 
-  //         ),
-  //       );
-  //     }
-  //   } finally {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isAddingToCart = false;
-  //       });
-  //     }
-  //   }
-  // }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +108,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             try {
               final cartProvider = context.read<CartProvider>();
               await cartProvider.addToCart(_product!, context);
-              // Uklonjena poruka "dodan u korpu"
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(

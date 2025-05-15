@@ -4,6 +4,9 @@ using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,66 +67,92 @@ namespace eBarbershop.Services
             }
             return entity;
         }
-        public async Task<List<Model.Proizvod>> GetRecommendedProducts(int userId)
+
+        static MLContext mlContext = null;
+        static object isLocked = new object();
+        static ITransformer model = null;
+
+        public List<Model.Proizvod> Recommend(int id)
         {
-          
-            var userProductIds = await _context.NarudzbaProizvodi
-                .Where(np => np.Narudzba.KorisnikId == userId)
-                .Select(np => np.ProizvodId)
-                .Distinct()
-                .ToListAsync();
-
-            // If user has purchased products, try to find similar users
-            if (userProductIds.Any())
+            lock(isLocked)
             {
-                var similarUserIds = await _context.NarudzbaProizvodi
-                    .Where(np => np.Narudzba.KorisnikId != userId &&
-                                userProductIds.Contains(np.ProizvodId))
-                    .Select(np => np.Narudzba.KorisnikId)
-                    .Distinct()
-                    .Take(5)
-                    .ToListAsync();
-
-                if (similarUserIds.Any())
+                if (mlContext == null)
                 {
-                    var recommendedProductIds = await _context.NarudzbaProizvodi
-                        .Where(np => similarUserIds.Contains(np.Narudzba.KorisnikId) &&
-                                    !userProductIds.Contains(np.ProizvodId))
-                        .GroupBy(np => np.ProizvodId)
-                        .OrderByDescending(g => g.Count())
-                        .Select(g => g.Key)
-                        .Take(3)
-                        .ToListAsync();
-
-                    if (recommendedProductIds.Any())
+                    mlContext = new MLContext();
+                    var tmpData = _context.Narudzba.Include("NarudzbaProizvodis").ToList();
+                    var data = new List<ProductEntry>();    
+                    foreach (var x in tmpData)
                     {
-                        var recommendedProducts = await _context.Proizvod
-                            .Where(p => recommendedProductIds.Contains(p.ProizvodId))
-                            .ToListAsync();
+                        if (x.NarudzbaProizvodis.Count > 1)
+                        {
+                            var distinctItemId = x.NarudzbaProizvodis.Select(y => y.ProizvodId)
+                                .ToList();
+                            distinctItemId.ForEach(y =>
+                            {
+                                var relatedItems = x.NarudzbaProizvodis.Where(z => z.ProizvodId != y);
+                                foreach(var z in relatedItems)
+                                {
+                                    data.Add(new ProductEntry()
+                                    {
+                                        ProductID = (uint)y,
+                                        CoPurchaseProductID = (uint)z.ProizvodId
+                                    });
+                                }
+                            });
+                        }
+                        var trainData = mlContext.Data.LoadFromEnumerable(data);
 
-                        return _mapper.Map<List<Model.Proizvod>>(recommendedProducts);
+                        MatrixFactorizationTrainer.Options options = new MatrixFactorizationTrainer.Options();
+                        options.MatrixColumnIndexColumnName = nameof(ProductEntry.ProductID);
+                        options.MatrixRowIndexColumnName = nameof(ProductEntry.CoPurchaseProductID);
+                        options.LabelColumnName = "Label";
+                        options.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
+                        options.Alpha = 0.01;
+                        options.Lambda = 0.025;
+                        // For better results use the following parameters
+                        options.NumberOfIterations = 100;
+                        options.C = 0.00001;
+
+                        var est = mlContext.Recommendation().Trainers.MatrixFactorization(options);
+
+                        model = est.Fit(trainData);
                     }
                 }
             }
-
-            // Fallback: Return most popular products overall
-            var fallbackProducts = await _context.Proizvod
-                .OrderByDescending(p => p.NarudzbaProizvodis.Sum(np => np.Kolicina))
-                .Take(3)
-                .ToListAsync();
-
-            if (fallbackProducts.Count < 3)
+            var products = _context.Proizvod.Where(x => x.ProizvodId != id);
+            var predictionResult = new List<Tuple<Database.Proizvod, float>>();
+            foreach(var product  in products)
             {
-                var needed = 3 - fallbackProducts.Count;
-                var popularProducts = await _context.Proizvod
-                    .OrderByDescending(p => p.NarudzbaProizvodis.Sum(np => np.Kolicina))
-                    .Where(p => !fallbackProducts.Select(rp => rp.ProizvodId).Contains(p.ProizvodId))
-                    .Take(needed)
-                    .ToListAsync();
-
-                fallbackProducts.AddRange(popularProducts);
+                var predictionengine = mlContext.Model.CreatePredictionEngine<ProductEntry, Copurchase_prediction>(model);
+                var prediction = predictionengine.Predict(
+                                         new ProductEntry()
+                                         {
+                                             ProductID = (uint)id,
+                                             CoPurchaseProductID = (uint)product.ProizvodId
+                                         });
+                predictionResult.Add(new Tuple<Database.Proizvod, float>(product, prediction.Score));
             }
-            return _mapper.Map<List<Model.Proizvod>>(fallbackProducts);
+
+            var finalResult = predictionResult.OrderByDescending(x => x.Item2).Select(x=>x.Item1).Take(3).ToList();
+            return _mapper.Map<List<Model.Proizvod>>(finalResult);
+
+
         }
+
+    }
+    public class Copurchase_prediction
+    {
+        public float Score { get; set; }
+    }
+
+    public class ProductEntry
+    {
+        [KeyType(count: 10)]
+        public uint ProductID { get; set; }
+
+        [KeyType(count: 10)]
+        public uint CoPurchaseProductID { get; set; }
+
+        public float Label { get; set; }
     }
 }

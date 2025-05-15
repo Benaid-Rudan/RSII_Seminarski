@@ -147,27 +147,27 @@ class _MasterScreenWidgetState extends State<MasterScreenWidget> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Početna',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
-            label: 'Shop',
+            label: 'Trgovina',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.cut),
-            label: 'Services',
+            label: 'Usluge',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
-            label: 'Reviews',
+            label: 'Recenzije',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Profil',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.date_range),
-            label: 'Appo',
+            label: 'Termini',
           ),
         ],
         selectedItemColor: Colors.amber[800],

@@ -20,7 +20,6 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   
   var result = await get(filter: filter);
   
-  // Filter only users with Uposlenik role
   result.result = result.result.where((k) => 
     k.korisnikUlogas?.any((uloga) => uloga.uloga?.naziv == 'Frizer') ?? false
   ).toList();

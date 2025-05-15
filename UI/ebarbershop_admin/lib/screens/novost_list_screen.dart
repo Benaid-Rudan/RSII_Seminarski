@@ -227,7 +227,7 @@ class _NovostListScreenState extends State<NovostListScreen> {
         title: Text(novost == null ? "Dodaj novost" : "Uredi novost"),
         content: Container(
           width: 400,
-          height: 380,
+          height: 400,
           child: SingleChildScrollView(
             child: FormBuilder(
               key: _formKey,

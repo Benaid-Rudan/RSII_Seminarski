@@ -27,16 +27,12 @@ builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
 builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<INovostService, NovostService>();
-//builder.Services.AddTransient<NotificationRabbitService, NotificationRabbitService>();
 builder.Services.AddTransient<IMailService, MailService>();
-//builder.Services.AddScoped<IKorisniciService, KorisniciService>();
-builder.Services.AddScoped<INotificationRabbitService, NotificationRabbitService>();
 
 
 // Add these to your DI container
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddControllers();
 
@@ -102,43 +98,9 @@ builder.Services.AddSingleton<IConnection>(sp =>
     return factory.CreateConnection();
 });
 
-
-
-
 var app = builder.Build();
 
 
-var connection = app.Services.GetRequiredService<IConnection>();
-using var channel = connection.CreateModel();
-
-channel.QueueDeclare("notifications", durable: true, exclusive: false, autoDelete: false);
-
-Console.WriteLine(" [*] Waiting for messages.");
-
-var consumer = new AsyncEventingBasicConsumer(channel);
-consumer.Received += async (model, ea) =>
-{
-    try
-    {
-        var body = ea.Body.ToArray();
-        var message = Encoding.UTF8.GetString(body);
-        var notification = JsonSerializer.Deserialize<NotificationUpsertRequest>(message);
-
-        using var scope = app.Services.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-        await service.Insert(notification);
-
-        channel.BasicAck(ea.DeliveryTag, false);
-    }
-    catch (Exception ex)
-    {
-        // Log error and reject message
-        channel.BasicNack(ea.DeliveryTag, false, true);
-    }
-};
-
-channel.BasicConsume("notifications", false, consumer);
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -12,8 +12,8 @@ class RezervacijaProvider extends BaseProvider<Rezervacija> {
   }
   Future<Rezervacija> createReservation({
   required DateTime datumRezervacije,
-  required int korisnikId, // frizer
-  required int klijentId, // logirani korisnik
+  required int korisnikId,
+  required int klijentId, 
   required int uslugaId,
 }) async {
   var request = {

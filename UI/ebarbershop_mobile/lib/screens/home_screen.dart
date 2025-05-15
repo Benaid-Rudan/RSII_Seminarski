@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ebarbershop_mobile/models/product.dart';
 import 'package:ebarbershop_mobile/providers/product_provider.dart';
+import 'package:ebarbershop_mobile/screens/product_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/providers/novost_provider.dart';
@@ -51,7 +52,7 @@ Future<void> _loadData() async {
 Future<void> _loadRecommendedProducts() async {
   try {
     print("Fetching recommended products for user: ${Authorization.userId}");
-    var data = await _productProvider.getRecommended(Authorization.userId!);
+    var data = await _productProvider.recommend(Authorization.userId!);
     print("API returned ${data.length} products:");
     data.forEach((p) => print(" - ${p.naziv} (ID: ${p.proizvodId})"));
     
@@ -64,7 +65,7 @@ Future<void> _loadRecommendedProducts() async {
     print("Error loading recommended products: $e");
     if (_mounted) {
       setState(() {
-        recommendedProducts = []; // Clear recommendations on error
+        recommendedProducts = []; 
       });
     }
   }
@@ -84,125 +85,186 @@ Future<void> _loadNovosti() async {
 }
 
  @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-  child: Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Align(
-      alignment: Alignment.center,
-      child: Text(
-        'Welcome ${Authorization.username}',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    ),
-  ),
-),
-        
-        SliverToBoxAdapter(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _showGallery = false; 
-                  });
-                },
-                child: Text(
-                  'Feed',
-                  style: TextStyle(
-                    color: !_showGallery ? Colors.amber[800] : Colors.grey,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Dobrodošao ${Authorization.username}',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _showGallery = true; 
-                  });
-                },
-                child: Text(
-                  'Gallery',
-                  style: TextStyle(
-                    color: _showGallery ? Colors.amber[800] : Colors.grey,
+            ),
+            
+            SliverToBoxAdapter(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _showGallery = false; 
+                      });
+                    },
+                    child: Text(
+                      'Početna strana',
+                      style: TextStyle(
+                        color: !_showGallery ? Colors.amber[800] : Colors.grey,
+                      ),
+                    ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _showGallery = true; 
+                      });
+                    },
+                    child: Text(
+                      'Galerija',
+                      style: TextStyle(
+                        color: _showGallery ? Colors.amber[800] : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            
+            _showGallery 
+              ? SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 5,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildGalleryImage(novosti[index]),
+                    childCount: novosti.length,
+                  ),
+                )
+              : SliverToBoxAdapter(
+                  child: _buildHorizontalNovostiSection(),
+                ),
+            
+            if (recommendedProducts.isNotEmpty && !_showGallery)
+              SliverToBoxAdapter(
+                child: _buildRecommendedProductsSection(),
+              ),
+          ],
         ),
-        
-        // Feed/Gallery content
-        _showGallery 
-          ? SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 1,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildGalleryImage(novosti[index]),
-                childCount: novosti.length,
-              ),
-            )
-          : SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildNovostCard(novosti[index]),
-                childCount: novosti.length,
-              ),
-            ),
-        
-        // Recommended products section
-        if (recommendedProducts.isNotEmpty && !_showGallery)
-          SliverToBoxAdapter(
-            child: _buildRecommendedProductsSection(),
-          ),
-      ],
-    ),
-  );
-}
-
-  
-
-  Widget _buildNovostCard(Novost novost) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-              child: _buildNovostImage(novost),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              novost.naslov ?? '',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
+
+  Widget _buildHorizontalNovostiSection() {
+    if (novosti.isEmpty) return SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Text(
+            'Najnovije vijesti',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Container(
+          height: 190,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal, 
+            itemCount: novosti.length,
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            itemBuilder: (context, index) {
+              return _buildNovostCardHorizontal(novosti[index]);
+            },
+          ),
+        ),
+        SizedBox(height: 16),
+      ],
+    );
+  }
+  
+  Widget _buildNovostCardHorizontal(Novost novost) {
+  return Container(
+    width: 150,
+    margin: EdgeInsets.symmetric(horizontal: 6),
+    child: Card(
+      elevation: 3,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 110,
+            width: double.infinity,
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: _buildNovostImage(novost),
+              ),
+          ),
+          
+          Container(
+            width: double.infinity, 
+            constraints: BoxConstraints(minHeight: 70),
+            padding: EdgeInsets.all(8.0), 
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity, 
+                child: Text(
+                  novost.naslov ?? '',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(height: 4), 
+              if (novost.sadrzaj != null)
+                Container(
+                  width: double.infinity, 
+                  child: Text(
+                    novost.sadrzaj!,
+                    style: TextStyle(
+                      fontSize: 11, 
+                      color: Colors.black,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildGalleryImage(Novost novost) {
     return ClipRRect(
@@ -216,6 +278,7 @@ Widget build(BuildContext context) {
       return Container(
         color: Colors.grey[200],
         child: Center(child: Icon(Icons.image, size: 40, color: Colors.grey)),
+
       );
     }
 
@@ -233,6 +296,7 @@ Widget build(BuildContext context) {
             : novost.slika!;
         return Image.memory(
           base64Decode(base64Data),
+        width: double.infinity,
           fit: BoxFit.cover,
         );
       } catch (e) {
@@ -250,83 +314,127 @@ Widget build(BuildContext context) {
     );
   }
   Widget _buildRecommendedProductsSection() {
-  // Don't show section if no recommendations
-  if (recommendedProducts.isEmpty) return SizedBox.shrink();
-  
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Text(
-          'Preporučeni proizvodi (${recommendedProducts.length})',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    if (recommendedProducts.isEmpty) return SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          child: Text(
+            'Preporučeni proizvodi',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
-      ),
-      Container(
-        height: 180,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: recommendedProducts.length, // Use exact count from API
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          itemBuilder: (context, index) {
-            return _buildRecommendedProductCard(recommendedProducts[index]);
-          },
+        Container(
+          height: 250,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: recommendedProducts.length,
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            itemBuilder: (context, index) {
+              return _buildRecommendedProductCard(recommendedProducts[index]);
+            },
+          ),
         ),
-      ),
-    ],
-  );
-}
+        SizedBox(height: 16),
+      ],
+    );
+  }
 
-Widget _buildRecommendedProductCard(Product product) {
-  return Container(
-    width: 140,
-    margin: EdgeInsets.symmetric(horizontal: 6),
-    child: Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Centriraj sve po horizontali
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-              child: Center( // Dodaj Center widget za sliku
-                child: _buildProductImage(product.slika),
-              ),
-            ),
+  Widget _buildRecommendedProductCard(Product product) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailsScreen(proizvodId: product.proizvodId?.toString() ?? ''),
+        ),
+      );
+      },
+      child: Container(
+        width: 160,
+        height: 220,
+        margin: EdgeInsets.symmetric(horizontal: 6),
+        child: Card(
+          elevation: 3,
+          color: Colors.white,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200, width: 1),
           ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center, // Centriraj tekst
-              children: [
-                Text(
-                  product.naziv ?? '',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  maxLines: 2, // Povećaj broj linija ako je potrebno
-                  textAlign: TextAlign.center, // Centriraj tekst unutar Text widgeta
-                  overflow: TextOverflow.ellipsis,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  "${formatNumber(product.cijena)} KM",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.amber[800],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(12),
+                    color: Colors.white,
+                    child: _buildProductImage(product.slika),
                   ),
-                  textAlign: TextAlign.center, // Centriraj cijenu
                 ),
-              ],
-            ),
+              ),
+              Container(
+                width: double.infinity,
+                height: 80,
+                padding: EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        product.naziv ?? '',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "${formatNumber(product.cijena)} KM",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.amber[900],
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 Widget _buildProductImage(String? image) {
   if (image == null || image.isEmpty) {
     return Container(
@@ -348,8 +456,9 @@ Widget _buildProductImage(String? image) {
           ? image.split(',').last 
           : image;
       return Image.memory(
-        base64Decode(base64Data),
-        fit: BoxFit.cover,
+         base64Decode(base64Data),
+        width: double.infinity,
+          fit: BoxFit.cover,
       );
     } catch (e) {
       print("Error decoding image: $e");

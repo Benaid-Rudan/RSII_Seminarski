@@ -1,4 +1,3 @@
-// service_selection_screen.dart
 import 'package:ebarbershop_mobile/screens/appointment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -75,7 +74,6 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Date selection row
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -109,7 +107,6 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                   ),
                 ),
                 
-                // Services list
                 Expanded(
                   child: _buildServicesList(),
                 ),

@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/providers/termin_provider.dart';
 import 'package:ebarbershop_mobile/models/termin.dart';
 import 'package:ebarbershop_mobile/providers/usluga_provider.dart';
-import 'package:ebarbershop_mobile/models/usluga.dart';
 
 class AppointmentListScreen extends StatefulWidget {
   static const String routeName = "/termini";
@@ -39,19 +38,17 @@ class _AppointmentListScreenState extends State<AppointmentListScreen> {
   try {
     setState(() => _isLoading = true);
     
-    // Get the current user's ID
     final currentUserId = Authorization.userId;
     
     if (currentUserId == null) {
       throw Exception("User not logged in");
     }
 
-    // Get appointments with filters
     var terminData = await _terminProvider.get(
       filter: {
         'includeRezervacija': true, 
         'includeUsluga': true,
-        'rezervacija.klijentId': currentUserId.toString(), // Filter by current user
+        'rezervacija.klijentId': currentUserId.toString(),
       }
     );
     
@@ -214,7 +211,6 @@ List<Termin> get _pastTermini {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Expanded date section
           Container(
             width: 90,
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -237,7 +233,6 @@ List<Termin> get _pastTermini {
             ),
           ),
           
-          // Content section
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -254,7 +249,6 @@ List<Termin> get _pastTermini {
             ),
           ),
           
-          // Cancel button (only for upcoming appointments)
           if (date.isAfter(DateTime.now()))
             Padding(
               padding: const EdgeInsets.only(top: 16, right: 8),
@@ -299,9 +293,7 @@ List<Termin> get _pastTermini {
 
     if (potvrda == true) {
       try {
-        // Zatim obriši termin
         await _terminProvider.delete(termin.terminId!);
-        // Prvo obriši rezervaciju ako postoji
         if (termin.rezervacijaId != null) {
           await _rezervacijaProvider.delete(termin.rezervacijaId!);
         }
@@ -320,11 +312,9 @@ List<Termin> get _pastTermini {
     }
   }
 
-  // Stilovi
   final TextStyle _whiteBoldTextStyle28 = TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold);
   final TextStyle _whiteBoldTextStyle18 = TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
 
-  // Pomoćne metode za datume
   String _getMonthAbbreviation(int month) => ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'][month - 1];
   
   String _getMonthName(int month) => ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Juni', 'Juli', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'][month - 1];

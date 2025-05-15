@@ -1,6 +1,8 @@
 import 'package:ebarbershop_mobile/models/grad.dart';
+import 'package:ebarbershop_mobile/models/uplata.dart';
 import 'package:ebarbershop_mobile/providers/mail_provider.dart';
 import 'package:ebarbershop_mobile/providers/reviews_provider.dart';
+import 'package:ebarbershop_mobile/providers/uplata_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
 import 'package:ebarbershop_mobile/screens/product_details.dart';
@@ -36,7 +38,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => NarudzbaProvider()),
       ChangeNotifierProvider(create: (_) => ReviewsProvider()),
       ChangeNotifierProvider(create: (_) => MailProvider()),
-
+      ChangeNotifierProvider(create: (_) => UplataProvider()),
     ],
     child: const MyMaterialApp(),
   ));
@@ -93,7 +95,6 @@ class MyMaterialApp extends StatelessWidget {
         ProductListScreen.routeName: (context) => ProductListScreen(),
         RegistrationPage.routeName: (context) => RegistrationPage(),
         UserProfileScreen.routeName: (context) => UserProfileScreen(),
-
       },
       onGenerateRoute: (settings) {
         if (settings.name?.startsWith('/product_details/') ?? false) {
@@ -193,7 +194,12 @@ class LoginPage extends StatelessWidget {
                             Authorization.slika = korisnik.slika;
                             Authorization.localImage = null;
                              print('Spremljena slika: ${Authorization.slika}');
-
+                           ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Uspešno ste se logirali."),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => MasterScreenWidget(

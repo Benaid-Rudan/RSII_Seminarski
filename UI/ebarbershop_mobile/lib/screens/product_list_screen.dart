@@ -40,15 +40,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   void dispose() {
-    _mounted = false; // Postavljamo na false prije poziva super.dispose()
-    _searchController.dispose(); // Ne zaboravite osloboditi controller
+    _mounted = false; 
+    _searchController.dispose(); 
     super.dispose();
   }
 
   Future loadData() async {
     try {
       var tmpData = await _productProvider?.get();
-      if (_mounted) { // Provjeravamo je li komponenta još montirana
+      if (_mounted) { 
         setState(() {
           data = tmpData?.result ?? [];
         });
@@ -61,7 +61,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Future<void> _searchProducts(String value) async {
     try {
       var tmpData = await _productProvider?.get(filter: {'naziv': value});
-      if (_mounted) { // Provjeravamo je li komponenta još montirana
+      if (_mounted) {
         setState(() {
           data = tmpData?.result ?? [];
           _sortAscending = true;

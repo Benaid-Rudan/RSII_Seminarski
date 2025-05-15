@@ -11,6 +11,6 @@ namespace eBarbershop.Services
 {
     public interface IProizvodService : ICRUDService<Proizvod,ProizvodSearchObject,ProizvodInsertRequest,ProizvodUpdateRequest>
     {
-        Task<List<Model.Proizvod>> GetRecommendedProducts(int id);
+        List<Model.Proizvod> Recommend(int id);
     }
 }

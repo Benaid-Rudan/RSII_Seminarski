@@ -28,7 +28,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
   var url = "$_baseUrl$_endpoint/Authenticate";
   var uri = Uri.parse(url);
   
-  // Create special headers just for this request with the provided credentials
   String basicAuth = "Basic ${base64Encode(utf8.encode('$username:$password'))}";
   var headers = {
     "Content-Type": "application/json",
@@ -88,8 +87,8 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 }
 
-  Future<List<Product>> getRecommended(int userId) async {
-  var url = "${BaseProvider._baseUrl}$_endpoint/recommended?userId=$userId";
+  Future<List<Product>> recommend(int userId) async {
+  var url = "${BaseProvider._baseUrl}$_endpoint/recommend?userId=$userId";
   print("Calling recommended products API: $url");
   var uri = Uri.parse(url);
   var headers = createHeaders();

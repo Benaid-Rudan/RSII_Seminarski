@@ -69,7 +69,6 @@ namespace eBarbershop.Services
 
             CreateMap<Database.KorisnikUloga, Model.KorisnikUloga>();
 
-            CreateMap<NotificationRabbitUpsertDto, NotificationRabbit>();
 
 
         }

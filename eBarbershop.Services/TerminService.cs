@@ -15,11 +15,9 @@ namespace eBarbershop.Services
 {
     public class TerminService : BaseCRUDService<Model.Termin, Database.Termin, TerminSearchObject , TerminInsertRequest, TerminUpdateRequest>, ITerminService 
     {
-        private readonly INotificationService _notificationService;
-        public TerminService(EBarbershop1Context context, IMapper mapper, INotificationService notificationService)
+        public TerminService(EBarbershop1Context context, IMapper mapper)
         : base(context, mapper)
         {
-            _notificationService = notificationService;
         }
         public override async Task<Model.Termin> Insert(TerminInsertRequest request)
         {

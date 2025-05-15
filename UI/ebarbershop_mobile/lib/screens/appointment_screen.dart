@@ -46,13 +46,11 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
     setState(() => isLoading = true);
     
     try {
-      // 1. Get all existing appointments for this employee on selected date
       final appointments = await _terminProvider.get(filter: {
         'korisnikId': widget.employee.korisnikId.toString(),
         'datum': DateFormat('yyyy-MM-dd').format(widget.selectedDate),
       });
 
-      // 2. Generate all possible time slots (9:00-17:00)
       final allSlots = List.generate(9, (index) {
         final hour = 9 + index;
         return TimeSlot(
@@ -63,11 +61,10 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
             hour,
             0,
           ),
-          true, // Initially available
+          true, 
         );
       });
 
-      // 3. Mark slots as unavailable if they exist in database
       if (appointments?.result != null) {
         for (final appointment in appointments!.result!) {
           if (appointment.vrijeme != null) {
@@ -124,7 +121,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       selectedTimeSlot!.time.minute,
     );
 
-    // Kreiranje rezervacije
     final createdReservation = await rezervacijaProvider.createReservation(
       datumRezervacije: DateTime.now(),
       korisnikId: widget.employee.korisnikId!,
@@ -132,7 +128,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       uslugaId: widget.service.uslugaId!,
     );
     
-    // Kreiranje termina
     await terminProvider.insert({
       "vrijeme": reservationDateTime.toIso8601String(),
       "rezervacijaId": createdReservation.rezervacijaId,
@@ -140,20 +135,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       "klijentId": widget.klijent.korisnikId!,
       "isBooked": true,
     });
-
-    // // Slanje emaila
-    // final mail = MailObject(
-    //   widget.klijent.email, 
-    //   "Potvrda rezervacije",
-    //   "Poštovani ${widget.klijent.ime},\n\n"
-    //   "Uspješno ste rezervisali termin kod ${widget.employee.ime} ${widget.employee.prezime} "
-    //   "za uslugu '${widget.service.naziv}' na datum "
-    //   "${DateFormat('dd.MM.yyyy. HH:mm').format(reservationDateTime)}.\n\n"
-    //   "Hvala Vam na povjerenju.\n"
-    //   "eBarbershop tim",
-    // );
-
-    // await mailProvider.sendMail(mail);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -164,7 +145,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       SnackBar(content: Text('Rezervacija uspješno kreirana')),
     );
     
-    // Navigacija nakon kratkog kašnjenja
     await Future.delayed(Duration(milliseconds: 500));
     if (mounted) {
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -200,7 +180,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Date and service info section
                 Container(
                   padding: EdgeInsets.all(16),
                   color: Colors.grey[900],
@@ -258,7 +237,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                   ),
                 ),
                 
-                // Barber info
                 Container(
                   padding: EdgeInsets.all(16),
                   child: Row(
@@ -298,7 +276,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                 
                 Divider(height: 1),
                 
-                // Available time slots
                 Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
@@ -336,7 +313,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                         ),
                       ),
                 
-                // Confirmation button
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),

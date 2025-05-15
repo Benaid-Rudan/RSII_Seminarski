@@ -10,11 +10,9 @@ class CartProvider with ChangeNotifier {
 
   Future<void> addToCart(Product product, BuildContext context) async {
     try {
-      // Dohvatimo trenutno stanje zaliha sa servera
       final productProvider = Provider.of<ProductProvider>(context, listen: false);
       final currentProduct = await productProvider.getById(product.proizvodId!);
       
-      // Provjera da li proizvod postoji i ima zaliha
       if (currentProduct == null || (currentProduct.zalihe ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -25,7 +23,6 @@ class CartProvider with ChangeNotifier {
         return;
       }
 
-      // Provjera da li već postoji u košarici i ukupna količina
       final existingItem = findInCart(product);
       final totalInCart = existingItem?.count ?? 0;
       
@@ -39,7 +36,6 @@ class CartProvider with ChangeNotifier {
         return;
       }
 
-      // Ako sve provjere prođu, dodajemo u košaricu
       if (existingItem != null) {
         existingItem.count++;
       } else {

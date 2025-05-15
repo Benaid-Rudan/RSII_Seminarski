@@ -1,11 +1,9 @@
-import 'dart:convert';
 
 import 'package:ebarbershop_mobile/models/cart.dart';
 import 'package:ebarbershop_mobile/providers/cart_provider.dart';
 import 'package:ebarbershop_mobile/providers/product_provider.dart';
+import 'package:ebarbershop_mobile/providers/uplata_provider.dart';
 import 'package:ebarbershop_mobile/screens/paypal_payment_screen.dart';
-import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
-import 'package:ebarbershop_mobile/widgets/master_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -25,21 +23,18 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-    bool _isProcessing = false;
 
   late CartProvider _cartProvider;
   late NarudzbaProvider _orderProvider;
   
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     
   }
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     _cartProvider = context.watch<CartProvider>();
     _orderProvider = context.read<NarudzbaProvider>();
@@ -71,20 +66,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                     Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MasterScreenWidget(
-                            child: ProductListScreen(),
-                            title: "Proizvodi",
-                          ),
-                        ),
-                      );
-                  },
-                  child: const Text("Pogledajte proizvode"),
-                ),
+                  Text("Vratite se nazad da pogledate proizvode"),
               ],
             ),
           )
@@ -156,7 +138,7 @@ Widget build(BuildContext context) {
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: isOutOfStock 
-                    ? null // Onemogući dodavanje ako nema zaliha
+                    ? null  
                     : () => _cartProvider.incrementCount(item.product,context),
               ),
             ],
@@ -198,18 +180,6 @@ Widget _buildProductImage(String? image) {
     padding: const EdgeInsets.all(16.0),
     child: Column(
       children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            minimumSize: const Size(double.infinity, 50),
-          ),
-          onPressed: _processOrder,
-          child: const Text(
-            "POTVRDI NARUDŽBU",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        const SizedBox(height: 10),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
@@ -300,23 +270,27 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
       "ukupnaCijena": ukupnaCijena,
       "korisnikId": Authorization.userId,
       "listaProizvoda": listaProizvoda,
-      "status": "Plaćeno",
-      "nacinPlacanja": "PayPal",
     };
 
-    // Prvo kreiramo narudžbu
-    await _orderProvider.insert(order);
-    
-    // Zatim ažuriramo zalihe za svaki proizvod
+    final createdOrder = await _orderProvider.insert(order);
+
+    final payment = {
+      "iznos": ukupnaCijena,
+      "nacinUplate": "PayPal", 
+      "narudzbaId": createdOrder.narudzbaId,
+      "datumUplate": DateTime.now().toIso8601String(),
+    };
+
+    await _createPaymentRecord(payment);
+
+    // 3. Update stocks and clear cart
     await _updateProductStocks(listaProizvoda);
-    
-    // Očistimo košaricu
     _cartProvider.clearCart(); 
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Narudžba uspješno kreirana i zalihe ažurirane"),
+          content: Text("Narudžba i uplata uspješno evidentirani"),
           backgroundColor: Colors.green,
         ),
       );
@@ -331,9 +305,20 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
         ),
       );
     }
-    throw e;
   }
 }
+
+Future<void> _createPaymentRecord(Map<String, dynamic> paymentData) async {
+  try {
+    // Assuming you have a payment provider similar to your order provider
+    final paymentProvider = context.read<UplataProvider>();
+    await paymentProvider.insert(paymentData);
+  } catch (e) {
+    print("Greška pri kreiranju uplate: $e");
+    throw Exception("Došlo je do greške pri evidentiranju uplate");
+  }
+}
+
 Future<void> _updateProductStocks(List<Map<String, dynamic>> listaProizvoda) async {
   try {
     final productProvider = context.read<ProductProvider>();
@@ -342,16 +327,13 @@ Future<void> _updateProductStocks(List<Map<String, dynamic>> listaProizvoda) asy
       final proizvodId = item['proizvodID'];
       final kolicina = item['kolicina'];
       
-      // Dohvatimo trenutni proizvod da vidimo koliko ima zaliha
       final proizvod = await productProvider.getById(proizvodId);
       
       if (proizvod != null) {
         final noveZalihe = (proizvod.zalihe ?? 0) - kolicina;
         
-        // Ažuriramo proizvod sa novim zalihama
         await productProvider.update(proizvodId, {
           'zalihe': noveZalihe,
-          // Ovdje možete dodati i ostale podatke ako je potrebno
           'naziv': proizvod.naziv,
           'opis': proizvod.opis,
           'cijena': proizvod.cijena,
@@ -363,61 +345,6 @@ Future<void> _updateProductStocks(List<Map<String, dynamic>> listaProizvoda) asy
   } catch (e) {
     print("Greška pri ažuriranju zaliha: $e");
     throw Exception("Došlo je do greške pri ažuriranju zaliha");
-  }
-}
-Future<void> _processOrder() async {
-  try {
-     final outOfStockProducts = await _checkProductAvailability();
-    if (outOfStockProducts.isNotEmpty) {
-      throw Exception(
-          "Sljedeći proizvodi nemaju dovoljno zaliha: ${outOfStockProducts.join(', ')}");
-    }
-
-    double ukupnaCijena = _cartProvider.cart.items.fold(
-      0,
-      (total, item) => total + (item.product.cijena! * item.count),
-    );
-
-    final listaProizvoda = _cartProvider.cart.items.map((item) {
-      return {
-        "proizvodID": item.product.proizvodId,
-        "kolicina": item.count,
-        "naziv": item.product.naziv ?? "Proizvod",
-        "cijena": item.product.cijena!,
-      };
-    }).toList();
-
-    final order = {
-      "datum": DateTime.now().toIso8601String(),
-      "ukupnaCijena": ukupnaCijena,
-      "korisnikId": Authorization.userId,
-      "listaProizvoda": listaProizvoda,
-      "status": "Na čekanju",
-      "nacinPlacanja": "Gotovina",
-    };
-
-    await _orderProvider.insert(order);
-    await _updateProductStocks(listaProizvoda); // Dodajte ovu liniju
-    _cartProvider.clearCart();
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Narudžba uspješno kreirana"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  } catch (e) {
-    print("Greška pri narudžbi: $e"); 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Greška: ${e.toString()}"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 }
 Future<List<String>> _checkProductAvailability() async {
