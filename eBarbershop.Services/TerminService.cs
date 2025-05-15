@@ -21,6 +21,9 @@ namespace eBarbershop.Services
         }
         public override async Task<Model.Termin> Insert(TerminInsertRequest request)
         {
+            if (request.Vrijeme < DateTime.Now)
+                throw new Exception("Nije moguće rezervisati termin u prošlosti.");
+
             var frizer = await _context.Korisnik.FindAsync(request.KorisnikID);
             if (frizer == null)
                 throw new Exception("Frizer nije pronađen");

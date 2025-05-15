@@ -283,7 +283,6 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
 
     await _createPaymentRecord(payment);
 
-    // 3. Update stocks and clear cart
     await _updateProductStocks(listaProizvoda);
     _cartProvider.clearCart(); 
     
@@ -310,7 +309,6 @@ Future<void> _completeOrderAfterPayment(double ukupnaCijena, List<Map<String, dy
 
 Future<void> _createPaymentRecord(Map<String, dynamic> paymentData) async {
   try {
-    // Assuming you have a payment provider similar to your order provider
     final paymentProvider = context.read<UplataProvider>();
     await paymentProvider.insert(paymentData);
   } catch (e) {

@@ -25,6 +25,7 @@ namespace eBarbershop.Services
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest request)
         {
+
             int loggedInUserId = _currentUserService.GetUserId(); 
             var entity = new Database.Rezervacija
             {

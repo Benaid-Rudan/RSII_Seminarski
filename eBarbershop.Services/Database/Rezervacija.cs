@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
 
 namespace eBarbershop.Services.Database;
 
@@ -23,4 +25,5 @@ public  class Rezervacija
     public virtual ICollection<Termin> Termins { get; set; } = new List<Termin>();
 
     public virtual Usluga Usluga { get; set; } = null!;
+
 }

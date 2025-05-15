@@ -32,31 +32,29 @@ services:
     networks:
       - ebarbershop-net
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Benaid123!" -Q "SELECT 1" || exit 1
+      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Benaid123! -Q 'SELECT 1' || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   ebarbershop_api:
     build:
       context: .
       dockerfile: eBarbershop/Dockerfile
     container_name: ebarbershop_api
+    # Use network_mode to make the DB container accessible as localhost
+    network_mode: "service:db"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;Database=NovaBaza;User=SA;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true;Connect Timeout=60
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:7126
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-    ports:
-      - "7126:7126"
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    networks:
-      - ebarbershop-net
     restart: on-failure
 
 volumes:

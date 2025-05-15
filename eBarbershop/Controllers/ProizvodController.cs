@@ -22,7 +22,7 @@ namespace eBarbershop.Controllers
         [HttpGet("recommend")]
         public virtual  List<Model.Proizvod> Recommend(int id)
         {
-            return (_service as IProizvodService).Recommend(id);
+            return _service.Recommend(id);
         }
 
     }
