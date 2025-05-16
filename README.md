@@ -24,4 +24,5 @@ RabbitMQ komunikacija se uspostavlja na mobile dijelu kada klijent izvrši rezer
 
 #Paypal račun
 mail: sb-47n8fg42105804@personal.example.com
+
 pass: C#p2thQP
