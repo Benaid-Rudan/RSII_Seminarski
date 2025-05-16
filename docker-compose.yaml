@@ -1,65 +1,28 @@
-version: '2.1'
-
+version: "3"
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq_container
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    ports:
-      - "15672:15672"  # Management UI
-      - "5672:5672"    # AMQP port
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ebarbershop-net
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=Password1
-      - MSSQL_PID=Developer
-    ports:
-      - "1433:1433"
-    volumes:
-      - db-data:/var/opt/mssql
-    healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -Q 'SELECT 1' || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - ebarbershop-net
-
-  ebarbershop_api:
-    build:
-      context: .
-      dockerfile: eBarbershop/Dockerfile
-    ports:
-      - "7126:80"
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=db; Initial Catalog=benaid; User=sa; Password=Benaid123!; MultipleActiveResultSets=true; TrustServerCertificate=True;
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USERNAME=guest
-      - RABBITMQ_PASSWORD=guest
-      - ASPNETCORE_ENVIRONMENT=Development
-    networks:
-      - ebarbershop-net
-    restart: on-failure
-
+    postgres_triple:
+        container_name: postgres_triple
+        image: postgres:9.5
+        volumes:
+            - pgdata_triple:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_PASSWORD=postgres
+    postgres:
+        container_name: postgres
+        image: postgres:9.5
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_PASSWORD=postgres
+    collectiwise:
+        container_name: collectiwise
+        build: .
+        image: collectiwise/main
+        ports:
+            - "8090:80"
+        environment:
+            - DB_HOST=postgres
+            - COLLECTIWISE_BRANCH=${BRANCH}
 volumes:
-  db-data:
-
-networks:
-  ebarbershop-net:
-    driver: bridge
+    pgdata:
+    pgdata_triple:

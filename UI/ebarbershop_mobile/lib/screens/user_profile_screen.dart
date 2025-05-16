@@ -146,8 +146,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           if (_passwordController.text.isNotEmpty) "password": _passwordController.text,
           if (_passwordController.text.isNotEmpty) "passwordPotvrda": _passwordPotvrdaController.text,
           "gradId": _selectedGradId,
-          if (base64Image != null) "slika": base64Image,
         };
+
+        updatedData["slika"] = base64Image ?? Authorization.slika;
 
         var updatedUser = await korisnikProvider.update(Authorization.userId!, updatedData);
         

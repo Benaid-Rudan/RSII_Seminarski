@@ -22,7 +22,6 @@ namespace eBarbershop.Model.Requests
         public string? Password { get; set; }
         
         public string? PasswordPotvrda { get; set; }
-        [Required]
         public string Slika { get; set; }
 
         [Required]

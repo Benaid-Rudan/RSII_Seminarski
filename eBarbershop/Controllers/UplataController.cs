@@ -16,11 +16,6 @@ namespace eBarbershop.Controllers
             _uplataService = service;
         }
 
-        [HttpPost("CreateUplata")]
-        public async Task<Model.Uplata> CreateUplata([FromBody] UplataInsertRequest request)
-        {
-            return await _uplataService.CreateUplata(request);
-        }
     }
 
     

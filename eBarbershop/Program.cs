@@ -1,16 +1,10 @@
 using eBarbershop;
-using eBarbershop.Model.Requests;
-using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services;
 using eBarbershop.Services.Database;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +30,6 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddControllers();
 
-
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -53,12 +45,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.AddSecurityDefinition("basicAuth", new Microsoft.OpenApi.Models.OpenApiSecurityScheme()
+    c.AddSecurityDefinition("basicAuth", new OpenApiSecurityScheme()
     {
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = SecuritySchemeType.Http,
         Scheme = "basic"
     });
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement()
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
     {
         {
             new OpenApiSecurityScheme
@@ -70,15 +62,15 @@ builder.Services.AddSwaggerGen(c =>
     }});
 });
 
-var konekcijskiString = builder.Configuration.GetConnectionString("DefaultConnection");
+var test = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<EBarbershop1Context>(
   dbContextOpcije => dbContextOpcije
-    .UseSqlServer(konekcijskiString));
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAutoMapper(typeof(IKorisniciService));
 builder.Services.AddAuthentication("BasicAuthentication")
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication",null);
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
 string hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "127.0.0.1";
 string username = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest";
@@ -100,6 +92,14 @@ builder.Services.AddSingleton<IConnection>(sp =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
+    dbContext.Database.Migrate();
+
+    SeedDbInitializer.Seed(dbContext);
+}
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -116,62 +116,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<EBarbershop1Context>();
-        var logger = services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("Attempting database connection and migrations...");
-
-        bool isDatabaseAvailable = false;
-        int retries = 0;
-        while (!isDatabaseAvailable && retries < 10)
-        {
-            try
-            {
-                context.Database.CanConnect();
-                isDatabaseAvailable = true;
-                logger.LogInformation("Database connection established successfully.");
-            }
-            catch (Exception ex)
-            {
-                retries++;
-                logger.LogWarning($"Database connection attempt {retries} failed: {ex.Message}");
-                System.Threading.Thread.Sleep(5000);
-            }
-        }
-
-        if (isDatabaseAvailable)
-        {
-            logger.LogInformation("Applying migrations...");
-            context.Database.Migrate();
-
-            if (!context.Drzava.Any())
-            {
-                logger.LogInformation("Seeding database...");
-                SeedDbInitializer.Seed(context);
-                logger.LogInformation("Database seeded successfully.");
-            }
-        }
-        else
-        {
-            logger.LogError("Could not connect to the database after multiple attempts.");
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while initializing the database.");
-    }
-}
-
-
-
-
-
 
 app.Run();

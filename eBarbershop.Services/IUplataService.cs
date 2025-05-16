@@ -10,6 +10,5 @@ namespace eBarbershop.Services
 {
     public interface IUplataService : ICRUDService<Model.Uplata, UplataSearchObject, UplataInsertRequest,UplataUpdateRequest>
     {
-        Task<Model.Uplata> CreateUplata(UplataInsertRequest request);
     }
 }

@@ -22,21 +22,7 @@ namespace eBarbershop.Services
         {
             entity.DatumUplate = DateTime.Now;
         }
-        public async Task<Model.Uplata> CreateUplata(UplataInsertRequest request)
-        {
-            var uplata = new Uplatum
-            {
-                Iznos = request.Iznos,
-                DatumUplate = DateTime.Now,
-                NacinUplate = request.NacinUplate,
-                NarudzbaId = request.NarudzbaId
-            };
-
-            _context.Uplata.Add(uplata);
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map<Model.Uplata>(uplata);
-        }
+        
 
 
     }
