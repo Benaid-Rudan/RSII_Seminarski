@@ -11,8 +11,6 @@ namespace eBarbershop.Model
         public int UlogaId { get; set; }
         public string Naziv { get; set; }
 
-        // Veza sa korisnicima
-        public ICollection<KorisnikUloga> KorisnikUloge { get; set; }
     }
 
 }

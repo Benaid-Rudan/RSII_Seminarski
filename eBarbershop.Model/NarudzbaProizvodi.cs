@@ -10,16 +10,12 @@ namespace eBarbershop.Model
     {
         public int NarudzbaProizvodiId { get; set; }
 
-        // Veza sa narudžbom
         public int NarudzbaId { get; set; }
-        public Narudzba Narudzba { get; set; }
 
-        // Veza sa proizvodom
         public int ProizvodId { get; set; }
-        public Proizvod Proizvod { get; set; }
+        public virtual Proizvod Proizvod { get; set; }
 
         public int Kolicina { get; set; }
-        public decimal Cijena { get; set; }
     }
 
 }

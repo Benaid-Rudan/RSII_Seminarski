@@ -1,24 +1,26 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+#Use the .NET 8 SDK for building the project,
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS base
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
+#Copy all project files,
+COPY ["eBarbershop/", "eBarbershop/"]
+COPY ["eBarbershop.Model/", "eBarbershop.Model/"]
+COPY ["eBarbershop.Services/", "eBarbershop.Services/"]
+COPY ["eBarbershop.RabbitMQ/", "eBarbershop.RabbitMQ/"]
+
+#Build and publish the project,
+WORKDIR /eBarbershop
+RUN dotnet publish --configuration Release --output /out --property WarningLevel=0
+
+#Use the .NET 8 ASP.NET runtime for running the application,
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim AS final
+
 EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["eBarbershop/eBarbershop.csproj", "eBarbershop/"]
-RUN dotnet restore "./eBarbershop/eBarbershop.csproj"
-COPY . .
-WORKDIR "/src/eBarbershop"
-RUN dotnet build "./eBarbershop.csproj" -c $BUILD_CONFIGURATION -o /app/build
+ENV ASPNETCORE_URLS="http://+"
+ENV ASPNETCORE_ENVIRONMENT="Development"
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./eBarbershop.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+#Copy the published application from the build stage,
+COPY --from=base /out /app/
 
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "eBarbershop.dll"]
+#Define the entry point for the container,
+ENTRYPOINT ["dotnet", "/app/eBarbershop.dll"]

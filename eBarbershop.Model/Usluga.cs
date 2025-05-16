@@ -13,9 +13,8 @@ namespace eBarbershop.Model
         public string Opis { get; set; }
         public decimal Cijena { get; set; }
 
-        // Veza sa rezervacijama i recenzijama
-        public ICollection<Rezervacija> Rezervacije { get; set; }
-        public ICollection<Recenzija> Recenzije { get; set; }
+
+
     }
 
 }

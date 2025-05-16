@@ -12,12 +12,9 @@ namespace eBarbershop.Model
         public DateTime Datum { get; set; }
         public decimal UkupnaCijena { get; set; }
 
-        // Veza sa korisnikom
         public int KorisnikId { get; set; }
-        public Korisnik Korisnik { get; set; }
 
-        // Veza sa proizvodima
-        public ICollection<NarudzbaProizvodi> NarudzbaProizvodi { get; set; }
+        public ICollection<NarudzbaProizvodi> NarudzbaProizvodis { get; set; }
     }
 
 }

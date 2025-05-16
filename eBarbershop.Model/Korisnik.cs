@@ -13,19 +13,13 @@ namespace eBarbershop.Model
         public string Prezime { get; set; }
         public string Email { get; set; }
         public string Username { get; set; }
-        public string PasswordHash { get; set; }
-        public string PasswordSalt { get; set; }
+        public string Slika { get; set; }
 
-        // Veza sa gradom
         public int GradId { get; set; }
-        public Grad Grad { get; set; }
-
-        // Veza sa ulogama
-        public ICollection<KorisnikUloga> KorisnikUloge { get; set; }
-
-        // Veza sa narudžbama i rezervacijama
-        public ICollection<Narudzba> Narudzbe { get; set; }
-        public ICollection<Rezervacija> Rezervacije { get; set; }
+        public List<string> Uloge => KorisnikUlogas?
+                .Select(x => x.Uloga?.Naziv)
+                .Where(naziv => !string.IsNullOrEmpty(naziv))
+                .ToList(); public virtual ICollection<KorisnikUloga> KorisnikUlogas { get; set; } = new List<KorisnikUloga>();
     }
     
 }
