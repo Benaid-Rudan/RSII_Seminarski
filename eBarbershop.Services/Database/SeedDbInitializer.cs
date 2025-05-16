@@ -113,7 +113,6 @@ public static class SeedDbInitializer
         }
         context.SaveChanges();
 
-        // Assign Roles to Users
         var userRoles = new KorisnikUloga[]
         {
             new KorisnikUloga
@@ -142,7 +141,6 @@ public static class SeedDbInitializer
         }
         context.SaveChanges();
 
-        // Seed Product Types
         var productTypes = new VrstaProizvoda[]
         {
             new VrstaProizvoda { Naziv = "Šamponi" },
@@ -157,7 +155,6 @@ public static class SeedDbInitializer
         }
         context.SaveChanges();
 
-        // Seed Products
         var products = new Proizvod[]
         {
             new Proizvod
@@ -166,7 +163,7 @@ public static class SeedDbInitializer
                 Opis = "Profesionalni šampon za mušku kosu",
                 Cijena = 16.00m,
                 Zalihe = 50,
-                VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Šamponi").VrstaProizvodaId,
+                VrstaProizvodaId = 1,
                 Slika = "https://www.biramzdravlje.hr/storage/upload/products/Pantogar-sampon-protiv-opadanja-kose-za-muskarce_133819.png"
             },
             new Proizvod
@@ -175,7 +172,7 @@ public static class SeedDbInitializer
                 Opis = "Krema za glatko i ugodno brijanje",
                 Cijena = 12.50m,
                 Zalihe = 30,
-                VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Krema za brijanje").VrstaProizvodaId,
+                VrstaProizvodaId = 2,
                 Slika = "https://www.just.hr/wp-content/uploads/2020/08/just-proizvodi-za-muskarce-gel-za-brijanje-819x1024.png"
             },
             new Proizvod
@@ -184,9 +181,100 @@ public static class SeedDbInitializer
                 Opis = "Gel za fiksiranje frizure",
                 Cijena = 9.00m,
                 Zalihe = 40,
-                VrstaProizvodaId = productTypes.Single(pt => pt.Naziv == "Gel za kosu").VrstaProizvodaId,
+                VrstaProizvodaId = 3,
                 Slika = "https://w7.pngwing.com/pngs/394/339/png-transparent-lotion-nivea-hair-styling-products-hairstyle-hair-gel-hair-gel.png"
+            },
+            new Proizvod
+                {
+                    Naziv = "Šampon protiv peruti",
+                    Opis = "Efikasan šampon za uklanjanje peruti",
+                    Cijena = 14.90m,
+                    Zalihe = 35,
+                    VrstaProizvodaId = 1,
+                    Slika = "https://media.dm-static.com/images/f_auto,q_auto,c_fit,h_1200,w_1200/v1744973382/products/pim/3337871331290-010191/vichy-dercos-anti-dandruff-sampon-protiv-peruti"
+                },
+            new Proizvod
+            {
+                Naziv = "Prirodno ulje za bradu",
+                Opis = "Ulje na bazi argana i jojobe za meku i zdravu bradu",
+                Cijena = 18.00m,
+                Zalihe = 25,
+                VrstaProizvodaId = 4,
+                Slika = "https://www.tinktura.com/slike/male/beard-stache-oil-41136-02140007.png"
+            },
+            new Proizvod
+            {
+                Naziv = "Gel za kosu Wet Look",
+                Opis = "Daje mokar izgled i čvrstu postojanost",
+                Cijena = 11.00m,
+                Zalihe = 45,
+                VrstaProizvodaId = 3,
+                Slika = "https://licilasicdn.s3.amazonaws.com/public/product_images/47995/gallery/original/24564962.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Brijačka krema Mentol",
+                Opis = "Osvježavajuća krema za brijanje s mentolom",
+                Cijena = 10.50m,
+                Zalihe = 20,
+                VrstaProizvodaId = 2,
+                Slika = "https://m.media-amazon.com/images/I/51JiNzI-SoL._SL1500_.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Šampon za suvu kosu",
+                Opis = "Hidratantni šampon za suvu i oštećenu kosu",
+                Cijena = 15.00m,
+                Zalihe = 28,
+                VrstaProizvodaId = 1,
+                Slika = "https://webshop.afroditacosmetics.com/bih/image/cache/1001-2000/1132/main/d7a3-Hair-Care-ESSENCE-Hranilni-sampon_320-ml-900x1040-0-2.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Ulje za bradu Citrus Fresh",
+                Opis = "Ulje sa citrusnim notama za negu i stilizovanje brade",
+                Cijena = 19.90m,
+                Zalihe = 32,
+                VrstaProizvodaId = 4,
+                Slika = "https://www.lijepa.hr/data/cache/thumb_min500_max1000-min500_max1000-12/products/451227/1687444971/angry-beards-beard-oil-bobby-citrus-ulje-za-bradu-za-muskarce-30-ml-487144.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Strong Fix gel za kosu",
+                Opis = "Dugotrajna formula za čvrsto učvršćivanje frizure",
+                Cijena = 13.00m,
+                Zalihe = 38,
+                VrstaProizvodaId = 3,
+                Slika = "https://frizerland.ba/wp-content/uploads/2022/08/hd-lifestyle-strong-gel-firm-hold_9426_0.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Šampon 2u1 Sport",
+                Opis = "Šampon i regenerator za muškarce aktivnog stila",
+                Cijena = 13.90m,
+                Zalihe = 40,
+                VrstaProizvodaId = 1,
+                Slika = "https://i.makeup.hr/k/kn/knwqnissahks.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Ulje za bradu Classic",
+                Opis = "Klasična formula za svakodnevnu negu brade",
+                Cijena = 17.00m,
+                Zalihe = 27,
+                VrstaProizvodaId = 4,
+                Slika = "https://cdn.alexandar-cosmetics.com/media/cache/t760/images/products/6737104e0bc2b_25633.jpg"
+            },
+            new Proizvod
+            {
+                Naziv = "Krema za brijanje Sensitive",
+                Opis = "Formula prilagođena osjetljivoj koži",
+                Cijena = 11.50m,
+                Zalihe = 22,
+                VrstaProizvodaId = 2,
+                Slika = "https://img.nivea.com/-/media/miscellaneous/media-center-items/b/a/b/81da96e8ca4942d9857b42ae8b57580b-web_1010x1180_transparent_png.png"
             }
+
         };
 
         foreach (var p in products)
@@ -223,7 +311,6 @@ public static class SeedDbInitializer
         }
         context.SaveChanges();
 
-        // Seed News
         var news = new Novost[]
         {
             new Novost
@@ -231,7 +318,7 @@ public static class SeedDbInitializer
                 Naslov = "Dobrodošli u eBarbershop",
                 Sadrzaj = "Radujemo se vašim posjetama u našem novom salonu!",
                 DatumObjave = DateTime.Now.AddDays(-10),
-                Slika = "https://png.pngtree.com/png-vector/20220818/ourmid/pngtree-barbershop-pole-decoration-png-image_6115703.png"
+                Slika = "https://meroscut.com/cdn/shop/files/cfb85b4bf155ff5423d0d78816c00ec5.jpg?v=1712334723&width=1445"
             },
             new Novost
             {
@@ -268,6 +355,201 @@ public static class SeedDbInitializer
                         Kolicina = 2
                     }
                 }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-5),
+                UkupnaCijena = 45.50m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Prirodno ulje za bradu").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Brijačka krema Mentol").ProizvodId,
+                        Kolicina = 2
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon protiv peruti").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-4),
+                UkupnaCijena = 19.90m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Ulje za bradu Citrus Fresh").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-3),
+                UkupnaCijena = 37.00m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon za suvu kosu").ProizvodId,
+                        Kolicina = 2
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Gel za kosu Wet Look").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-2),
+                UkupnaCijena = 28.50m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Krema za brijanje Classic").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Krema za brijanje Sensitive").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-1),
+                UkupnaCijena = 62.80m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon za muškarce").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Ulje za bradu Classic").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Strong Fix gel za kosu").ProizvodId,
+                        Kolicina = 2
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now,
+                UkupnaCijena = 13.90m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon 2u1 Sport").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-6),
+                UkupnaCijena = 24.00m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Gel za kosu Strong Hold").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Gel za kosu Wet Look").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-7),
+                UkupnaCijena = 29.00m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon protiv peruti").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Prirodno ulje za bradu").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-8),
+                UkupnaCijena = 51.50m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Šampon za suvu kosu").ProizvodId,
+                        Kolicina = 2
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Brijačka krema Mentol").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Ulje za bradu Citrus Fresh").ProizvodId,
+                        Kolicina = 1
+                    }
+                }
+            },
+            new Narudzba
+            {
+                Datum = DateTime.Now.AddDays(-9),
+                UkupnaCijena = 35.00m,
+                KorisnikId = users.Single(u => u.Username == "klijent").KorisnikId,
+                NarudzbaProizvodis = new List<NarudzbaProizvodi>
+                {
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Krema za brijanje Classic").ProizvodId,
+                        Kolicina = 1
+                    },
+                    new NarudzbaProizvodi
+                    {
+                        ProizvodId = products.Single(p => p.Naziv == "Strong Fix gel za kosu").ProizvodId,
+                        Kolicina = 2
+                    }
+                }
             }
         };
 
@@ -283,7 +565,7 @@ public static class SeedDbInitializer
             {
                 Iznos = 34.00m,
                 DatumUplate = DateTime.Now.AddDays(-2),
-                NacinUplate = "Gotovina",
+                NacinUplate = "Paypal",
                 NarudzbaId = orders[0].NarudzbaId
             }
         };
@@ -311,7 +593,6 @@ public static class SeedDbInitializer
         }
         context.SaveChanges();
 
-        // Seed Appointments
         var appointments = new Rezervacija[]
         {
             new Rezervacija
