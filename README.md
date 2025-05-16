@@ -1,8 +1,8 @@
-#eBarbershop
+eBarbershop
 
-#Kredencijali za prijavu
+Kredencijali za prijavu
 
-#DESKTOP I MOBILE:
+DESKTOP I MOBILE:
 
 Uloga admin
   username: admin
@@ -12,17 +12,18 @@ Uloga frizer
   password: frizer123
 
 
-#MOBILE:
+MOBILE:
 
 Uloga klijent 
   username: klijent
   password: klijent123
 
-#RabbitMq
+RabbitMq
 RabbitMQ komunikacija se uspostavlja na mobile dijelu kada klijent izvrši rezervaciju termina, automatski se šalje mail u vidu potvrde izvršene rezervacije.
 
 
-#Paypal račun
+Paypal račun
+
 mail: sb-47n8fg42105804@personal.example.com
 
 pass: C#p2thQP
