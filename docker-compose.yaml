@@ -51,7 +51,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Data Source=db;Initial Catalog=benaidtest;User=sa;Password=Benaid123!;MultipleActiveResultSets=true;TrustServerCertificate=True"
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Data Source=db;Initial Catalog=benaidfinal;User=sa;Password=Benaid123!;MultipleActiveResultSets=true;TrustServerCertificate=True"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
