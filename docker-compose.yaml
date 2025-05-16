@@ -1,28 +1,89 @@
-version: "3"
+version: '2.1'
+
 services:
-    postgres_triple:
-        container_name: postgres_triple
-        image: postgres:9.5
-        volumes:
-            - pgdata_triple:/var/lib/postgresql/data
-        environment:
-            - POSTGRES_PASSWORD=postgres
-    postgres:
-        container_name: postgres
-        image: postgres:9.5
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-        environment:
-            - POSTGRES_PASSWORD=postgres
-    collectiwise:
-        container_name: collectiwise
-        build: .
-        image: collectiwise/main
-        ports:
-            - "8090:80"
-        environment:
-            - DB_HOST=postgres
-            - COLLECTIWISE_BRANCH=${BRANCH}
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP port
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s  # Give RabbitMQ time to initialize
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq  # Persist RabbitMQ data
+    networks:
+      - ebarbershop-net
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Password1"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - db-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ebarbershop-net
+
+  ebarbershop_api:
+    build:
+      context: .
+      dockerfile: eBarbershop/Dockerfile
+    ports:
+      - "7126:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Data Source=db;Initial Catalog=benaidtest;User=sa;Password=Benaid123!;MultipleActiveResultSets=true;TrustServerCertificate=True"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      ASPNETCORE_ENVIRONMENT: Development
+    restart: on-failure
+    networks:
+      - ebarbershop-net
+
+  rabbitmq_consumer:
+    build:
+      context: .
+      dockerfile: eBarbershop.RabbitMQ/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      SERVER_ADDRESS: smtp.gmail.com
+      MAIL_SENDER: ebarbershop2024@gmail.com
+      MAIL_PASS: jovbskkfeqscedzn
+      MAIL_PORT: 587
+      ASPNETCORE_ENVIRONMENT: Development
+    restart: on-failure
+    networks:
+      - ebarbershop-net
+
 volumes:
-    pgdata:
-    pgdata_triple:
+  db-data:
+  rabbitmq-data:
+
+networks:
+  ebarbershop-net:
+    driver: bridge
