@@ -44,8 +44,10 @@ public partial class EBarbershop1Context : DbContext
     public virtual DbSet<VrstaProizvoda> VrstaProizvoda { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=NovaBazaa;User=sa;Password=Benaid123!;TrustServerCertificate=True;Encrypt=false;MultipleActiveResultSets=true");
+    {
+
+    }
+    //        => optionsBuilder.UseSqlServer("x");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -124,10 +126,10 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Narudzba__Korisn__38996AB5");
 
-                entity.HasOne(n => n.Korisnik)
-           .WithMany(k => k.Narudzbas)
-           .HasForeignKey(n => n.KorisnikId)
-           .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(n => n.Korisnik)
+       .WithMany(k => k.Narudzbas)
+       .HasForeignKey(n => n.KorisnikId)
+       .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<NarudzbaProizvodi>(entity =>
@@ -189,7 +191,7 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Recenzija__Koris__4316F928");
 
-            
+
         });
 
         modelBuilder.Entity<Rezervacija>(entity =>
@@ -209,7 +211,7 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(d => d.Klijent)
                 .WithMany(p => p.RezervacijeKaoKlijent)
                 .HasForeignKey(d => d.KlijentId)
-                .OnDelete(DeleteBehavior.Restrict) 
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
             // Veza sa uslugom
@@ -219,10 +221,10 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Rezervaci__Uslug__403A8C7D");
 
-             entity.HasMany(r => r.Termins)
-            .WithOne(t => t.Rezervacija)
-            .HasForeignKey(t => t.RezervacijaId)
-            .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(r => r.Termins)
+           .WithOne(t => t.Rezervacija)
+           .HasForeignKey(t => t.RezervacijaId)
+           .OnDelete(DeleteBehavior.Cascade);
 
         });
 
@@ -293,8 +295,9 @@ public partial class EBarbershop1Context : DbContext
             entity.HasKey(e => e.VrstaProizvodaId).HasName("PK__VrstaPro__7DC005E063976FC1");
 
             entity.Property(e => e.Naziv).HasMaxLength(100);
-            
+
         });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

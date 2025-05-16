@@ -8,7 +8,7 @@ import 'package:http/io_client.dart';
 
 class ProductProvider extends BaseProvider<Product> {
   static String? _baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "https://localhost:7286/");
+        defaultValue: "https://localhost:7126/");
   ProductProvider() : super("Proizvod");
   @override
   Product fromJson(data) {

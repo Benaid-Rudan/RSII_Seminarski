@@ -199,60 +199,70 @@ class _AdminDashboardState extends State<AdminDashboard> {
 }
 
   Widget _buildDashboardGrid() {
-    return Expanded(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.5,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          children: [
-            _buildStatCard('Korisnici', _korisniciCount, Icons.people, Colors.blue),
-            _buildStatCard('Narudžbe', _narudzbeCount, Icons.shopping_cart, Colors.green),
-            _buildStatCard('Ukupna vrijednost narudžbi', '${_narudzbeTotal.toStringAsFixed(2)} KM',
-                Icons.attach_money, Colors.orange),
-            _buildStatCard('Novosti', _novostiCount, Icons.article, Colors.purple),
-            _buildStatCard('Proizvodi', _proizvodiCount, Icons.shopping_bag, Colors.red),
-            _buildStatCard('Rezervacije', _rezervacijeCount, Icons.calendar_today, Colors.teal),
-            _buildStatCard('Termini', _terminiCount, Icons.schedule, Colors.indigo),
-            _buildStatCard('Usluge', _uslugeCount, Icons.cut, Colors.blueGrey),
-          ],
-        ),
+  return Expanded(
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          // Prvi red - 4 kartice
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: _buildStatCard('Korisnici', _korisniciCount, Icons.people, Colors.blue)),
+                Expanded(child: _buildStatCard('Narudžbe', _narudzbeCount, Icons.shopping_cart, Colors.green)),
+                Expanded(child: _buildStatCard('Vrijednost', '${_narudzbeTotal.toStringAsFixed(2)} KM', Icons.attach_money, Colors.orange)),
+                Expanded(child: _buildStatCard('Novosti', _novostiCount, Icons.article, Colors.purple)),
+              ],
+            ),
+          ),
+          // Drugi red - 4 kartice
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: _buildStatCard('Proizvodi', _proizvodiCount, Icons.shopping_bag, Colors.red)),
+                Expanded(child: _buildStatCard('Rezervacije', _rezervacijeCount, Icons.calendar_today, Colors.teal)),
+                Expanded(child: _buildStatCard('Termini', _terminiCount, Icons.schedule, Colors.indigo)),
+                Expanded(child: _buildStatCard('Usluge', _uslugeCount, Icons.cut, Colors.blueGrey)),
+              ],
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildStatCard(String title, dynamic value, IconData icon, Color color) {
-    return Card(
-      elevation: 4,
+Widget _buildStatCard(String title, dynamic value, IconData icon, Color color) {
+  return Padding(
+    padding: const EdgeInsets.all(4.0),
+    child: Card(
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 10),
+            Icon(icon, size: 24, color: color),
+            const SizedBox(height: 6),
             Text(
               value.toString(),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _generateReport() async {
   if (_dateRange == null) {

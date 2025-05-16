@@ -9,6 +9,7 @@ import 'package:ebarbershop_admin/providers/termin_provider.dart';
 import 'package:ebarbershop_admin/providers/uloga_provider.dart';
 import 'package:ebarbershop_admin/providers/usluga_provider.dart';
 import 'package:ebarbershop_admin/providers/vrsta_proizvoda.dart';
+import 'package:ebarbershop_admin/screens/admindashboard.dart';
 import 'package:ebarbershop_admin/screens/korisnik_list_screen.dart';
 import 'package:ebarbershop_admin/screens/product_list_screen.dart';
 import 'package:ebarbershop_admin/utils/util.dart';
@@ -181,12 +182,11 @@ class LoginPage extends StatelessWidget {
                             return;
                           }
 
-                          // Ako je korisnik administrator ili uposlenik, preusmjeri na MasterScreen
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => MasterScreenWidget(
-                                title: "Proizvodi",
-                                child: ProductListScreen(),
+                                title: "Dashboard",
+                                child: AdminDashboard(),
                               ),
                             ),
                           );

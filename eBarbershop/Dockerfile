@@ -1,31 +1,26 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 7126
-ENV ASPNETCORE_URLS=http://+:7126
+#Use the .NET 8 SDK for building the project,
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+#Copy all project files,
+COPY ["eBarbershop/", "eBarbershop/"]
+COPY ["eBarbershop.Model/", "eBarbershop.Model/"]
+COPY ["eBarbershop.Services/", "eBarbershop.Services/"]
+COPY ["eBarbershop.RabbitMQ/", "eBarbershop.RabbitMQ/"]
 
-# Copy all project files
-COPY ["eBarbershop/eBarbershop.csproj", "eBarbershop/"]
-COPY ["eBarbershop.Model/eBarbershop.Model.csproj", "eBarbershop.Model/"]
-COPY ["eBarbershop.Services/eBarbershop.Services.csproj", "eBarbershop.Services/"]
-COPY ["eBarbershop.RabbitMQ/eBarbershop.RabbitMQ.csproj", "eBarbershop.RabbitMQ/"]
+#Build and publish the project,
+WORKDIR /eBarbershop
+RUN dotnet publish --configuration Release --output /out --property WarningLevel=0
 
-# Restore packages
-RUN dotnet restore "eBarbershop/eBarbershop.csproj"
+#Use the .NET 8 ASP.NET runtime for running the application,
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim AS final
 
-# Copy everything else
-COPY . .
+EXPOSE 80
 
-# Build
-WORKDIR "/src/eBarbershop"
-RUN dotnet build "eBarbershop.csproj" -c Release -o /app/build
+ENV ASPNETCORE_URLS="http://+"
+ENV ASPNETCORE_ENVIRONMENT="Development"
 
-FROM build AS publish
-RUN dotnet publish "eBarbershop.csproj" -c Release -o /app/publish
+#Copy the published application from the build stage,
+COPY --from=base /out /app/
 
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "eBarbershop.dll", "--migrate"]
+#Define the entry point for the container,
+ENTRYPOINT ["dotnet", "/app/eBarbershop.dll"]

@@ -3,56 +3,117 @@ using eBarbershop.Services;
 using eBarbershop.Services.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using RabbitMQ.Client.Events;
+using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
-using System.Text;
-using Newtonsoft.Json;
-using RabbitMQ;
 
-var hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
-var username = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest";
-var password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "guest";
+var builder = WebApplication.CreateBuilder(args);
 
-var factory = new ConnectionFactory { HostName = hostname, UserName = username, Password = password };
+builder.Services.AddTransient<IProizvodService, ProizvodService>();
+builder.Services.AddTransient<IKorisniciService, KorisniciService>();
+builder.Services.AddTransient<IGradService, GradService>();
+builder.Services.AddTransient<IDrzavaService, DrzavaService>();
+builder.Services.AddTransient<IVrstaProizvodaService, VrstaProizvodaService>();
+builder.Services.AddTransient<IUslugaService, UslugaService>();
+builder.Services.AddTransient<IUplataService, UplataService>();
+builder.Services.AddTransient<IUlogaService, UlogaService>();
+builder.Services.AddTransient<ITerminService, TerminService>();
+builder.Services.AddTransient<INarudzbaService, NarudzbaService>();
+builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
+builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
+builder.Services.AddTransient<INovostService, NovostService>();
+builder.Services.AddTransient<IMailService, MailService>();
 
-using var connection = factory.CreateConnection();
 
-using var channel = connection.CreateModel();
+// Add these to your DI container
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-channel.QueueDeclare(queue: "email_sending",
+builder.Services.AddControllers();
 
-                     durable: false,
-
-                     exclusive: false,
-
-                     autoDelete: false,
-
-                     arguments: null);
-
-Console.WriteLine("Listening to messages....");
-
-var consumer = new EventingBasicConsumer(channel);
-
-consumer.Received += (model, ea) =>
-
+builder.Services.AddCors(options =>
 {
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
-    var body = ea.Body.ToArray();
 
-    var message = Encoding.UTF8.GetString(body);
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("basicAuth", new OpenApiSecurityScheme()
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference{Type = ReferenceType.SecurityScheme, Id = "basicAuth"},
 
-    var entitet = JsonConvert.DeserializeObject<MailObjekat>(message);
+            },
+            new string[]{}
+    }});
+});
 
-    MailSending.posaljiMail(entitet!);
 
-};
+builder.Services.AddDbContext<EBarbershop1Context>(
+  dbContextOpcije => dbContextOpcije
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-channel.BasicConsume(queue: "email_sending",
+builder.Services.AddAutoMapper(typeof(IKorisniciService));
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
-                     autoAck: true,
+string hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "127.0.0.1";
+string username = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest";
+string password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest";
+string virtualHost = Environment.GetEnvironmentVariable("RABBITMQ_VIRTUALHOST") ?? "/";
 
-                     consumer: consumer);
+builder.Services.AddSingleton<IConnection>(sp =>
+{
+    var factory = new ConnectionFactory
+    {
+        HostName = hostname,
+        UserName = username,
+        Password = password,
+        VirtualHost = virtualHost,
+        DispatchConsumersAsync = true
+    };
+    return factory.CreateConnection();
+});
 
-Thread.Sleep(Timeout.Infinite);
+var app = builder.Build();
 
-Console.ReadLine();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
+    dbContext.Database.Migrate();
+
+    SeedDbInitializer.Seed(dbContext);
+}
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseCors("AllowAll");
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

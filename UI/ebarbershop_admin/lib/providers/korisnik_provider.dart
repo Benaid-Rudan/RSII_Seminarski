@@ -11,7 +11,7 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
     _baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "https://localhost:7286/");
+        defaultValue: "https://localhost:7126/");
   }
   @override
   Korisnik fromJson(data) {

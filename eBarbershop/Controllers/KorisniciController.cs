@@ -20,14 +20,12 @@ namespace eBarbershop.Controllers
         }
 
         [HttpPost]
-        //[AllowAnonymous]
         public async Task<Korisnik> Insert([FromBody] KorisniciInsertRequest request)
         {
             return await _service.Insert(request);
         }
 
         [HttpPut("{id}")]
-        //[AllowAnonymous]
         public async Task<Korisnik> Update(int id, [FromBody] KorisniciUpdateRequest request)
         {
             return await _service.Update(id, request);
