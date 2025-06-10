@@ -138,11 +138,12 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Email potvrde poslan na ${widget.klijent.email}')),
+        SnackBar(content: Text('Email potvrde poslan na ${widget.klijent.email}'),
+        backgroundColor: Colors.green,),
       );
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Rezervacija uspješno kreirana')),
+      SnackBar(content: Text('Rezervacija uspješno kreirana'),backgroundColor: Colors.green,),
     );
     
     await Future.delayed(Duration(milliseconds: 500));

@@ -1,5 +1,6 @@
 
 import 'package:ebarbershop_mobile/models/cart.dart';
+import 'package:ebarbershop_mobile/models/product.dart';
 import 'package:ebarbershop_mobile/providers/cart_provider.dart';
 import 'package:ebarbershop_mobile/providers/product_provider.dart';
 import 'package:ebarbershop_mobile/providers/uplata_provider.dart';
@@ -95,7 +96,8 @@ Widget build(BuildContext context) {
   return FutureBuilder(
     future: context.read<ProductProvider>().getById(item.product.proizvodId!),
     builder: (context, snapshot) {
-      final isOutOfStock = snapshot.hasData && (snapshot.data!.zalihe ?? 0) < item.count;
+      final product = snapshot.data as Product?;
+      final isOutOfStock = snapshot.hasData && (product?.zalihe ?? 0) < item.count;
       
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
