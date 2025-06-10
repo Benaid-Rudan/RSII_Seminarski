@@ -23,6 +23,7 @@ services:
 
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: ebarbershop_db
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "Benaid123!"
@@ -32,17 +33,20 @@ services:
     volumes:
       - db-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Benaid123! -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      interval: 20s
+      timeout: 10s
       retries: 10
+      start_period: 60s  # Give SQL Server more time to initialize
     networks:
       - ebarbershop-net
+    restart: unless-stopped
 
   ebarbershop_api:
     build:
       context: .
       dockerfile: eBarbershop/Dockerfile
+    container_name: ebarbershop_api
     ports:
       - "7126:80"
     depends_on:
@@ -51,19 +55,31 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Data Source=db;Initial Catalog=benaidfinal;User=sa;Password=Benaid123!;MultipleActiveResultSets=true;TrustServerCertificate=True"
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=benaidfinal;User Id=sa;Password=Benaid123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
       ASPNETCORE_ENVIRONMENT: Development
-    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
     networks:
       - ebarbershop-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   rabbitmq_consumer:
     build:
       context: .
       dockerfile: eBarbershop.RabbitMQ/Dockerfile
+    container_name: rabbitmq_consumer_container
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -76,9 +92,14 @@ services:
       MAIL_PASS: jovbskkfeqscedzn
       MAIL_PORT: 587
       ASPNETCORE_ENVIRONMENT: Development
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - ebarbershop-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   db-data:
