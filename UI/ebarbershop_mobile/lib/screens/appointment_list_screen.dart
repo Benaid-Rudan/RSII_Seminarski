@@ -300,7 +300,8 @@ List<Termin> get _pastTermini {
         
         
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Termin i rezervacija uspješno obrisani")),
+          SnackBar(content: Text("Rezervacija  uspješno obrisana"),backgroundColor: Colors.red,),
+          
         );
         
         await _refreshAppointments();

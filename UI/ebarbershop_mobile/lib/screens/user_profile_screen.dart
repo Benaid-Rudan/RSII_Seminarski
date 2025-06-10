@@ -164,7 +164,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       });
         if(mounted){
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Profil uspješno ažuriran")),
+            const SnackBar(content: Text("Profil uspješno ažuriran"),
+            backgroundColor: Colors.green,),
           );
           Navigator.of(context).pop();
           setState(() {
