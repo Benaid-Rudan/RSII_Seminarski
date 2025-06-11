@@ -30,6 +30,8 @@ services:
       MSSQL_PID: Developer
     ports:
       - "1433:1433"
+    expose:
+      - "1433"
     volumes:
       - db-data:/var/opt/mssql
     healthcheck:
@@ -55,7 +57,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=benaidfinal;User=sa;Password=Benaid123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db,1433;Database=benaidfinal;User=sa;Password=Benaid123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
