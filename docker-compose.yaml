@@ -37,7 +37,7 @@ services:
       interval: 20s
       timeout: 10s
       retries: 10
-      start_period: 60s  # Give SQL Server more time to initialize
+      start_period: 90s  # Give SQL Server more time to initialize
     networks:
       - ebarbershop-net
     restart: unless-stopped
