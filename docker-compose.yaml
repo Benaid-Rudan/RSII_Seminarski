@@ -26,7 +26,7 @@ services:
     container_name: ebarbershop_db
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Benaid1234!"
+      SA_PASSWORD: "Benaid123!"
       MSSQL_PID: Developer
     ports:
       - "1433:1433"
@@ -55,7 +55,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=benaidfinal;User Id=sa;Password=Benaid1234!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=benaidfinal;User Id=sa;Password=Benaid123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
