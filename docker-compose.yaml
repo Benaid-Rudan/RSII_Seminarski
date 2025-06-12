@@ -1,72 +1,56 @@
-version: '2.1'
 
 services:
+  # MSSQL Docker
+  db:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    container_name: ebarbershop_db
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    expose:
+      - 1433
+    volumes:
+      - db-data:/var/opt/mssql
+    networks:
+      - ebarbershop-net
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
+    restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
     ports:
       - "15672:15672"  # Management UI
       - "5672:5672"    # AMQP port
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s  # Give RabbitMQ time to initialize
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq  # Persist RabbitMQ data
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - ebarbershop-net
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-CU29-ubuntu-20.04
-    container_name: ebarbershop_db
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
-      - MSSQL_PID=Developer
-    ports:
-      - "1433:1433"
-    volumes:
-      - db-data:/var/opt/mssql
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/db/1433' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
-    networks:
-      - ebarbershop-net
-    restart: unless-stopped
 
   ebarbershop_api:
     build:
       context: .
       dockerfile: eBarbershop/Dockerfile
     container_name: ebarbershop_api
-    ports:
-      - "7126:80"
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+    restart: unless-stopped
     environment:
       - ConnectionStrings__DefaultConnection=Server=db,1433;Database=ebarbershopDB;User=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
       - ASPNETCORE_ENVIRONMENT=Development
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/db/1433' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
-    restart: unless-stopped
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "7126:80"
+    depends_on:
+      - db
+      - rabbitmq
     networks:
       - ebarbershop-net
     logging:
@@ -80,19 +64,18 @@ services:
       context: .
       dockerfile: eBarbershop.RabbitMQ/Dockerfile
     container_name: rabbitmq_consumer_container
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+    restart: unless-stopped
     environment:
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASS=${RABBITMQ_PASS}
-      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - RABBITMQ_HOST=rabbitmq
       - SERVER_ADDRESS=smtp.gmail.com
       - MAIL_SENDER=ebarbershop2024@gmail.com
       - MAIL_PASS=jovbskkfeqscedzn
       - MAIL_PORT=587
       - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
+    depends_on:
+      - rabbitmq
     networks:
       - ebarbershop-net
     logging:
