@@ -33,7 +33,7 @@ services:
     volumes:
       - db-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/db/1433' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -55,13 +55,13 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=master;User=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=ebarbershopDB;User=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
       - ASPNETCORE_ENVIRONMENT=Development
     healthcheck:
-      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/db/1433' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

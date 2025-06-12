@@ -6,6 +6,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
+
+static async Task WaitForDatabase(IServiceProvider serviceProvider)
+{
+    using var scope = serviceProvider.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
+
+    var maxAttempts = 20;
+    var delay = TimeSpan.FromSeconds(2);
+
+    for (int i = 0; i < maxAttempts; i++)
+    {
+        try
+        {
+            Console.WriteLine($"Checking database connection... attempt {i + 1}");
+            await context.Database.CanConnectAsync();
+            Console.WriteLine("Database is ready!");
+            return;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database not ready: {ex.Message}");
+            if (i == maxAttempts - 1) throw;
+            await Task.Delay(delay);
+        }
+    }
+}
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<IProizvodService, ProizvodService>();
@@ -91,7 +119,7 @@ builder.Services.AddSingleton<IConnection>(sp =>
 });
 
 var app = builder.Build();
-
+await WaitForDatabase(app.Services);
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
