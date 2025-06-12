@@ -66,7 +66,7 @@ var test = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<EBarbershop1Context>(
   dbContextOpcije => dbContextOpcije
-    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 
 builder.Services.AddAutoMapper(typeof(IKorisniciService));
 builder.Services.AddAuthentication("BasicAuthentication")

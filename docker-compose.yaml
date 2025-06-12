@@ -5,8 +5,8 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     ports:
       - "15672:15672"  # Management UI
       - "5672:5672"    # AMQP port
@@ -25,21 +25,19 @@ services:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: ebarbershop_db
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Benaid123!"
-      MSSQL_PID: Developer
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Benaid123!
+      - MSSQL_PID=Developer
     ports:
       - "1433:1433"
-    expose:
-      - "1433"
     volumes:
       - db-data:/var/opt/mssql
     healthcheck:
       test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
-      interval: 20s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 10
-      start_period: 90s  # Give SQL Server more time to initialize
+      start_period: 60s
     networks:
       - ebarbershop-net
     restart: unless-stopped
@@ -57,17 +55,17 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db,1433;Database=benaidfinal;User=sa;Password=Benaid123!;TrustServerCertificate=True;MultipleActiveResultSets=true;"
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      ASPNETCORE_ENVIRONMENT: Development
+      - ConnectionStrings:DefaultConnection=Server=db,1433;Database=master;User=sa;Password=Benaid123!;ConnectRetryCount=0;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ASPNETCORE_ENVIRONMENT=Development
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     restart: unless-stopped
     networks:
       - ebarbershop-net
@@ -86,14 +84,14 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
-      SERVER_ADDRESS: smtp.gmail.com
-      MAIL_SENDER: ebarbershop2024@gmail.com
-      MAIL_PASS: jovbskkfeqscedzn
-      MAIL_PORT: 587
-      ASPNETCORE_ENVIRONMENT: Development
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - SERVER_ADDRESS=smtp.gmail.com
+      - MAIL_SENDER=ebarbershop2024@gmail.com
+      - MAIL_PASS=jovbskkfeqscedzn
+      - MAIL_PORT=587
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - ebarbershop-net
