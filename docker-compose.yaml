@@ -22,7 +22,7 @@ services:
       - ebarbershop-net
 
   db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2019-CU29-ubuntu-20.04
     container_name: ebarbershop_db
     environment:
       - ACCEPT_EULA=Y
