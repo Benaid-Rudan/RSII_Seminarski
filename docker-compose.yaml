@@ -26,7 +26,7 @@ services:
     container_name: ebarbershop_db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Benaid123!
+      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
@@ -55,7 +55,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      - ConnectionStrings:DefaultConnection=Server=db,1433;Database=master;User=sa;Password=Benaid123!;ConnectRetryCount=0;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=master;User=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
@@ -84,9 +84,9 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
       - SERVER_ADDRESS=smtp.gmail.com
       - MAIL_SENDER=ebarbershop2024@gmail.com
       - MAIL_PASS=jovbskkfeqscedzn
