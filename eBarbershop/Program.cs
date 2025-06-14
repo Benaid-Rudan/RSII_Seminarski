@@ -92,6 +92,10 @@ builder.Services.AddSwaggerGen(c =>
 
 var test = builder.Configuration.GetConnectionString("DefaultConnection");
 
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
+                     builder.Configuration.GetConnectionString("DefaultConnection");
+
+
 builder.Services.AddDbContext<EBarbershop1Context>(
   dbContextOpcije => dbContextOpcije
     .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
