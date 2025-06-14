@@ -275,7 +275,7 @@ public partial class EBarbershop1Context : DbContext
 
             entity.HasOne(d => d.Narudzba).WithMany(p => p.Uplata)
                 .HasForeignKey(d => d.NarudzbaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Uplata__Narudzba__5070F446");
         });
 

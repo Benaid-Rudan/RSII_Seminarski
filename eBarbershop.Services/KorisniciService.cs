@@ -254,25 +254,31 @@ namespace eBarbershop.Services
             try
             {
                 var korisnik = await _context.Korisnik
-                    .Include(k => k.Narudzbas) // Lista narudžbi
-                        .ThenInclude(n => n.NarudzbaProizvodis) // Lista proizvoda po narudžbi
-                    .FirstOrDefaultAsync(k => k.KorisnikId == korisnikId);
+                                             .FirstOrDefaultAsync(k => k.KorisnikId == korisnikId);
 
                 if (korisnik != null)
                 {
-                    foreach (var narudzba in korisnik.Narudzbas.ToList())
+                    var rezervacije = await _context.Rezervacija
+                                                    .Where(r => r.KorisnikId == korisnikId  r.KlijentId == korisnikId)
+                                                    .ToListAsync();
+
+                    foreach (var rezervacija in rezervacije)
                     {
-                        foreach (var np in narudzba.NarudzbaProizvodis.ToList())
-                        {
-                            _context.NarudzbaProizvodi.Remove(np);
-                        }
-
-                        await _context.SaveChangesAsync();
-
-                        _context.Narudzba.Remove(narudzba);
-                        await _context.SaveChangesAsync();
+                        _context.Rezervacija.Remove(rezervacija);
                     }
 
+                    var termini = await _context.Termin
+                                                .Where(t => t.KorisnikID == korisnikId  t.KlijentId == korisnikId)
+                                                .ToListAsync();
+
+                    foreach (var termin in termini)
+                    {
+                        _context.Termin.Remove(termin);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    // 3. Delete the user - everything else cascades automatically
                     _context.Korisnik.Remove(korisnik);
                     await _context.SaveChangesAsync();
 
@@ -287,8 +293,7 @@ namespace eBarbershop.Services
                 await transaction.RollbackAsync();
                 throw;
             }
-        }
 
-    }
+        }
 }
 
