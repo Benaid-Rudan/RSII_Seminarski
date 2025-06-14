@@ -28,6 +28,13 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Developer
+    healthcheck:
+      test: ["CMD-SHELL",
+            "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $$SA_PASSWORD -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     ports:
       - "1433:1433"
     expose:
@@ -53,8 +60,10 @@ services:
     ports:
       - "7126:80"
     depends_on:
-      - db
-      - rabbitmq
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - ebarbershop-net
     logging:

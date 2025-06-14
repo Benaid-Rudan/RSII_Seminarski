@@ -2,36 +2,58 @@ using eBarbershop;
 using eBarbershop.Services;
 using eBarbershop.Services.Database;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
 
-static async Task WaitForDatabase(IServiceProvider serviceProvider)
+static async Task WaitForDatabase(IServiceProvider services)
 {
-    using var scope = serviceProvider.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
+    var cfg = services.GetRequiredService<IConfiguration>();
+    var full = cfg.GetConnectionString("DefaultConnection");       // sadrži ebarbershopDB
+    var masterConn = new SqlConnectionStringBuilder(full)           // kloniramo
+    { InitialCatalog = "master" }                  // promijenimo bazu
+                     .ConnectionString;
 
-    var maxAttempts = 20;
+    const string dbName = "ebarbershopDB";
+    const int maxAttempts = 30;
     var delay = TimeSpan.FromSeconds(2);
 
-    for (int i = 0; i < maxAttempts; i++)
+    for (int i = 1; i <= maxAttempts; i++)
     {
         try
         {
-            Console.WriteLine($"Checking database connection... attempt {i + 1}");
-            await context.Database.CanConnectAsync();
-            Console.WriteLine("Database is ready!");
-            return;
+            Console.WriteLine($"[WaitForDb] Try {i}/{maxAttempts}");
+            await using var conn = new SqlConnection(masterConn);
+            await conn.OpenAsync();
+
+            // postoji li veæ baza?
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"SELECT db_id('{dbName}')";
+            var id = await cmd.ExecuteScalarAsync();
+
+            if (id == null || id == DBNull.Value)
+            {
+                Console.WriteLine($"[WaitForDb] Creating database {dbName}…");
+                cmd.CommandText = $"CREATE DATABASE [{dbName}]";
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            Console.WriteLine("[WaitForDb] Database is ready!");
+            return;                           // završili smo
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Database not ready: {ex.Message}");
-            if (i == maxAttempts - 1) throw;
+            Console.WriteLine($"[WaitForDb] Not ready: {ex.Message}");
             await Task.Delay(delay);
         }
     }
+
+    throw new Exception("Database not ready after multiple attempts.");
 }
+
+
 
 
 var builder = WebApplication.CreateBuilder(args);
