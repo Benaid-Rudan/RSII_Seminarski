@@ -127,9 +127,16 @@ public partial class EBarbershop1Context : DbContext
                 .HasConstraintName("FK__Narudzba__Korisn__38996AB5");
 
             entity.HasOne(n => n.Korisnik)
-       .WithMany(k => k.Narudzbas)
-       .HasForeignKey(n => n.KorisnikId)
-       .OnDelete(DeleteBehavior.Cascade);
+           .WithMany(k => k.Narudzbas)
+           .HasForeignKey(n => n.KorisnikId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(n => n.Uplata)
+              .WithOne(u => u.Narudzba)
+                .HasForeignKey(u => u.NarudzbaId)
+                .IsRequired()
+                .HasConstraintName("FK__Uplata__Narudzba__5070F446")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<NarudzbaProizvodi>(entity =>
@@ -273,10 +280,11 @@ public partial class EBarbershop1Context : DbContext
             entity.Property(e => e.Iznos).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.NacinUplate).HasMaxLength(100);
 
-            entity.HasOne(d => d.Narudzba).WithMany(p => p.Uplata)
-                .HasForeignKey(d => d.NarudzbaId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Uplata__Narudzba__5070F446");
+            entity.HasOne(u => u.Narudzba)
+                .WithMany(n => n.Uplata)
+                .HasForeignKey(u => u.NarudzbaId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Usluga>(entity =>
