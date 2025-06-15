@@ -29,11 +29,6 @@ services:
       MSSQL_PID: Developer
     ports:
       - "1433:1433"
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
     networks:
       - ebarbershop-net
 
@@ -43,11 +38,6 @@ services:
       dockerfile: eBarbershop/Dockerfile
     ports:
       - "7126:80"
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     environment:
       CONNECTIONSTRINGS__DEFAULTCONNECTION: "Data Source=db;Initial Catalog=benaidfinal;User=sa;Password=Password1;MultipleActiveResultSets=true;TrustServerCertificate=True"
       RABBITMQ_HOST: rabbitmq
