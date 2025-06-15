@@ -22,7 +22,7 @@ namespace eBarbershop.Services
         {
             if (obj.IncludeKorisnik == true)
             {
-                entity = entity.Include(x => x.Korisnik); //
+                entity = entity.Include(x => x.Korisnik); 
             }
 
             return entity;

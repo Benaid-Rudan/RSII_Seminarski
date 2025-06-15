@@ -15,7 +15,6 @@ class ProductProvider extends BaseProvider<Product> {
     return Product.fromJson(data);
   }
 
-  // Dodajte ovu metodu
   Future<bool> deleteProduct(int productId) async {
     try {
       final response = await _client.delete(
@@ -35,7 +34,6 @@ class ProductProvider extends BaseProvider<Product> {
     }
   }
 
-  // Pomoćna metoda za dobijanje HTTP klijenta
   http.Client get _client {
     if (_baseUrl!.startsWith('https')) {
       final httpClient = HttpClient()

@@ -25,17 +25,14 @@ namespace eBarbershop.Services
 
         public async Task<Model.Korisnik> Insert(KorisniciInsertRequest request)
         {
-            // Provjera da li su šifre jednake
             if (request.Password != request.PasswordPotvrda)
             {
                 throw new Exception("Password i PasswordPotvrda se ne podudaraju!");
             }
 
-            // Generisanje salt-a i hash-a
             var salt = GenerateSalt();
             var hash = GenerateHash(salt, request.Password);
 
-            // Kreiranje novog korisnika
             var entity = new Database.Korisnik
             {
                 Ime = request.Ime,
@@ -65,7 +62,6 @@ namespace eBarbershop.Services
 
             await _context.SaveChangesAsync();
 
-            // Vraćanje rezultata
             return new Model.Korisnik
             {
                 KorisnikId = entity.KorisnikId,
@@ -116,10 +112,8 @@ namespace eBarbershop.Services
                 throw new Exception("Korisnik nije pronađen!");
             }
 
-            // Mapiraj osnovne podatke (ime, prezime, email itd.)
             _mapper.Map(request, entity);
 
-            // Ako korisnik želi promijeniti šifru
             if (!string.IsNullOrWhiteSpace(request.Password) || !string.IsNullOrWhiteSpace(request.PasswordPotvrda))
             {
                 if (request.Password != request.PasswordPotvrda)
@@ -127,7 +121,6 @@ namespace eBarbershop.Services
                     throw new Exception("Password i PasswordPotvrda se ne podudaraju!");
                 }
 
-                // Generiši novi salt i hash
                 var salt = GenerateSalt();
                 var hash = GenerateHash(salt, request.Password);
 
@@ -278,7 +271,6 @@ namespace eBarbershop.Services
 
                     await _context.SaveChangesAsync();
 
-                    // 3. Delete the user - everything else cascades automatically
                     _context.Korisnik.Remove(korisnik);
                     await _context.SaveChangesAsync();
 

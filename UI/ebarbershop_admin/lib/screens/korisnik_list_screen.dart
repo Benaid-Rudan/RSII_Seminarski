@@ -50,9 +50,8 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   if (pickedFile != null) {
     File imageFile = File(pickedFile.path);
     
-    // Provjeri veličinu slike (opcionalno)
     final bytes = await imageFile.length();
-    if (bytes > 2 * 1024 * 1024) { // 2MB limit
+    if (bytes > 2 * 1024 * 1024) { 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Slika je prevelika (max 2MB)'))
       );
@@ -314,7 +313,6 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   DataCell(
   e.slika != null && e.slika!.isNotEmpty
       ? (() {
-          // Provjeri je li string vrlo kratak (poput riječi "string") ili ne izgleda kao Base64
           if (e.slika!.length < 10 || 
               e.slika! == "string" || 
               RegExp(r'^[a-zA-Z]+$').hasMatch(e.slika!)) {
@@ -327,19 +325,16 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                 width: 50, height: 50, fit: BoxFit.cover);
             } else {
               try {
-                // Pokušaj prepoznati je li string validan Base64
                 final RegExp base64Regex = RegExp(r'^[A-Za-z0-9+/=]+$');
                 if (!base64Regex.hasMatch(e.slika!)) {
                   return Icon(Icons.broken_image, size: 50, color: Colors.orange);
                 }
                 
-                // Fix potential Base64 padding issues
                 String fixedBase64 = e.slika!;
                 while (fixedBase64.length % 4 != 0) {
                   fixedBase64 += '=';
                 }
                 
-                // Dodatna provjera - odbaci vrlo kratke stringove koji ne mogu biti slike
                 if (fixedBase64.length < 20) {
                   return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
                 }
@@ -661,7 +656,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
                               korisnik!.slika! != "string") {
                       userData['Slika'] = korisnik!.slika;
                     } else {
-                      userData['Slika'] = ""; // ili null, ovisno o tome što back-end očekuje
+                      userData['Slika'] = "";  
                     }
 
                   if (korisnik == null) {
@@ -704,12 +699,10 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
   }
 
   Widget _buildImageWidget(String imageData) {
-  // Ako je samo tekst "string" ili prazno, prikaži ikonu umjesto slike
   if (imageData == "string" || imageData.isEmpty) {
     return Icon(Icons.person, size: 50, color: Colors.grey);
   }
 
-  // Ako je URL slike
   if (imageData.startsWith('http') || imageData.startsWith('https')) {
     return Image.network(
       imageData,
@@ -722,9 +715,7 @@ class _KorisnikListScreenState extends State<KorisnikListScreen> {
     );
   }
 
-  // Ako je Base64 slika
   try {
-    // Provjeri da li izgleda kao Base64
     if (!RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(imageData)) {
       return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
     }

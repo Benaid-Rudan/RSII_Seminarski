@@ -59,7 +59,6 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // Ostale metode ostaju iste
   void clearCart() {
     cart.items.clear();
     notifyListeners();
@@ -74,7 +73,6 @@ class CartProvider with ChangeNotifier {
     try {
       final item = findInCart(product);
       if (item != null) {
-        // Provjera zaliha prije povećanja
         final productProvider = Provider.of<ProductProvider>(context, listen: false);
         final currentProduct = await productProvider.getById(product.proizvodId!);
         

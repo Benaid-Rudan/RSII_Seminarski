@@ -18,8 +18,10 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
   IOClient _createClient() {
     HttpClient httpClient = HttpClient()
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        print('Prihvaćam certifikat za $host:$port');
+        return true; 
+      };
     return IOClient(httpClient);
   }
 
@@ -27,23 +29,24 @@ abstract class BaseProvider<T> with ChangeNotifier {
   var url = "$_baseUrl$_endpoint/Authenticate";
   var uri = Uri.parse(url);
   
-  // Create special headers just for this request with the provided credentials
-  String basicAuth = "Basic ${base64Encode(utf8.encode('$username:$password'))}";
-  var headers = {
-    "Content-Type": "application/json",
-    "Authorization": basicAuth
-  };
+  String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
   
+  var headers = {
+    "accept": "*/*",
+    "Authorization": basicAuth,
+  };
+
   var ioClient = _createClient();
   var response = await ioClient.get(uri, headers: headers);
   
   if (isValidResponse(response)) {
     var data = jsonDecode(response.body);
     return fromJson(data);
-    } else {
-    throw Exception("Authentication failed");
-    }
+  } else {
+    throw Exception("Authentication failed: ${response.statusCode}");
   }
+}
+
   Future<SearchResult<T>> get({dynamic filter}) async {
     var url = "$_baseUrl$_endpoint";
     if (filter != null) {
@@ -67,7 +70,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
     } else {
       throw new Exception("Unknown error");
     }
-    // print("Response: ${response.statusCode}, ${response.body}");
   }
 
   Future<T> insert(dynamic request) async {
@@ -111,7 +113,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var response = await http.delete(uri, headers: headers);
 
     if (isValidResponse(response)) {
-      notifyListeners(); // Osvežava UI ako je potrebno
+      notifyListeners(); 
     } else {
       throw Exception("Brisanje nije uspelo");
     }

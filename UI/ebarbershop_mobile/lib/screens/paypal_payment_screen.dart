@@ -96,7 +96,7 @@ class _PaypalPaymentScreenState extends State<PaypalPaymentScreen> {
               try {
                 await widget.onPaymentSuccess();
                 if (!_isDisposed && mounted) {
-                  Navigator.of(context).pop(true); // Vraćamo true kao rezultat
+                  Navigator.of(context).pop(true); 
                 }
               } catch (e) {
                 if (!_isDisposed && mounted) {

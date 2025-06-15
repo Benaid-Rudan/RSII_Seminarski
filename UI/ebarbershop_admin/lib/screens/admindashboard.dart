@@ -204,7 +204,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          // Prvi red - 4 kartice
           Expanded(
             child: Row(
               children: [
@@ -215,7 +214,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ],
             ),
           ),
-          // Drugi red - 4 kartice
           Expanded(
             child: Row(
               children: [

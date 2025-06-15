@@ -152,7 +152,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   } catch (e) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Greška pri kreiranju rezervacije: $e')),
+        SnackBar(content: Text('Vratite se korak nazad i odaberite neki budući datum i vrijeme.'),backgroundColor: Colors.red,),
       );
     }
   } finally {

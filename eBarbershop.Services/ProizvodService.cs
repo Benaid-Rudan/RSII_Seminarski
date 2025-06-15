@@ -109,7 +109,6 @@ namespace eBarbershop.Services
                         options.LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass;
                         options.Alpha = 0.01;
                         options.Lambda = 0.025;
-                        // For better results use the following parameters
                         options.NumberOfIterations = 100;
                         options.C = 0.00001;
 

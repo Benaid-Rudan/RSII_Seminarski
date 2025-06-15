@@ -24,7 +24,6 @@ builder.Services.AddTransient<INovostService, NovostService>();
 builder.Services.AddTransient<IMailService, MailService>();
 
 
-// Add these to your DI container
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -40,7 +39,6 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader();
         });
 });
-
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

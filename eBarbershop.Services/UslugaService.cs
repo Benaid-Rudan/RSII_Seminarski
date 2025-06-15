@@ -35,10 +35,7 @@ namespace eBarbershop.Services
             {
                 entity = entity.Where(x => x.Naziv.ToLower().StartsWith(obj.Naziv.ToLower()));
             }
-            //if (obj.datumRezervacije.HasValue)
-            //{
-            //    entity = entity.Where(x => x.DatumRezervacije.Date == obj.datumRezervacije.Value.Date); // Poredi samo datum
-            //}
+            
             
             return entity;
         }

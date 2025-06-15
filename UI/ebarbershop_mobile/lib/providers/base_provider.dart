@@ -13,15 +13,18 @@ abstract class BaseProvider<T> with ChangeNotifier {
 
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
-    _baseUrl = const String.fromEnvironment("baseUrl",
+     _baseUrl = const String.fromEnvironment("baseUrl",
         defaultValue: "http://10.0.2.2:7126/");  
+     
   }
 
   IOClient _createClient() {
     HttpClient httpClient = HttpClient()
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-
-    return IOClient(httpClient);
+    ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+      print('Prihvaćam certifikat za $host:$port');
+      return true; 
+    };
+  return IOClient(httpClient);
   }
 
   Future<T> login(String username, String password) async {

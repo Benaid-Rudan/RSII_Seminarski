@@ -47,7 +47,6 @@ public partial class EBarbershop1Context : DbContext
     {
 
     }
-    //        => optionsBuilder.UseSqlServer("x");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -221,7 +220,6 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
-            // Veza sa uslugom
             entity.HasOne(d => d.Usluga)
                 .WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.UslugaId)
@@ -241,7 +239,6 @@ public partial class EBarbershop1Context : DbContext
 
             entity.Property(e => e.Vrijeme).HasColumnType("datetime");
 
-            // Veza sa frizerom
             entity.HasOne(d => d.Korisnik)
                 .WithMany()
                 .HasForeignKey(d => d.KorisnikID)

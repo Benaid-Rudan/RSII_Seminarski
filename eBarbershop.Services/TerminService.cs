@@ -53,11 +53,9 @@ namespace eBarbershop.Services
                 {
                     var rezervacijaId = termin.RezervacijaId;
 
-                    // Prvo briši termin
                     _context.Termin.Remove(termin);
                     await _context.SaveChangesAsync();
 
-                    // Zatim briši rezervaciju ako postoji
                     var rezervacija = await _context.Rezervacija.FindAsync(rezervacijaId);
                     if (rezervacija != null)
                     {
@@ -99,7 +97,7 @@ namespace eBarbershop.Services
                     .ThenInclude(x=> x.Usluga);
 
             }
-            if (obj.IncludeKlijent == true) // Dodajte ovaj property u TerminSearchObject
+            if (obj.IncludeKlijent == true) 
             {
                 entity = entity.Include(x => x.Klijent);
             }

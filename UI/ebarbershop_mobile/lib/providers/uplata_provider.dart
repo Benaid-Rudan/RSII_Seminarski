@@ -9,39 +9,10 @@ import 'package:http/io_client.dart';
 class UplataProvider extends BaseProvider<Uplata> {
   UplataProvider() : super("Uplata"); 
   String?_baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "https://10.0.2.2:7126/"); 
+        defaultValue: "http://10.0.2.2:7126/"); 
   @override
   Uplata fromJson(data) {
     return Uplata.fromJson(data);
   }
-  
-//   @override
-//   Future<Uplata> insert(dynamic request) async {
-//   var url = "$_baseUrl" + "Uplata";  
-//   var uri = Uri.parse(url);
-//   var headers = createHeaders();
-
-//   var jsonRequest = jsonEncode({
-//     "iznos": request["iznos"],
-//     "nacinUplate": request["nacinUplate"],
-//     "narudzbaId": request["narudzbaId"],
-//     "datumUplate": request["datumUplate"],
-//   });
-
-//   var ioClient = _createClient(); 
-//   var response = await ioClient.post(uri, headers: headers, body: jsonRequest);
-
-//   if (isValidResponse(response)) {
-//     var responseData = jsonDecode(response.body);
-//     return fromJson(responseData);
-//   } else {
-//     throw Exception("Failed to create payment");
-//   }
-// }
-// IOClient _createClient() {
-//     HttpClient httpClient = HttpClient()
-//       ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-
-//     return IOClient(httpClient);
-//   }
+ 
 }

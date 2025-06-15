@@ -442,7 +442,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               false) {
                             final formData = _formKey.currentState?.value;
 
-                            // Check if at least one parameter is entred
                             if (formData?['naziv'].isEmpty &&
                                 formData?['opis'].isEmpty &&
                                 formData?['cijena'].isEmpty &&

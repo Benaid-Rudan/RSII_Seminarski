@@ -72,7 +72,6 @@
                 throw new Exception("Narudžba ne postoji.");
             }
 
-            // Ažuriranje osnovnih podataka narudžbe
             entity.Datum = request.Datum;
             entity.UkupnaCijena = request.UkupnaCijena;
             entity.KorisnikId = request.KorisnikId;
@@ -116,43 +115,9 @@
         public override async Task BeforeInsert(Database.Narudzba entity, NarudzbaInsertRequest insert)
             {
                 _context.Add(entity);
-                await _context.SaveChangesAsync(); // Ovdje se stvarno sačuva Narudzba i dodeljuje se NarudzbaId
+                await _context.SaveChangesAsync(); 
 
-                // Sada možete dodati povezane NarudzbaProizvodi entitete
-                //foreach (var proizvod in insert.ListaProizvoda)
-                //{
-                //    Database.NarudzbaProizvodi narudzbaProizvod = new Database.NarudzbaProizvodi
-                //    {
-                //        ProizvodId = proizvod.ProizvodID,
-                //        Kolicina = proizvod.Kolicina,
-                //        NarudzbaId = entity.NarudzbaId // NarudzbaId je sada sigurno postavljen
-                //    };
-
-                //    _context.Add(narudzbaProizvod);
-                //}
-
-                //// Sačuvajte promene u bazi
-                //await _context.SaveChangesAsync();
-                //2
-                ////foreach (var proizvod in insert.ListaProizvoda)
-                //{
-                //    Database.NarudzbaProizvodi narudzbaProizvod = new Database.NarudzbaProizvodi
-                //    {
-                //        ProizvodId = proizvod.ProizvodID,
-                //        Kolicina = proizvod.Kolicina,
-                //        NarudzbaId = entity.NarudzbaId 
-                //    };
-
-                //    _context.Add(narudzbaProizvod);
-                //}
-
-
-                //3
-                //await _context.SaveChangesAsync(); 
-                //if (insert.ListaProizvoda == null || insert.ListaProizvoda.Count == 0)
-                //{
-                //    throw new ArgumentException("Lista proizvoda ne može biti prazna.");
-                //}
+                
             }
 
         }
