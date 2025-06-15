@@ -6,6 +6,9 @@ namespace eBarbershop.Services.Database;
 
 public partial class EBarbershop1Context : DbContext
 {
+    protected EBarbershop1Context()
+    {
+    }
 
     public EBarbershop1Context(DbContextOptions<EBarbershop1Context> options)
         : base(options)
@@ -126,11 +129,20 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__Narudzba__Korisn__38996AB5");
 
-            entity.HasOne(n => n.Korisnik)
-       .WithMany(k => k.Narudzbas)
-       .HasForeignKey(n => n.KorisnikId)
-       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(n => n.Korisnik)
+           .WithMany(k => k.Narudzbas)
+           .HasForeignKey(n => n.KorisnikId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(n => n.Uplata)
+              .WithOne(u => u.Narudzba)
+                .HasForeignKey(u => u.NarudzbaId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         });
+
 
         modelBuilder.Entity<NarudzbaProizvodi>(entity =>
         {
@@ -214,7 +226,6 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK__Rezervaci__Klijen__NOVI_CONSTRAINT");
 
-            // Veza sa uslugom
             entity.HasOne(d => d.Usluga)
                 .WithMany(p => p.Rezervacijas)
                 .HasForeignKey(d => d.UslugaId)
@@ -234,7 +245,6 @@ public partial class EBarbershop1Context : DbContext
 
             entity.Property(e => e.Vrijeme).HasColumnType("datetime");
 
-            // Veza sa frizerom
             entity.HasOne(d => d.Korisnik)
                 .WithMany()
                 .HasForeignKey(d => d.KorisnikID)
@@ -273,10 +283,11 @@ public partial class EBarbershop1Context : DbContext
             entity.Property(e => e.Iznos).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.NacinUplate).HasMaxLength(100);
 
-            entity.HasOne(d => d.Narudzba).WithMany(p => p.Uplata)
-                .HasForeignKey(d => d.NarudzbaId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__Uplata__Narudzba__5070F446");
+            entity.HasOne(u => u.Narudzba)
+                .WithMany(n => n.Uplata)
+                .HasForeignKey(u => u.NarudzbaId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Usluga>(entity =>

@@ -622,8 +622,8 @@ namespace eBarbershop.Services.Migrations
                     b.HasOne("eBarbershop.Services.Database.Narudzba", "Narudzba")
                         .WithMany("Uplata")
                         .HasForeignKey("NarudzbaId")
-                        .IsRequired()
-                        .HasConstraintName("FK__Uplata__Narudzba__5070F446");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Narudzba");
                 });
