@@ -89,7 +89,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Recenzija uspješno dodana")),
+        SnackBar(content: Text("Recenzija uspješno dodana"),backgroundColor: Colors.green,),
       );
       
       _loadReviews();

@@ -24,7 +24,7 @@ class ProductProvider extends BaseProvider<Product> {
       );
 
       if (response.statusCode == 200) {
-        notifyListeners(); // Obavijestite promatrače o promjeni
+        notifyListeners(); 
         return true;
       } else {
         final error = jsonDecode(response.body);

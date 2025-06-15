@@ -16,7 +16,7 @@ namespace eBarbershop.Services
     {
         EBarbershop1Context _context;
         IMapper _mapper;
-           
+
         public KorisniciService(EBarbershop1Context context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
@@ -48,22 +48,22 @@ namespace eBarbershop.Services
                 Slika = request.Slika
             };
 
-            await _context.Korisnik.AddAsync(entity); 
-            await _context.SaveChangesAsync(); 
+            await _context.Korisnik.AddAsync(entity);
+            await _context.SaveChangesAsync();
 
             foreach (var ulogaId in request.UlogeID)
             {
                 var korisnikUloga = new Database.KorisnikUloga
                 {
-                    KorisnikId = entity.KorisnikId, 
+                    KorisnikId = entity.KorisnikId,
                     UlogaId = ulogaId,
                     DatumDodjele = DateTime.Now
                 };
 
-                await _context.KorisnikUloga.AddAsync(korisnikUloga); 
+                await _context.KorisnikUloga.AddAsync(korisnikUloga);
             }
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             // Vraćanje rezultata
             return new Model.Korisnik
@@ -195,7 +195,7 @@ namespace eBarbershop.Services
             };
             _context.KorisnikUloga.Add(nova);
             _context.SaveChanges();
-                
+
             return _mapper.Map<eBarbershop.Model.Korisnik>(user);
         }
         public eBarbershop.Model.Korisnik DeleteUloga(int id, KorisniciUlogaUpdateRequest request)
@@ -259,7 +259,7 @@ namespace eBarbershop.Services
                 if (korisnik != null)
                 {
                     var rezervacije = await _context.Rezervacija
-                                                    .Where(r => r.KorisnikId == korisnikId  r.KlijentId == korisnikId)
+                                                    .Where(r => r.KorisnikId == korisnikId || r.KlijentId == korisnikId)
                                                     .ToListAsync();
 
                     foreach (var rezervacija in rezervacije)
@@ -268,7 +268,7 @@ namespace eBarbershop.Services
                     }
 
                     var termini = await _context.Termin
-                                                .Where(t => t.KorisnikID == korisnikId  t.KlijentId == korisnikId)
+                                                .Where(t => t.KorisnikID == korisnikId || t.KlijentId == korisnikId)
                                                 .ToListAsync();
 
                     foreach (var termin in termini)
@@ -295,5 +295,6 @@ namespace eBarbershop.Services
             }
 
         }
+    } 
 }
 
