@@ -1,6 +1,9 @@
 import 'package:ebarbershop_mobile/models/grad.dart';
+import 'package:ebarbershop_mobile/models/predvidjanje_zauzetosti.dart';
 import 'package:ebarbershop_mobile/models/uplata.dart';
 import 'package:ebarbershop_mobile/providers/mail_provider.dart';
+import 'package:ebarbershop_mobile/providers/predvidjanje_zauzetosti_provider.dart';
+import 'package:ebarbershop_mobile/providers/preporuka_termina_provider.dart';
 import 'package:ebarbershop_mobile/providers/reviews_provider.dart';
 import 'package:ebarbershop_mobile/providers/uplata_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
@@ -39,6 +42,9 @@ void main() {
       ChangeNotifierProvider(create: (_) => ReviewsProvider()),
       ChangeNotifierProvider(create: (_) => MailProvider()),
       ChangeNotifierProvider(create: (_) => UplataProvider()),
+      ChangeNotifierProvider(create: (_) => PredvidjanjeZauzetostiProvider()),
+      ChangeNotifierProvider(create: (_) => PreporukaTerminaProvider()),
+
     ],
     child: const MyMaterialApp(),
   ));

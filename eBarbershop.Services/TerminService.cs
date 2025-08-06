@@ -15,9 +15,11 @@ namespace eBarbershop.Services
 {
     public class TerminService : BaseCRUDService<Model.Termin, Database.Termin, TerminSearchObject , TerminInsertRequest, TerminUpdateRequest>, ITerminService 
     {
-        public TerminService(EBarbershop1Context context, IMapper mapper)
+        private readonly IPreporukaTerminaService _preporukaService;
+        public TerminService(EBarbershop1Context context, IMapper mapper, IPreporukaTerminaService preporukaService)
         : base(context, mapper)
         {
+            _preporukaService = preporukaService;
         }
         public override async Task<Model.Termin> Insert(TerminInsertRequest request)
         {
@@ -35,7 +37,19 @@ namespace eBarbershop.Services
             var rezervacija = await _context.Rezervacija.FindAsync(request.RezervacijaId);
             if (rezervacija == null)
                 throw new Exception("Rezervacija nije pronađena");
+           
+            var preporuka = await _context.PreporukaTermina
+           .FirstOrDefaultAsync(p =>
+               p.KlijentId == request.KlijentId &&
+               p.KorisnikId == request.KorisnikID &&
+               p.PreporuceniTermin.Date == request.Vrijeme.Date &&
+               p.PreporuceniTermin.Hour == request.Vrijeme.Hour);
 
+            if (preporuka != null)
+            {
+                preporuka.IsAccepted = true;
+                await _context.SaveChangesAsync();
+            }
             var entity = _mapper.Map<Database.Termin>(request);
             entity.isBooked = true; 
 

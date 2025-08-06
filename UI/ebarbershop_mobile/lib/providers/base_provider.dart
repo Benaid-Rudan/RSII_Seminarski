@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:ebarbershop_mobile/models/predvidjanje_zauzetosti.dart';
+import 'package:ebarbershop_mobile/models/preporuka_termina.dart';
 import 'package:ebarbershop_mobile/models/search_result.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:ebarbershop_mobile/models/product.dart';
@@ -14,7 +16,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
   BaseProvider(String endpoint) {
     _endpoint = endpoint;
      _baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "http://10.0.2.2:7126/");  
+        defaultValue: "https://10.0.2.2:7286/");  
      
   }
 
@@ -187,7 +189,52 @@ abstract class BaseProvider<T> with ChangeNotifier {
       throw new Exception("Something bad happened please try again");
     }
   }
+  Future<T> predvidiZauzetost(int korisnikId, DateTime datum) async {
+    var url = "$_baseUrl$_endpoint/predvidi/$korisnikId?datum=${datum.toIso8601String()}";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
 
+    var ioClient = _createClient();
+    var response = await ioClient.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return fromJson(data);
+    } else {
+      throw Exception("Greška pri dohvatanju predviđanja zauzetosti");
+    }
+  }
+  Future<List<PreporukaTermina>> generirajPreporuke(int klijentId, int uslugaId) async {
+    var url = "$_baseUrl$_endpoint/generiraj/$klijentId/$uslugaId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var ioClient = _createClient();
+    var response = await ioClient.post(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body) as List;
+      return data.map((x) => PreporukaTermina.fromJson(x)).toList();
+    } else {
+      throw Exception("Greška pri generiranju preporuka");
+    }
+  }
+
+  Future<bool> prihvatiPreporuku(int preporukaId) async {
+    var url = "$_baseUrl$_endpoint/prihvati/$preporukaId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var ioClient = _createClient();
+    var response = await ioClient.put(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return data is bool ? data : true;
+    } else {
+      throw Exception("Greška pri prihvatanju preporuke");
+    }
+  }
   Map<String, String> createHeaders() {
     String username = Authorization.username ?? "";
     String password = Authorization.password ?? "";

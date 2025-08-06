@@ -22,7 +22,10 @@ builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<INovostService, NovostService>();
 builder.Services.AddTransient<IMailService, MailService>();
-
+// Startup.cs / Program.cs
+builder.Services.AddScoped<IMachineLearningService, MachineLearningService>();
+builder.Services.AddScoped<IPreporukaTerminaService, PreporukaTerminaService>();
+builder.Services.AddScoped<IPredvidjanjeZauzetostiService, PredvidjanjeZauzetostiService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

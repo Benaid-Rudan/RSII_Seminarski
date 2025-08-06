@@ -42,6 +42,9 @@ public partial class EBarbershop1Context : DbContext
     public virtual DbSet<Usluga> Usluga { get; set; }
 
     public virtual DbSet<VrstaProizvoda> VrstaProizvoda { get; set; }
+    public virtual DbSet<PreporukaTermina> PreporukaTermina { get; set; }
+    public virtual DbSet<PredvidjanjeZauzetosti> PredvidjanjeZauzetosti { get; set; }
+    public virtual DbSet<ZauzetostPoSatu> ZauzetostPoSatu { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -302,7 +305,33 @@ public partial class EBarbershop1Context : DbContext
             entity.Property(e => e.Naziv).HasMaxLength(100);
 
         });
+        modelBuilder.Entity<PreporukaTermina>(entity =>
+        {
+            entity.HasKey(e => e.PreporukaId);
 
+            entity.HasOne(e => e.Klijent)
+                .WithMany()
+                .HasForeignKey(e => e.KlijentId)
+                .OnDelete(DeleteBehavior.Restrict); // ❗️ Izbjegni kaskadu
+
+            entity.HasOne(e => e.Korisnik)
+                .WithMany()
+                .HasForeignKey(e => e.KorisnikId)
+                .OnDelete(DeleteBehavior.Cascade); // može ostati kaskadno
+
+            entity.HasOne(e => e.Usluga)
+                .WithMany()
+                .HasForeignKey(e => e.UslugaId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ZauzetostPoSatu>(entity =>
+        {
+               entity.HasOne(z => z.Predvidjanje)
+        .WithMany(p => p.ZauzetostPoSatima)
+        .HasForeignKey(z => z.PredvidjanjeId);
+
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

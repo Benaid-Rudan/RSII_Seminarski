@@ -9,7 +9,7 @@ import 'package:http/io_client.dart';
 class UplataProvider extends BaseProvider<Uplata> {
   UplataProvider() : super("Uplata"); 
   String?_baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "http://10.0.2.2:7126/"); 
+        defaultValue: "http://10.0.2.2:7286/"); 
   @override
   Uplata fromJson(data) {
     return Uplata.fromJson(data);
