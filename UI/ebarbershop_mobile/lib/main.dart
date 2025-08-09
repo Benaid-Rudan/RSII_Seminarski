@@ -8,6 +8,7 @@ import 'package:ebarbershop_mobile/providers/reviews_provider.dart';
 import 'package:ebarbershop_mobile/providers/uplata_provider.dart';
 import 'package:ebarbershop_mobile/screens/cart_screen.dart';
 import 'package:ebarbershop_mobile/screens/home_screen.dart';
+import 'package:ebarbershop_mobile/screens/notification_service.dart';
 import 'package:ebarbershop_mobile/screens/product_details.dart';
 import 'package:ebarbershop_mobile/screens/product_list_screen.dart';
 import 'package:ebarbershop_mobile/screens/user_profile_screen.dart';
@@ -26,7 +27,12 @@ import 'package:ebarbershop_mobile/providers/vrsta_proizvoda.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicijalizacija notifikacija
+  await NotificationService().init();
+  
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CartProvider()),

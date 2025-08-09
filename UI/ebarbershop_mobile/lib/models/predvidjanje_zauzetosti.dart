@@ -1,3 +1,4 @@
+import 'package:ebarbershop_mobile/models/zauzetost_po_satu.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'predvidjanje_zauzetosti.g.dart';
@@ -5,12 +6,13 @@ part 'predvidjanje_zauzetosti.g.dart';
 @JsonSerializable()
 class PredvidjanjeZauzetosti {
   int? predvidjanjeId;
-  DateTime? datum;
   int? korisnikId;
-  Map<String, double>? zauzetostPoSatima;
+  DateTime? datum;
+  List<ZauzetostPoSatu>? zauzetostPoSatima;
+
   double? ukupnaZauzetost;
   List<String>? preporuceniTermini;
-
+  bool? isPredvidjeno;
   PredvidjanjeZauzetosti({
     this.predvidjanjeId,
     this.datum,
@@ -18,6 +20,7 @@ class PredvidjanjeZauzetosti {
     this.zauzetostPoSatima,
     this.ukupnaZauzetost,
     this.preporuceniTermini,
+    this.isPredvidjeno,
   });
 
   factory PredvidjanjeZauzetosti.fromJson(Map<String, dynamic> json) => 

@@ -18,7 +18,7 @@ namespace eBarbershop.Controllers
         }
 
         [HttpPost("generiraj/{klijentId}/{uslugaId}")]
-        public async Task<List<PreporukaTermina>> GenerirajPreporuke(int klijentId, int uslugaId)
+        public async Task<List<PreporukaTermina>> GenerirajPreporuke(int klijentId, int uslugaId,int minDaysBetweenAppointments = 7)
         {
             return await _service.GenerirajPreporuke(klijentId, uslugaId);
         }

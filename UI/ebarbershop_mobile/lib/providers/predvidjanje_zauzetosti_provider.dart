@@ -11,9 +11,7 @@ class PredvidjanjeZauzetostiProvider extends BaseProvider<PredvidjanjeZauzetosti
     return PredvidjanjeZauzetosti.fromJson(data);
   }
 
-  Future<PredvidjanjeZauzetosti> predvidiZauzetost(int korisnikId, DateTime datum) async {
-   return await predvidiZauzetost(korisnikId, datum);
-    
+  Future<PredvidjanjeZauzetosti> predvidiZauzetostZaFrizera(int korisnikId, DateTime datum) async {
+    return await super.predvidiZauzetost(korisnikId, datum);
   }
-  
 }

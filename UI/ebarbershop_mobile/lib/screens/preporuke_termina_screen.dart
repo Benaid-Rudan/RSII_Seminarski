@@ -66,6 +66,7 @@ class _PreporukeTerminaScreenState extends State<PreporukeTerminaScreen> {
 
   Future<void> _prihvatiPreporuku(PreporukaTermina preporuka) async {
     try {
+      
       // Prvo prihvatimo preporuku
       await _preporukaProvider.prihvatiPreporuku(preporuka.preporukaId!);
 

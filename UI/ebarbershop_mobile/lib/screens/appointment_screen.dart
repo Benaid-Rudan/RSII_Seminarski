@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:ebarbershop_mobile/models/mail_object.dart';
 import 'package:ebarbershop_mobile/providers/mail_provider.dart';
+import 'package:ebarbershop_mobile/screens/notification_service.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -10,12 +10,15 @@ import 'package:ebarbershop_mobile/models/korisnik.dart';
 import 'package:ebarbershop_mobile/models/usluga.dart';
 import 'package:ebarbershop_mobile/providers/rezervacija_provider.dart';
 import 'package:ebarbershop_mobile/providers/termin_provider.dart';
+import 'package:ebarbershop_mobile/screens/predvidjanje_zauzetosti_screen.dart' as zauzetost;
+import 'package:ebarbershop_mobile/screens/preporuke_termina_screen.dart' as preporuke;
 
 class AppointmentTimeScreen extends StatefulWidget {
   final Korisnik employee;
   final Usluga service;
   final DateTime selectedDate;
   final Korisnik klijent;
+
   const AppointmentTimeScreen({
     Key? key, 
     required this.employee, 
@@ -91,6 +94,99 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
     }
   }
 
+ Widget _buildActionButtons() {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _showRecommendations(),
+                icon: Icon(Icons.auto_awesome, size: 20),
+                label: Text('Preporuke'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber[800],
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _showBusynessPrediction(),
+                icon: Icon(Icons.analytics, size: 20),
+                label: Text('Zauzetost'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[800],
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        // //  Test dugmad
+        //  Row(
+        //    children: [
+        //      Expanded(
+        //        child: ElevatedButton.icon(
+        //          onPressed: _testNotification,
+        //          icon: Icon(Icons.notifications, size: 20),
+        //          label: Text('Test'),
+        //          style: ElevatedButton.styleFrom(
+        //            backgroundColor: Colors.green[800],
+        //            foregroundColor: Colors.white,
+        //            padding: EdgeInsets.symmetric(vertical: 8),
+        //          ),
+        //        ),
+        //      ),
+        //      SizedBox(width: 12),
+        //      Expanded(
+        //        child: ElevatedButton.icon(
+        //          onPressed: _checkNotifications,
+        //          icon: Icon(Icons.list, size: 20),
+        //          label: Text('Provjeri'),
+        //          style: ElevatedButton.styleFrom(
+        //            backgroundColor: Colors.purple[800],
+        //            foregroundColor: Colors.white,
+        //            padding: EdgeInsets.symmetric(vertical: 8),
+        //          ),
+        //        ),
+        //      ),
+        //    ],
+        //  ),
+      ],
+    ),
+  );
+}
+ 
+  void _showRecommendations() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => preporuke.PreporukeTerminaScreen(
+          usluga: widget.service,
+        ),
+      ),
+    );
+  }
+
+  void _showBusynessPrediction() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => zauzetost.PredvidjanjeZauzetostiScreen(
+          frizer: widget.employee,
+          usluga: widget.service,
+        ),
+      ),
+    );
+  }
+
   Future<void> _createReservation() async {
   if (selectedTimeSlot == null || !mounted) return;
 
@@ -103,7 +199,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
     );
     return;
   }
-
+  
   setState(() {
     isCreatingReservation = true;
   });
@@ -111,7 +207,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   try {
     final rezervacijaProvider = context.read<RezervacijaProvider>();
     final terminProvider = context.read<TerminProvider>();
-    final mailProvider = context.read<MailProvider>();
     
     final reservationDateTime = DateTime(
       widget.selectedDate.year,
@@ -120,6 +215,19 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       selectedTimeSlot!.time.hour,
       selectedTimeSlot!.time.minute,
     );
+
+    // Provjeri da li je rezervacija u budućnosti
+    if (reservationDateTime.isBefore(DateTime.now())) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ne možete rezervisati termin u prošlosti'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
     final createdReservation = await rezervacijaProvider.createReservation(
       datumRezervacije: DateTime.now(),
@@ -136,14 +244,27 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       "isBooked": true,
     });
 
+    // Sigurno zakaži notifikaciju
+    try {
+      await NotificationService().scheduleReservationReminder(
+        id: createdReservation.rezervacijaId!, 
+        title: 'Podsjetnik za rezervaciju',
+        body: 'Imate rezervaciju kod ${widget.employee.ime} ${widget.employee.prezime}',
+        reservationTime: reservationDateTime,
+      );
+    } catch (notificationError) {
+      // Ne prekidaj proces rezervacije ako notifikacija ne uspije
+      print('Greška pri zakazivanju notifikacije: $notificationError');
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Email potvrde poslan na ${widget.klijent.email}'), backgroundColor: Colors.green,),
+        SnackBar(
+          content: Text('Rezervacija uspješno kreirana'), 
+          backgroundColor: Colors.green,
+        ),
       );
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Rezervacija uspješno kreirana'), backgroundColor: Colors.green,),
-    );
     
     await Future.delayed(Duration(milliseconds: 500));
     if (mounted) {
@@ -152,7 +273,10 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   } catch (e) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vratite se korak nazad i odaberite neki budući datum i vrijeme.'),backgroundColor: Colors.red,),
+        SnackBar(
+          content: Text('Greška pri kreiranju rezervacije: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   } finally {
@@ -237,22 +361,23 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                   ),
                 ),
                 
+                _buildActionButtons(), // Dodana dugmad ovdje
+                
                 Container(
                   padding: EdgeInsets.all(16),
                   child: Row(
                     children: [
                       CircleAvatar(
-                      radius: 25,
-                      backgroundImage: widget.employee.slika != null && widget.employee.slika!.isNotEmpty
-                        ? (widget.employee.slika!.startsWith('http')
-                            ? NetworkImage(widget.employee.slika!)
-                            : MemoryImage(base64Decode(widget.employee.slika!))) as ImageProvider
-                        : null,
-                      child: widget.employee.slika == null 
-                        ? Icon(Icons.person, color: Colors.white)
-                        : null,
-                    ),
-
+                        radius: 25,
+                        backgroundImage: widget.employee.slika != null && widget.employee.slika!.isNotEmpty
+                          ? (widget.employee.slika!.startsWith('http')
+                              ? NetworkImage(widget.employee.slika!)
+                              : MemoryImage(base64Decode(widget.employee.slika!))) as ImageProvider
+                          : null,
+                        child: widget.employee.slika == null 
+                          ? Icon(Icons.person, color: Colors.white)
+                          : null,
+                      ),
                       SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

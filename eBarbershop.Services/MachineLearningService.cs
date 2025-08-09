@@ -33,36 +33,62 @@ namespace eBarbershop.Services
 
         public async Task<List<Model.PreporukaTermina>> GenerateRecommendations(int klijentId, int uslugaId, List<Model.Rezervacija> historija)
         {
-            // 1. Priprema podataka za treniranje
+            // Detect haircut frequency pattern
+            var detectedInterval = await DetectHaircutFrequency(klijentId);
+            var defaultInterval = TimeSpan.FromDays(7);
+
+            // Get last completed appointment
+            var lastAppointmentDate = await GetLastCompletedAppointmentDate(klijentId);
+
+            DateTime minRecommendationDate = DateTime.Now.Date;
+
+            if (lastAppointmentDate.HasValue)
+            {
+                var interval = detectedInterval ?? defaultInterval;
+                minRecommendationDate = lastAppointmentDate.Value.Date.Add(interval);
+
+                if (minRecommendationDate < DateTime.Now.Date)
+                {
+                    minRecommendationDate = DateTime.Now.Date;
+                }
+            }
+
+            // Look 30 days ahead for availability
+            var startDate = minRecommendationDate;
+            var endDate = startDate.AddDays(30);
+
+            var existingAppointments = await _context.Termin
+                .Where(t => t.Vrijeme >= startDate && t.Vrijeme <= endDate)
+                .ToListAsync();
+
+            // Prepare training data
             var trainingData = await PrepareRecommendationTrainingData(klijentId);
 
-            // 2. Definišemo pipeline za preporuke
+            // Define recommendation pipeline
             var pipeline = _mlContext.Transforms.Conversion.MapValueToKey(
-                    outputColumnName: "Label",
-                    inputColumnName: nameof(AppointmentRecommendationData.Label))
-                .Append(_mlContext.Transforms.Concatenate("Features",
-                    nameof(AppointmentRecommendationData.ClientId),
-                    nameof(AppointmentRecommendationData.BarberId),
-                    nameof(AppointmentRecommendationData.ServiceId),
-                    nameof(AppointmentRecommendationData.DayOfWeek),
-                    nameof(AppointmentRecommendationData.TimeOfDay))
+                    outputColumnName: "ClientIdEncoded",
+                    inputColumnName: nameof(AppointmentRecommendationData.ClientId))
+                .Append(_mlContext.Transforms.Conversion.MapValueToKey(
+                    outputColumnName: "BarberIdEncoded",
+                    inputColumnName: nameof(AppointmentRecommendationData.BarberId)))
                 .Append(_mlContext.Recommendation().Trainers.MatrixFactorization(
                     new MatrixFactorizationTrainer.Options
                     {
-                        MatrixColumnIndexColumnName = "Features",
-                        MatrixRowIndexColumnName = "Label",
+                        MatrixColumnIndexColumnName = "ClientIdEncoded",
+                        MatrixRowIndexColumnName = "BarberIdEncoded",
+                        LabelColumnName = "Label",
                         LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
                         Alpha = 0.01,
                         Lambda = 0.025,
                         NumberOfIterations = 100
-                    })));
+                    }));
 
-            // 3. Treniramo model
+            // Train model
             var model = pipeline.Fit(trainingData);
 
-            // 4. Generišemo preporuke za sve frizere
+            // Get all barbers
             var allBarbers = await _context.Korisnik
-                .Where(k => k.KorisnikId == 2) // Pretpostavka da je tip 2 za frizere
+                .Where(k => k.KorisnikId == 2)
                 .ToListAsync();
 
             var recommendations = new List<Model.PreporukaTermina>();
@@ -70,18 +96,69 @@ namespace eBarbershop.Services
 
             foreach (var barber in allBarbers)
             {
-                // Mapiraj Database.Korisnik u Model.Korisnik
                 var barberModel = _mapper.Map<Model.Korisnik>(barber);
 
-                // Generišemo preporuke za narednih 7 dana
-                for (int daysFromNow = 1; daysFromNow <= 7; daysFromNow++)
+                // Generate recommendations based on detected interval first
+                if (detectedInterval.HasValue && lastAppointmentDate.HasValue)
                 {
-                    var date = DateTime.Now.AddDays(daysFromNow);
+                    var idealDate = lastAppointmentDate.Value.Add(detectedInterval.Value);
+                    if (idealDate >= startDate && idealDate <= endDate)
+                    {
+                        var dayOfWeek = (float)idealDate.DayOfWeek;
+
+                        for (int hour = 9; hour <= 17; hour++)
+                        {
+                            var proposedTime = new DateTime(idealDate.Year, idealDate.Month, idealDate.Day, hour, 0, 0);
+
+                            if (!existingAppointments.Any(a => a.KorisnikID == barber.KorisnikId && a.Vrijeme == proposedTime))
+                            {
+                                var input = new AppointmentRecommendationData
+                                {
+                                    ClientId = klijentId,
+                                    BarberId = barber.KorisnikId,
+                                    ServiceId = uslugaId,
+                                    DayOfWeek = dayOfWeek,
+                                    TimeOfDay = hour,
+                                    Label = 1
+                                };
+
+                                var prediction = predictionEngine.Predict(input);
+
+                                if (prediction.Score > 0.7)
+                                {
+                                    recommendations.Add(new Model.PreporukaTermina
+                                    {
+                                        KlijentId = klijentId,
+                                        KorisnikId = barber.KorisnikId,
+                                        UslugaId = uslugaId,
+                                        PreporuceniTermin = proposedTime,
+                                        SkorPovjerenja = prediction.Score,
+                                        RazlogPreporuke = GetRecommendationReason(prediction.Score, barberModel, detectedInterval, lastAppointmentDate),
+                                        IsAccepted = false
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Also include other available slots
+                for (int daysFromNow = 0; daysFromNow <= (endDate - startDate).Days; daysFromNow++)
+                {
+                    var date = startDate.AddDays(daysFromNow).Date;
+                    if (date < DateTime.Now.Date) continue;
+
                     var dayOfWeek = (float)date.DayOfWeek;
 
-                    // Provjeravamo radno vrijeme (9-17h)
                     for (int hour = 9; hour <= 17; hour++)
                     {
+                        var proposedTime = new DateTime(date.Year, date.Month, date.Day, hour, 0, 0);
+
+                        if (existingAppointments.Any(a => a.KorisnikID == barber.KorisnikId && a.Vrijeme == proposedTime))
+                        {
+                            continue;
+                        }
+
                         var input = new AppointmentRecommendationData
                         {
                             ClientId = klijentId,
@@ -89,12 +166,11 @@ namespace eBarbershop.Services
                             ServiceId = uslugaId,
                             DayOfWeek = dayOfWeek,
                             TimeOfDay = hour,
-                            Label = 1 // Neutralna vrijednost za predikciju
+                            Label = 1
                         };
 
                         var prediction = predictionEngine.Predict(input);
 
-                        // Dodajemo samo preporuke sa visokim score-om
                         if (prediction.Score > 0.7)
                         {
                             recommendations.Add(new Model.PreporukaTermina
@@ -102,9 +178,9 @@ namespace eBarbershop.Services
                                 KlijentId = klijentId,
                                 KorisnikId = barber.KorisnikId,
                                 UslugaId = uslugaId,
-                                PreporuceniTermin = new DateTime(date.Year, date.Month, date.Day, hour, 0, 0),
+                                PreporuceniTermin = proposedTime,
                                 SkorPovjerenja = prediction.Score,
-                                RazlogPreporuke = GetRecommendationReason(prediction.Score, barberModel),
+                                RazlogPreporuke = GetRecommendationReason(prediction.Score, barberModel, detectedInterval, lastAppointmentDate),
                                 IsAccepted = false
                             });
                         }
@@ -112,32 +188,105 @@ namespace eBarbershop.Services
                 }
             }
 
-            // Sortiramo preporuke po score-u
-            return recommendations.OrderByDescending(r => r.SkorPovjerenja).ToList();
+            return recommendations
+                .OrderBy(r => Math.Abs((r.PreporuceniTermin - (lastAppointmentDate?.Add(detectedInterval ?? defaultInterval) ?? DateTime.MaxValue)).Ticks))
+                .ThenByDescending(r => r.SkorPovjerenja)
+                .ToList();
+
         }
+
+        private async Task<TimeSpan?> DetectHaircutFrequency(int klijentId)
+        {
+            var appointments = await _context.Termin
+                .Where(t => t.KlijentId == klijentId)
+                .OrderBy(t => t.Vrijeme)
+                .ToListAsync();
+
+            if (appointments.Count < 3) return null;
+
+            var intervals = new List<TimeSpan>();
+            for (int i = 1; i < appointments.Count; i++)
+            {
+                intervals.Add(appointments[i].Vrijeme - appointments[i - 1].Vrijeme);
+            }
+
+            var averageIntervalTicks = (long)intervals.Average(i => i.Ticks);
+            var averageInterval = new TimeSpan(averageIntervalTicks);
+
+            // Round to common intervals
+            if (averageInterval.TotalDays >= 27 && averageInterval.TotalDays <= 33)
+                return TimeSpan.FromDays(30);
+            else if (averageInterval.TotalDays >= 19 && averageInterval.TotalDays <= 25)
+                return TimeSpan.FromDays(21);
+            else if (averageInterval.TotalDays >= 12 && averageInterval.TotalDays <= 18)
+                return TimeSpan.FromDays(14);
+            else if (averageInterval.TotalDays >= 5 && averageInterval.TotalDays <= 9)
+                return TimeSpan.FromDays(7);
+
+            return null;
+        }
+
+        private async Task<DateTime?> GetLastCompletedAppointmentDate(int klijentId)
+        {
+            return await _context.Termin
+                .Where(t => t.KlijentId == klijentId && t.Vrijeme < DateTime.Now)
+                .OrderByDescending(t => t.Vrijeme)
+                .Select(t => t.Vrijeme)
+                .FirstOrDefaultAsync();
+        }
+
+        private string GetRecommendationReason(float score, Model.Korisnik barber, TimeSpan? detectedInterval, DateTime? lastAppointmentDate)
+        {
+            string baseReason = score > 0.9
+                ? $"Visoko preporučeno na osnovu vaših prethodnih rezervacija kod {barber.Ime}"
+                : score > 0.8
+                    ? $"Popularan termin kod {barber.Ime} koji odgovara vašim navikama"
+                    : "Dobar izbor prema vašoj historiji rezervacija";
+
+            if (detectedInterval.HasValue && lastAppointmentDate.HasValue)
+            {
+                var days = detectedInterval.Value.TotalDays;
+                baseReason += $" (preporuka za vaš redovni {days}-dnevni ritam šišanja)";
+            }
+            else if (lastAppointmentDate.HasValue)
+            {
+                var daysSince = (DateTime.Now.Date - lastAppointmentDate.Value.Date).Days;
+                baseReason += $" (prošlo je {daysSince} dana od poslednjeg šišanja)";
+            }
+
+            return baseReason;
+        }
+
 
         public async Task<Model.PredvidjanjeZauzetosti> PredictBusyness(int korisnikId, DateTime datum, List<Model.Termin> historija)
         {
-            // 1. Priprema podataka za treniranje
+            // 1. Prepare training data with improved logic
             var trainingData = await PrepareBusynessTrainingData(korisnikId);
 
-            // 2. Definišemo pipeline za predviđanje zauzetosti
+            // Check if we have enough data to train
+            if (trainingData.GetRowCount() == 0)
+            {
+                return GenerateDefaultPrediction(korisnikId, datum);
+            }
+
+            // 2. Enhanced pipeline with more features
             var pipeline = _mlContext.Transforms.Concatenate("Features",
                     nameof(BusynessData.DayOfWeek),
                     nameof(BusynessData.TimeSlot),
                     nameof(BusynessData.Month),
                     nameof(BusynessData.IsHoliday))
-                .Append(_mlContext.Regression.Trainers.Sdca());
+                .Append(_mlContext.Regression.Trainers.Sdca(
+                    labelColumnName: nameof(BusynessData.BusyPercentage),
+                    maximumNumberOfIterations: 100));
 
-            // 3. Treniramo model
+            // 3. Train model with validation
             var model = pipeline.Fit(trainingData);
 
-            // 4. Pravimo predikcije za traženi datum
+            // 4. Make predictions for each hour
             var predictionEngine = _mlContext.Model.CreatePredictionEngine<BusynessData, BusynessPrediction>(model);
             var busynessPerHour = new Dictionary<string, double>();
             var recommendedSlots = new List<string>();
 
-            // Provjeravamo radno vrijeme (9-17h)
             for (int hour = 9; hour <= 17; hour++)
             {
                 var input = new BusynessData
@@ -147,14 +296,16 @@ namespace eBarbershop.Services
                     TimeSlot = hour,
                     Month = datum.Month,
                     IsHoliday = IsHoliday(datum) ? 1 : 0,
-                    BusyPercentage = 0 // Ovo će biti predviđeno
+                    BusyPercentage = 0 // Will be predicted
                 };
 
                 var prediction = predictionEngine.Predict(input);
-                var busyPercentage = Math.Min(1, Math.Max(0, prediction.BusyPercentage)); // Osiguravamo vrijednost između 0 i 1
-                busynessPerHour.Add(hour.ToString(), busyPercentage);
 
-                // Preporučujemo termine sa zauzetosti manjom od 70%
+                // Apply smoothing and ensure reasonable values
+                var busyPercentage = Math.Min(1, Math.Max(0, prediction.BusyPercentage * 1.2));
+
+                busynessPerHour.Add($"{hour}:00", busyPercentage);
+
                 if (busyPercentage < 0.7)
                 {
                     recommendedSlots.Add($"{hour}:00");
@@ -165,9 +316,14 @@ namespace eBarbershop.Services
             {
                 KorisnikId = korisnikId,
                 Datum = datum,
-                ZauzetostPoSatima = (ICollection<Model.ZauzetostPoSatu>)busynessPerHour,
+                ZauzetostPoSatima = busynessPerHour.Select(x => new Model.ZauzetostPoSatu
+                {
+                    Sat = x.Key,
+                    Vrijednost = x.Value
+                }).ToList(),
                 UkupnaZauzetost = busynessPerHour.Values.Average(),
-                PreporuceniTermini = recommendedSlots
+                PreporuceniTermini = recommendedSlots,
+                IsDefaultPrediction = false
             };
         }
 
@@ -217,26 +373,36 @@ namespace eBarbershop.Services
 
         private async Task<IDataView> PrepareBusynessTrainingData(int korisnikId)
         {
-            // Dohvaćamo sve historijske termine za frizera
+            // Get appointments from last 6 months for better accuracy
+            var sixMonthsAgo = DateTime.Now.AddMonths(-6);
+
             var appointments = await _context.Termin
-                .Where(t => t.KorisnikID == korisnikId && t.Vrijeme < DateTime.Now)
+                .Where(t => t.KorisnikID == korisnikId &&
+                           t.Vrijeme >= sixMonthsAgo &&
+                           t.Vrijeme < DateTime.Now)
                 .ToListAsync();
 
+            // If no data, return empty set (handled by caller)
+            if (!appointments.Any())
+            {
+                return _mlContext.Data.LoadFromEnumerable(new List<BusynessData>());
+            }
+
+            // Calculate busyness more precisely
             var trainingData = new List<BusynessData>();
 
-            // Grupišemo termine po danu i satu da izračunamo zauzetost
-            var grouped = appointments
+            // Group by day and hour
+            var dailyGroups = appointments
                 .GroupBy(t => new { t.Vrijeme.Date, t.Vrijeme.Hour })
-                .Select(g => new
-                {
+                .Select(g => new {
                     Date = g.Key.Date,
                     Hour = g.Key.Hour,
                     Count = g.Count(),
-                    // Pretpostavka da frizer može imati max 1 termin po satu
-                    BusyPercentage = Math.Min(1, g.Count())
+                    // Assume barber can handle 2 appointments per hour
+                    BusyPercentage = Math.Min(1, g.Count() / 2.0)
                 });
 
-            foreach (var item in grouped)
+            foreach (var item in dailyGroups)
             {
                 trainingData.Add(new BusynessData
                 {
@@ -245,13 +411,53 @@ namespace eBarbershop.Services
                     TimeSlot = item.Hour,
                     Month = item.Date.Month,
                     IsHoliday = IsHoliday(item.Date) ? 1 : 0,
-                    BusyPercentage = item.BusyPercentage
+                    
+                    BusyPercentage = (float)item.BusyPercentage
                 });
             }
 
             return _mlContext.Data.LoadFromEnumerable(trainingData);
         }
+        private Model.PredvidjanjeZauzetosti GenerateDefaultPrediction(int korisnikId, DateTime datum)
+        {
+            // Default pattern when no historical data exists
+            var busynessPerHour = new Dictionary<string, double>();
+            var recommendedSlots = new List<string>();
 
+            // Weekday pattern
+            if (datum.DayOfWeek != DayOfWeek.Saturday && datum.DayOfWeek != DayOfWeek.Sunday)
+            {
+                for (int hour = 9; hour <= 17; hour++)
+                {
+                    var busyness = (hour >= 10 && hour <= 12) || (hour >= 15 && hour <= 17) ? 0.6 : 0.3;
+                    busynessPerHour.Add($"{hour}:00", busyness);
+
+                    if (busyness < 0.7) recommendedSlots.Add($"{hour}:00");
+                }
+            }
+            else // Weekend pattern
+            {
+                for (int hour = 10; hour <= 15; hour++)
+                {
+                    busynessPerHour.Add($"{hour}:00", 0.8);
+                    if (hour == 12) recommendedSlots.Add($"{hour}:00");
+                }
+            }
+
+            return new Model.PredvidjanjeZauzetosti
+            {
+                KorisnikId = korisnikId,
+                Datum = datum,
+                ZauzetostPoSatima = busynessPerHour.Select(x => new Model.ZauzetostPoSatu
+                {
+                    Sat = x.Key,
+                    Vrijednost = x.Value
+                }).ToList(),
+                UkupnaZauzetost = busynessPerHour.Values.Average(),
+                PreporuceniTermini = recommendedSlots,
+                IsDefaultPrediction = true
+            };
+        }
         private bool IsHoliday(DateTime date)
         {
             // Ovo je pojednostavljena implementacija
@@ -262,14 +468,6 @@ namespace eBarbershop.Services
                    (date.Month == 5 && date.Day == 1);   // Praznik rada
         }
 
-        private string GetRecommendationReason(float score, Model.Korisnik barber)
-        {
-            if (score > 0.9)
-                return $"Visoko preporučeno na osnovu vaših prethodnih rezervacija kod {barber.Ime}";
-            if (score > 0.8)
-                return $"Popularan termin kod {barber.Ime} koji odgovara vašim navikama";
-            return $"Dobar izbor prema vašoj historiji rezervacija";
-        }
 
         // Modeli podataka za ML.NET
         private class AppointmentRecommendationData

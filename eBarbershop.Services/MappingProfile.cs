@@ -69,13 +69,18 @@ namespace eBarbershop.Services
 
             CreateMap<Database.KorisnikUloga, Model.KorisnikUloga>();
 
-            CreateMap<Database.PredvidjanjeZauzetosti, Model.PredvidjanjeZauzetosti>();
+            CreateMap<Database.PredvidjanjeZauzetosti, Model.PredvidjanjeZauzetosti>().ReverseMap();
+
             CreateMap<Model.Requests.PredvidjanjeZauzetostiInsertRequest, Database.PredvidjanjeZauzetosti>();
             CreateMap<Model.Requests.PredvidjanjeZauzetostiUpdateRequest, Database.PredvidjanjeZauzetosti>();
 
             CreateMap<Database.PreporukaTermina, Model.PreporukaTermina>();
             CreateMap<Model.Requests.PreporukaTerminaInsertRequest, Database.PreporukaTermina>();
             CreateMap<Model.Requests.PreporukaTerminaUpdateRequest, Database.PreporukaTermina>();
+
+            CreateMap<Database.ZauzetostPoSatu, Model.ZauzetostPoSatu>()
+            .ForMember(dest => dest.Predvidjanje, opt => opt.Ignore())
+            .ReverseMap();
 
         }
     }

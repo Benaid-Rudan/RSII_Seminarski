@@ -238,6 +238,9 @@ namespace eBarbershop.Services.Migrations
                     b.Property<DateTime>("Datum")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDefaultPrediction")
+                        .HasColumnType("bit");
+
                     b.Property<int>("KorisnikId")
                         .HasColumnType("int");
 

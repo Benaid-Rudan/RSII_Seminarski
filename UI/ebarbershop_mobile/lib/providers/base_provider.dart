@@ -190,19 +190,31 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
   }
   Future<T> predvidiZauzetost(int korisnikId, DateTime datum) async {
-    var url = "$_baseUrl$_endpoint/predvidi/$korisnikId?datum=${datum.toIso8601String()}";
-    var uri = Uri.parse(url);
-    var headers = createHeaders();
+   var url = "$_baseUrl$_endpoint/predvidi/$korisnikId?datum=${datum.toIso8601String()}";
+  var uri = Uri.parse(url);
+  var headers = createHeaders();
 
-    var ioClient = _createClient();
-    var response = await ioClient.get(uri, headers: headers);
+  var ioClient = _createClient();
+  var response = await ioClient.get(uri, headers: headers);
 
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
+  if (isValidResponse(response)) {
+    var data = jsonDecode(response.body);
+    
+    // Handle both List and Map responses
+    if (data is List) {
+      if (data.isNotEmpty) {
+        return fromJson(data.first); // Take first item if it's a list
+      } else {
+        throw Exception("No prediction data available");
+      }
+    } else if (data is Map<String, dynamic>) {
       return fromJson(data);
     } else {
-      throw Exception("Greška pri dohvatanju predviđanja zauzetosti");
+      throw Exception("Unexpected response format");
     }
+  } else {
+    throw Exception("Greška pri dohvatanju predviđanja zauzetosti");
+  }
   }
   Future<List<PreporukaTermina>> generirajPreporuke(int klijentId, int uslugaId) async {
     var url = "$_baseUrl$_endpoint/generiraj/$klijentId/$uslugaId";

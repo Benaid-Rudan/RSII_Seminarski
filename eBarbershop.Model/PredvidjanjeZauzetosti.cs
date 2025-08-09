@@ -15,7 +15,7 @@ namespace eBarbershop.Model
         public ICollection<ZauzetostPoSatu> ZauzetostPoSatima { get; set; } = new List<ZauzetostPoSatu>();
 
         public double UkupnaZauzetost { get; set; }
-
+        public bool IsDefaultPrediction { get; set; }
         public List<string> PreporuceniTermini { get; set; }
     }
 }

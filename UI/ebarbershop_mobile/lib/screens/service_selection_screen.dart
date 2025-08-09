@@ -1,6 +1,4 @@
 import 'package:ebarbershop_mobile/screens/appointment_screen.dart';
-import 'package:ebarbershop_mobile/screens/predvidjanje_zauzetosti_screen.dart';
-import 'package:ebarbershop_mobile/screens/preporuke_termina_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ebarbershop_mobile/models/korisnik.dart';
@@ -23,7 +21,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   bool isLoading = true;
   List<Usluga>? services;
   DateTime? selectedDate;
-  Usluga? selectedService; 
+  
   @override
   void initState() {
     super.initState();
@@ -56,7 +54,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2025, 1, 1),
       lastDate: DateTime.now().add(Duration(days: 365)),
     );
     if (picked != null && picked != selectedDate) {
@@ -64,69 +62,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
         selectedDate = picked;
       });
     }
-  } 
-  Widget _buildActionButtons() {
-  if (selectedService == null) return SizedBox.shrink(); 
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    child: Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () => _showRecommendations(),
-            icon: Icon(Icons.auto_awesome, size: 20),
-            label: Text('Preporuke'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amber[800],
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () => _showBusynessPrediction(),
-            icon: Icon(Icons.analytics, size: 20),
-            label: Text('Zauzetost'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[800],
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+  }
 
-
-void _showRecommendations() {
-  if (selectedService == null) return;
-  
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PreporukeTerminaScreen(usluga: selectedService!),
-    ),
-  );
-}
-
-void _showBusynessPrediction() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PredvidjanjeZauzetostiScreen(frizer: widget.employee),
-    ),
-  );
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,7 +106,6 @@ void _showBusynessPrediction() {
                     ],
                   ),
                 ),
-                 _buildActionButtons(),
                 Expanded(
                   child: _buildServicesList(),
                 ),
@@ -236,12 +172,9 @@ void _showBusynessPrediction() {
                         Container(
                           width: double.infinity,
                           child: ElevatedButton(
-                              onPressed: selectedDate == null
+                            onPressed: selectedDate == null
                               ? null
                               : () {
-                                  setState(() {
-                                    selectedService = service; 
-                                  });
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -254,15 +187,14 @@ void _showBusynessPrediction() {
                                     ),
                                   );
                                 },
-
-
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
-                            ),
-                            
-                          ), child: Text('Rezerviši'),
-                        ),),
+                              ),
+                            ), 
+                            child: Text('Rezerviši'),
+                          ),
+                        ),
                       ],
                     ),
                   ),

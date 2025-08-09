@@ -45,14 +45,18 @@ dependencies:
   webview_flutter_android: ^3.0.0
   webview_flutter_wkwebview: ^3.0.0
   flutter_paypal: ^0.2.1
-  
+  flutter_local_notifications: ^15.1.0+1
+  timezone: ^0.9.2
 dev_dependencies:
   json_serializable: ^6.7.0
   build_runner: ^2.4.4
   collection: ^1.17.2
   flutter_test:
     sdk: flutter
-
+dependency_overrides:
+  # Forsirajte novije verzije ovih paketa
+  file: ^7.0.0
+  process: ^5.0.0
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

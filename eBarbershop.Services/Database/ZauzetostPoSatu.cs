@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace eBarbershop.Services.Database
@@ -13,7 +14,7 @@ namespace eBarbershop.Services.Database
         public double Vrijednost { get; set; }
 
         public int PredvidjanjeId { get; set; }  // FK
-        public PredvidjanjeZauzetosti Predvidjanje { get; set; }
+        [JsonIgnore] public PredvidjanjeZauzetosti Predvidjanje { get; set; }
     }
 
 }
