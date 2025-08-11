@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:ebarbershop_mobile/models/lista_cekanja.dart';
 import 'package:ebarbershop_mobile/models/mail_object.dart';
+import 'package:ebarbershop_mobile/providers/lista_cekanja_provider.dart';
 import 'package:ebarbershop_mobile/providers/mail_provider.dart';
+import 'package:ebarbershop_mobile/providers/my_waiting_list_screen.dart';
 import 'package:ebarbershop_mobile/screens/notification_service.dart';
 import 'package:ebarbershop_mobile/utils/util.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +96,130 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       );
     }
   }
+  Future<void> _joinWaitingList() async {
+  if (widget.klijent.korisnikId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Morate biti prijavljeni da biste se pridružili listi čekanja')),
+    );
+    return;
+  }
 
+  final now = DateTime.now();
+  final zeljeniDatum = widget.selectedDate;
+
+  // Check if date is in the past
+  if (zeljeniDatum.isBefore(DateTime(now.year, now.month, now.day))) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Ne možete se pridružiti listi čekanja za prošle dane')),
+    );
+    return;
+  }
+
+  // Show time picker if no time slot is selected
+  TimeOfDay? selectedTime;
+  if (selectedTimeSlot != null) {
+    selectedTime = TimeOfDay.fromDateTime(selectedTimeSlot!.time);
+  } else {
+    selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (selectedTime == null) return;
+  }
+
+  try {
+    final listaCekanjaProvider = context.read<ListaCekanjaProvider>();
+    
+    // 1. First check for existing waiting list entries
+    final existingEntries = await listaCekanjaProvider.getByFrizerAndDate(
+      frizerId: widget.employee.korisnikId!,
+      datum: widget.selectedDate,
+    );
+
+    // 2. Check if user already has an entry for this time
+    final timeString = "${selectedTime.hour.toString().padLeft(2,'0')}:${selectedTime.minute.toString().padLeft(2,'0')}:00";
+    final hasExisting = existingEntries.any((entry) => 
+      entry.klijentId == widget.klijent.korisnikId &&
+      entry.zeljeniDatum == timeString
+    );
+
+    if (hasExisting) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Već ste na listi čekanja za ovaj termin'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // 3. Create new waiting list entry
+    final request = ListaCekanjaInsertRequest(
+      frizerId: widget.employee.korisnikId!,
+      klijentId: Authorization.userId!,
+      uslugaId: widget.service.uslugaId!,
+      zeljeniDatum: DateTime(
+        zeljeniDatum.year,
+        zeljeniDatum.month,
+        zeljeniDatum.day,
+      ),
+      zeljenoVrijeme: selectedTime,
+      napomena: 'Želim termin u ${selectedTime.format(context)}',
+      daniDoIsteka: 7,
+    );
+
+    debugPrint('Sending request: ${request.toJson()}');
+    final result = await listaCekanjaProvider.joinWaitingList(request);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Uspješno dodani na listu čekanja!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    
+    Navigator.pop(context);
+  } catch (e) {
+    debugPrint("Full error: $e");
+    
+    // Handle specific API error message
+    String errorMessage = 'Greška pri pridruživanju listi čekanja';
+    if (e.toString().contains('Već ste na listi čekanja')) {
+      errorMessage = 'Već ste na listi čekanja za ovaj termin';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Widget _buildWaitingListButton() {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: OutlinedButton(
+      onPressed: _joinWaitingList,
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        side: BorderSide(color: Theme.of(context).primaryColor),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+      child: Text(
+        'Pridruži se listi čekanja',
+        style: TextStyle(
+          fontSize: 16,
+          color: Theme.of(context).primaryColor,
+        ),
+      ),
+    ),
+  );
+}
  Widget _buildActionButtons() {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -124,6 +250,18 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 12),
                 ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyWaitingListScreen()),
+                  );
+                },
+                child: Text('Moje liste čekanja'),
               ),
             ),
           ],
@@ -466,6 +604,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
                           ),
                   ),
                 ),
+                _buildWaitingListButton(),
               ],
             ),
     );

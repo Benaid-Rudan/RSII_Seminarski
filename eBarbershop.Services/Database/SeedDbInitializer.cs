@@ -618,6 +618,31 @@ public static class SeedDbInitializer
         {
             context.Rezervacija.Add(a);
         }
+
+        if (!context.ListaCekanja.Any())
+        {
+            var testWaitingList = new[]
+            {
+            new Database.ListaCekanja
+            {
+                KlijentId = 1, // Treba postojati u bazi
+                FrizerId = 2,  // Treba postojati u bazi
+                UslugaId = 1,  // Treba postojati u bazi
+                ZeljeniDatum = DateTime.Today.AddDays(1),
+                ZeljenoVrijeme = new TimeSpan(10, 0, 0),
+                Prioritet = 75,
+                DatumPrijave = DateTime.Now.AddHours(-2),
+                Status = 1, // Aktivna
+                DatumIsteka = DateTime.Now.AddDays(7),
+                MLSkor = 0.85,
+                NotifikacijaPoslana = false
+            },
+            // Dodajte više test podataka po potrebi...
+        };
+
+            context.ListaCekanja.AddRange(testWaitingList);
+            context.SaveChanges();
+        }
         context.SaveChanges();
     }
 

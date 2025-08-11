@@ -1,6 +1,7 @@
 using eBarbershop;
 using eBarbershop.Services;
 using eBarbershop.Services.Database;
+using eBarbershop.Services.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -26,7 +27,20 @@ builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<IMachineLearningService, MachineLearningService>();
 builder.Services.AddScoped<IPreporukaTerminaService, PreporukaTerminaService>();
 builder.Services.AddScoped<IPredvidjanjeZauzetostiService, PredvidjanjeZauzetostiService>();
+builder.Services.AddScoped<IWaitingListMLService, WaitingListMLService>();
+builder.Services.AddScoped<IListaCekanjaService, ListaCekanjaService>();
+builder.Services.AddScoped<IWaitingListAnalyticsService, WaitingListAnalyticsService>();
+builder.Services.AddWaitingListServices(); // Koristiti extension metodu
+builder.Services.AddScoped<IWaitingListNotificationService, WaitingListNotificationService>();
 
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck<WaitingListHealthCheck>("waiting_list");
+// Background servis za automatsko upravljanje listom èekanja
+builder.Services.AddHostedService<WaitingListBackgroundService>();
+
+// Dodavanje ML.NET dependencija
+builder.Services.AddSingleton<Microsoft.ML.MLContext>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -117,5 +131,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHealthChecks("/health");
 app.Run();

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ebarbershop_mobile/models/lista_cekanja.dart';
 import 'package:ebarbershop_mobile/models/predvidjanje_zauzetosti.dart';
 import 'package:ebarbershop_mobile/models/preporuka_termina.dart';
 import 'package:ebarbershop_mobile/models/search_result.dart';
@@ -7,7 +8,8 @@ import 'package:ebarbershop_mobile/models/product.dart';
 import 'package:http/io_client.dart';  
 import 'dart:io';  
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';  
+import 'package:http/http.dart';
+import 'package:intl/intl.dart';  
 
 abstract class BaseProvider<T> with ChangeNotifier {
   static String? _baseUrl;
@@ -91,6 +93,79 @@ abstract class BaseProvider<T> with ChangeNotifier {
     throw Exception("Neuspješan API poziv");
   }
 }
+Future<List<T>> getByFrizerAndDate({
+  required int frizerId,
+  required DateTime datum,
+}) async {
+  var url = "$_baseUrl$_endpoint/frizer/$frizerId?datum=${DateFormat('yyyy-MM-dd').format(datum)}";
+  var uri = Uri.parse(url);
+  var headers = createHeaders();
+
+  var ioClient = _createClient();
+  var response = await ioClient.get(uri, headers: headers);
+
+  if (isValidResponse(response)) {
+    var data = jsonDecode(response.body) as List;
+    return data.map((item) => fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load waiting list');
+  }
+}
+
+
+Future<T> joinWaitingList(ListaCekanjaInsertRequest request) async {
+  var url = "$_baseUrl$_endpoint";
+  var uri = Uri.parse(url);
+  var headers = createHeaders();
+  var jsonRequest = jsonEncode(request.toJson());
+
+  print('Sending to ${uri.toString()} with body: $jsonRequest'); // Dodajte logging
+
+  var ioClient = _createClient();
+  var response = await ioClient.post(uri, headers: headers, body: jsonRequest);
+
+  if (response.statusCode == 400) {
+    print('Bad request details: ${response.body}');
+    throw Exception(response.body);
+  }
+
+  if (isValidResponse(response)) {
+    var data = jsonDecode(response.body);
+    return fromJson(data);
+  } else {
+    throw Exception("Failed to join waiting list: ${response.statusCode}");
+  }
+}
+
+Future<List<T>> getMyWaitingList(int klijentId) async {
+    var url = "$_baseUrl$_endpoint/my-waiting-list";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var ioClient = _createClient();
+    var response = await ioClient.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body) as List;
+      return data.map((x) => fromJson(x)).toList();
+    } else {
+      throw Exception("Failed to get waiting list");
+    }
+  }
+Future<bool> removeFromWaitingList(int listaCekanjaId) async {
+    var url = "$_baseUrl$_endpoint/leave/$listaCekanjaId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var ioClient = _createClient();
+    var response = await ioClient.delete(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      return true;
+    } else {
+      throw Exception("Failed to remove from waiting list");
+    }
+  }
 
   Future<List<Product>> recommend(int userId) async {
   var url = "${BaseProvider._baseUrl}$_endpoint/recommend?userId=$userId";
