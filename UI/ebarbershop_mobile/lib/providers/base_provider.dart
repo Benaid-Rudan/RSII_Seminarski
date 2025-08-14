@@ -93,24 +93,24 @@ abstract class BaseProvider<T> with ChangeNotifier {
     throw Exception("Neuspješan API poziv");
   }
 }
-Future<List<T>> getByFrizerAndDate({
-  required int frizerId,
-  required DateTime datum,
-}) async {
-  var url = "$_baseUrl$_endpoint/frizer/$frizerId?datum=${DateFormat('yyyy-MM-dd').format(datum)}";
-  var uri = Uri.parse(url);
-  var headers = createHeaders();
+// Future<List<T>> getByFrizerAndDate({
+//   required int frizerId,
+//   required DateTime datum,
+// }) async {
+//   var url = "$_baseUrl$_endpoint/frizer/$frizerId?datum=${DateFormat('yyyy-MM-dd').format(datum)}";
+//   var uri = Uri.parse(url);
+//   var headers = createHeaders();
 
-  var ioClient = _createClient();
-  var response = await ioClient.get(uri, headers: headers);
+//   var ioClient = _createClient();
+//   var response = await ioClient.get(uri, headers: headers);
 
-  if (isValidResponse(response)) {
-    var data = jsonDecode(response.body) as List;
-    return data.map((item) => fromJson(item)).toList();
-  } else {
-    throw Exception('Failed to load waiting list');
-  }
-}
+//   if (isValidResponse(response)) {
+//     var data = jsonDecode(response.body) as List;
+//     return data.map((item) => fromJson(item)).toList();
+//   } else {
+//     throw Exception('Failed to load waiting list');
+//   }
+// }
 
 
 Future<T> joinWaitingList(ListaCekanjaInsertRequest request) async {
@@ -153,7 +153,7 @@ Future<List<T>> getMyWaitingList(int klijentId) async {
     }
   }
 Future<bool> removeFromWaitingList(int listaCekanjaId) async {
-    var url = "$_baseUrl$_endpoint/leave/$listaCekanjaId";
+    var url = "$_baseUrl$_endpoint/$listaCekanjaId";
     var uri = Uri.parse(url);
     var headers = createHeaders();
 
@@ -323,17 +323,16 @@ Future<bool> removeFromWaitingList(int listaCekanjaId) async {
     }
   }
   Map<String, String> createHeaders() {
-    String username = Authorization.username ?? "";
-    String password = Authorization.password ?? "";
-    print("passed creds: $username $password");
-
-    String basicAuth =
-        "Basic ${base64Encode(utf8.encode('$username:$password'))}";
-
     var headers = {
-      "Content-Type": "application/json",
-      "Authorization": basicAuth
+      'Content-Type': 'application/json',
     };
+
+    if (Authorization.username != null && Authorization.password != null) {
+      final credentials = '${Authorization.username}:${Authorization.password}';
+      final encoded = base64Encode(utf8.encode(credentials));
+      headers['Authorization'] = 'Basic $encoded';
+    }
+
     return headers;
   }
 }

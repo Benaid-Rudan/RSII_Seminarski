@@ -82,11 +82,10 @@ namespace eBarbershop.Services
             .ForMember(dest => dest.Predvidjanje, opt => opt.Ignore())
             .ReverseMap();
 
-            CreateMap<Database.ListaCekanja, Model.ListaCekanja>()
-    .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (StatusCekanja)src.Status));
+            CreateMap<Database.ListaCekanja, Model.ListaCekanja>();
+    //.ForMember(dest => dest.Status, opt => opt.MapFrom(src => (StatusCekanja)src.Status));
             CreateMap<Model.Requests.ListaCekanjaInsertRequest, Database.ListaCekanja>();
-            CreateMap<Model.Requests.ListaCekanjaUpdateRequest, Database.ListaCekanja>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status));
+            CreateMap<Model.Requests.ListaCekanjaUpdateRequest, Database.ListaCekanja>();
 
             CreateMap<Database.NotifikacijaListeCekanja, Model.NotifikacijaListeCekanja>();
             

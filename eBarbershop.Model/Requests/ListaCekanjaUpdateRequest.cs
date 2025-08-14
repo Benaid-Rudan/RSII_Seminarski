@@ -13,7 +13,7 @@ namespace eBarbershop.Model.Requests
         [MaxLength(500)]
         public string Napomena { get; set; }
 
-        [Required]
-        public StatusCekanja Status { get; set; }
+        //[Required]
+        //public StatusCekanja Status { get; set; }
     }
 }

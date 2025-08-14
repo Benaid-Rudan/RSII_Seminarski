@@ -19,7 +19,7 @@ namespace eBarbershop.Model
         public TimeSpan? ZeljenoVrijeme { get; set; } // null znači bilo koje vrijeme
         public int Prioritet { get; set; } // ML-generated priority score
         public DateTime DatumPrijave { get; set; }
-        public StatusCekanja Status { get; set; }
+        //public StatusCekanja Status { get; set; }
         public DateTime? DatumNotifikacije { get; set; }
         public DateTime? DatumIsteka { get; set; }
         public string Napomena { get; set; }
@@ -27,12 +27,12 @@ namespace eBarbershop.Model
         public bool NotifikacijaPoslana { get; set; }
     }
 
-    public enum StatusCekanja
-    {
-        Aktivna = 1,
-        Notificirana = 2,
-        Prihvacena = 3,
-        Istekla = 4,
-        Otkazana = 5
-    }
+    //public enum StatusCekanja
+    //{
+    //    Aktivna = 1,
+    //    Notificirana = 2,
+    //    Prihvacena = 3,
+    //    Istekla = 4,
+    //    Otkazana = 5
+    //}
 }

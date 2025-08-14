@@ -9,21 +9,24 @@ class ListaCekanjaProvider extends BaseProvider<ListaCekanja> {
   ListaCekanja fromJson(data) => ListaCekanja.fromJson(data);
 
   Future<ListaCekanja> joinWaitingList(ListaCekanjaInsertRequest request) async {
-        return await super.joinWaitingList(request);
-
+    return await super.joinWaitingList(request);
   }
 
-  Future<List<ListaCekanja>> getMyWaitingList(int klijentId) async {
-        return await super.getMyWaitingList(klijentId);
-    
-  }
+  // @override
+  // Future<List<ListaCekanja>> getByFrizerAndDate({
+  //   required int frizerId, 
+  //   required DateTime datum
+  // }) async {
+  //   return await super.getByFrizerAndDate(frizerId: frizerId, datum: datum);
+  // }
 
-  Future<bool> removeFromWaitingList(int listaCekanjaId) async {
-        return await super.removeFromWaitingList(listaCekanjaId);
-    
-  }
   @override
-  Future<List<ListaCekanja>> getByFrizerAndDate({required int frizerId, required DateTime datum}) {
-    return super.getByFrizerAndDate(frizerId: frizerId, datum: datum);
+  Future<List<ListaCekanja>> getMyWaitingList(int klijentId) async {
+    return await super.getMyWaitingList(klijentId);
+  }
+
+  @override
+  Future<bool> removeFromWaitingList(int listaCekanjaId) async {
+    return await super.removeFromWaitingList(listaCekanjaId);
   }
 }

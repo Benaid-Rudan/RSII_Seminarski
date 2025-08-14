@@ -34,6 +34,8 @@ namespace eBarbershop.Services
             _logger = logger;
         }
 
+        // Updated JoinWaitingList method in ListaCekanjaService.cs
+        // Updated JoinWaitingList method in ListaCekanjaService.cs
         public async Task<Model.ListaCekanja> JoinWaitingList(ListaCekanjaInsertRequest request)
         {
             var klijentId = _currentUserService.GetUserId();
@@ -43,8 +45,9 @@ namespace eBarbershop.Services
                 .FirstOrDefaultAsync(l => l.KlijentId == klijentId &&
                                         l.FrizerId == request.FrizerId &&
                                         l.UslugaId == request.UslugaId &&
-                                        l.ZeljeniDatum.Date == request.ZeljeniDatum.Date &&
-                                        l.Status == 1);
+                                        l.ZeljeniDatum.Date == request.ZeljeniDatum.Date);
+                                        
+                                        //l.Status == 1);
 
             if (postojeciZahtjev != null)
             {
@@ -62,16 +65,16 @@ namespace eBarbershop.Services
                 throw new InvalidOperationException("Termin je dostupan za direktnu rezervaciju.");
             }
 
-            // Kreiraj novu stavku liste čekanja
+            // Kreiraj novu stavku liste čekanja s default vrijednostima
             var entity = new Database.ListaCekanja
             {
                 KlijentId = klijentId,
                 FrizerId = request.FrizerId,
                 UslugaId = request.UslugaId,
                 ZeljeniDatum = request.ZeljeniDatum,
-                ZeljenoVrijeme = request.ParsedZeljenoVrijeme,
+                //ZeljenoVrijeme = request.ParsedZeljenoVrijeme,
                 DatumPrijave = DateTime.Now,
-                Status = (int)StatusCekanja.Aktivna, // Aktivna
+                //Status = (int)StatusCekanja.Aktivna, // Aktivna
                 DatumIsteka = DateTime.Now.AddDays(request.DaniDoIsteka),
                 Napomena = request.Napomena,
                 NotifikacijaPoslana = false,
@@ -79,44 +82,54 @@ namespace eBarbershop.Services
                 MLSkor = 0.5 // Default value
             };
 
+            // Pokuša izračunati ML vrijednosti, ali nastavi ako ne uspije
             try
             {
                 entity.Prioritet = await _mlService.CalculatePriorityScore(
                     klijentId, request.FrizerId, request.UslugaId, request.ZeljeniDatum);
+
                 entity.MLSkor = await _mlService.PredictAcceptanceProbability(klijentId, 0);
+
+                _logger.LogInformation($"ML scores calculated - Priority: {entity.Prioritet}, ML Score: {entity.MLSkor}");
             }
             catch (Exception ex)
             {
                 _logger.LogWarning($"ML services failed, using default values: {ex.Message}");
                 // Keep the default values we set above
+                entity.Prioritet = 50 + (int)((request.ZeljeniDatum - DateTime.Now).TotalDays);
+                entity.MLSkor = 0.5;
             }
+
             await _context.ListaCekanja.AddAsync(entity);
             await _context.SaveChangesAsync();
 
-            // Izračunaj ML score
-            entity.MLSkor = await _mlService.PredictAcceptanceProbability(klijentId, 0); // 0 jer nema specifičan termin
-
-            await _context.SaveChangesAsync();
-
             // Pošalji potvrdu emailom
-            var klijent = await _context.Korisnik.FindAsync(klijentId);
-            var frizer = await _context.Korisnik.FindAsync(request.FrizerId);
-            var usluga = await _context.Usluga.FindAsync(request.UslugaId);
-
-            if (klijent?.Email != null)
+            try
             {
-                var mailObject = new MailObject
+                var klijent = await _context.Korisnik.FindAsync(klijentId);
+                var frizer = await _context.Korisnik.FindAsync(request.FrizerId);
+                var usluga = await _context.Usluga.FindAsync(request.UslugaId);
+
+                if (klijent?.Email != null)
                 {
-                    mailAdresa = klijent.Email,
-                    subject = "Dodani ste na listu čekanja",
-                    poruka = $"Poštovani {klijent.Ime},<br/><br/>Uspješno ste dodani na listu čekanja za:<br/>" +
-                            $"<strong>Frizer:</strong> {frizer?.Ime} {frizer?.Prezime}<br/>" +
-                            $"<strong>Usluga:</strong> {usluga?.Naziv}<br/>" +
-                            $"<strong>Željeni datum:</strong> {request.ZeljeniDatum:dd.MM.yyyy}<br/>" +
-                            $"<strong>Vaš prioritet:</strong> {entity.Prioritet}/100<br/><br/>" +
-                            "Obavijestit ćemo vas kada se oslobodi termin!"
-                };
-                await _emailService.startConnection(mailObject);
+                    var mailObject = new MailObject
+                    {
+                        mailAdresa = klijent.Email,
+                        subject = "Dodani ste na listu čekanja",
+                        poruka = $"Poštovani {klijent.Ime},<br/><br/>Uspješno ste dodani na listu čekanja za:<br/>" +
+                                $"<strong>Frizer:</strong> {frizer?.Ime} {frizer?.Prezime}<br/>" +
+                                $"<strong>Usluga:</strong> {usluga?.Naziv}<br/>" +
+                                $"<strong>Željeni datum:</strong> {request.ZeljeniDatum:dd.MM.yyyy}<br/>" +
+                                $"<strong>Vaš prioritet:</strong> {entity.Prioritet}/100<br/><br/>" +
+                                "Obavijestit ćemo vas kada se oslobodi termin!"
+                    };
+                    await _emailService.startConnection(mailObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Failed to send email notification: {ex.Message}");
+                // Continue without email - this shouldn't block the operation
             }
 
             _logger.LogInformation($"Korisnik {klijentId} dodan na listu čekanja za frizera {request.FrizerId}");
@@ -132,7 +145,7 @@ namespace eBarbershop.Services
 
             if (stavka == null) return false;
 
-            stavka.Status = 5; // Otkazana
+            //stavka.Status = 5; // Otkazana
             await _context.SaveChangesAsync();
 
             _logger.LogInformation($"Korisnik {klijentId} uklonjen sa liste čekanja {listaCekanjaId}");
@@ -145,7 +158,7 @@ namespace eBarbershop.Services
             var query = _context.ListaCekanja
                 .Include(l => l.Klijent)
                 .Include(l => l.Usluga)
-                .Where(l => l.FrizerId == frizerId && l.Status == 1);
+                .Where(l => l.FrizerId == frizerId);
 
             // Apply date filter if provided
             if (datum.HasValue)
@@ -163,14 +176,17 @@ namespace eBarbershop.Services
 
         public async Task<List<Model.ListaCekanja>> GetMyWaitingList(int klijentId)
         {
-            var lista = await _context.ListaCekanja
-                .Where(l => l.KlijentId == klijentId && (l.Status == 1 || l.Status == 2))
+            _logger.LogInformation($"Fetching waiting list for client {klijentId}");
+
+            var items = await _context.ListaCekanja
+                .Where(l => l.KlijentId == klijentId)
                 .Include(l => l.Frizer)
                 .Include(l => l.Usluga)
                 .OrderBy(l => l.ZeljeniDatum)
                 .ToListAsync();
 
-            return _mapper.Map<List<Model.ListaCekanja>>(lista);
+            _logger.LogInformation($"Found {items.Count} items for client {klijentId}");
+            return _mapper.Map<List<Model.ListaCekanja>>(items);
         }
 
         public async Task ProcessAvailableSlot(int terminId)
@@ -189,7 +205,7 @@ namespace eBarbershop.Services
             var potencijalniKandidati = await _context.ListaCekanja
                 .Where(l => l.FrizerId == termin.KorisnikID &&
                            l.ZeljeniDatum.Date <= termin.Vrijeme.Date &&
-                           l.Status == 1 &&
+                           //l.Status == 1 &&
                            (!l.ZeljenoVrijeme.HasValue ||
                             Math.Abs((l.ZeljenoVrijeme.Value - termin.Vrijeme.TimeOfDay).TotalMinutes) <= 60))
                 .Include(l => l.Klijent)
@@ -202,9 +218,24 @@ namespace eBarbershop.Services
                 return;
             }
 
-            // Koristi ML za pronalaženje najboljih kandidata
-            var kandidatIds = potencijalniKandidati.Select(k => k.ListaCekanjaId).ToList();
-            var rangiranKandidati = await _mlService.FindBestCandidatesForSlot(terminId, kandidatIds);
+            List<int> rangiranKandidati;
+
+            try
+            {
+                // Koristi ML za pronalaženje najboljih kandidata
+                var kandidatIds = potencijalniKandidati.Select(k => k.ListaCekanjaId).ToList();
+                rangiranKandidati = await _mlService.FindBestCandidatesForSlot(terminId, kandidatIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"ML candidate ranking failed, using fallback: {ex.Message}");
+                // Fallback sorting by priority and waiting time
+                rangiranKandidati = potencijalniKandidati
+                    .OrderByDescending(k => k.Prioritet)
+                    .ThenBy(k => k.DatumPrijave)
+                    .Select(k => k.ListaCekanjaId)
+                    .ToList();
+            }
 
             // Notificiraj do 3 najbolja kandidata
             var brojNotifikacija = Math.Min(3, rangiranKandidati.Count);
@@ -214,12 +245,20 @@ namespace eBarbershop.Services
                 var kandidatId = rangiranKandidati[i];
                 var kandidat = potencijalniKandidati.First(k => k.ListaCekanjaId == kandidatId);
 
-                await SendNotification(kandidat, termin);
-
-                // Dodaj kašnjenje između notifikacija da ne spamamo
-                if (i < brojNotifikacija - 1)
+                try
                 {
-                    await Task.Delay(5000); // 5 sekundi
+                    await SendNotification(kandidat, termin);
+
+                    // Dodaj kašnjenje između notifikacija da ne spamamo
+                    if (i < brojNotifikacija - 1)
+                    {
+                        await Task.Delay(5000); // 5 sekundi
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to send notification to candidate {kandidatId}: {ex.Message}");
+                    // Continue with other candidates
                 }
             }
 
@@ -269,7 +308,7 @@ namespace eBarbershop.Services
                 notifikacija.Termin.RezervacijaId = rezervacija.RezervacijaId;
 
                 // Ažuriraj listu čekanja
-                notifikacija.ListaCekanja.Status = 3; // Prihvacena
+                //notifikacija.ListaCekanja.Status = 3; // Prihvacena
 
                 // Otkaži ostale notifikacije za isti termin
                 var ostaleNotifikacije = await _context.NotifikacijaListeCekanja
@@ -311,12 +350,12 @@ namespace eBarbershop.Services
 
             // Također provjeri istekle stavke liste čekanja
             var istekleStavke = await _context.ListaCekanja
-                .Where(l => l.Status == 1 && l.DatumIsteka < DateTime.Now)
+                .Where(l => l.DatumIsteka < DateTime.Now)
                 .ToListAsync();
 
             foreach (var stavka in istekleStavke)
             {
-                stavka.Status = 4; // Istekla
+                //stavka.Status = 4; // Istekla
             }
 
             if (istekleNotifikacije.Any() || istekleStavke.Any())
@@ -328,29 +367,52 @@ namespace eBarbershop.Services
 
         public async Task OptimizeWaitingListOrder()
         {
-            var aktivneStavke = await _context.ListaCekanja
-                .Where(l => l.Status == 1)
-                .Include(l => l.Klijent)
-                .Include(l => l.Frizer)
-                .Include(l => l.Usluga)
-                .ToListAsync();
-
-            if (!aktivneStavke.Any()) return;
-
-            var modelStavke = _mapper.Map<List<Model.ListaCekanja>>(aktivneStavke);
-            var optimizovaneStavke = await _mlService.GetOptimalNotificationOrder(modelStavke);
-
-            // Ažuriraj prioritete
-            for (int i = 0; i < optimizovaneStavke.Count; i++)
+            try
             {
-                var dbStavka = aktivneStavke.First(s => s.ListaCekanjaId == optimizovaneStavke[i].ListaCekanjaId);
-                dbStavka.Prioritet = optimizovaneStavke[i].Prioritet;
-                dbStavka.MLSkor = optimizovaneStavke[i].MLSkor;
-            }
+                var aktivneStavke = await _context.ListaCekanja
+                    //.Where(l => l.Status == 1)
+                    .Include(l => l.Klijent)
+                    .Include(l => l.Frizer)
+                    .Include(l => l.Usluga)
+                    .ToListAsync();
 
-            await _context.SaveChangesAsync();
-            _logger.LogInformation($"Optimizovano {aktivneStavke.Count} stavki liste čekanja");
+                if (!aktivneStavke.Any()) return;
+
+                var modelStavke = _mapper.Map<List<Model.ListaCekanja>>(aktivneStavke);
+
+                List<Model.ListaCekanja> optimizovaneStavke;
+
+                try
+                {
+                    optimizovaneStavke = await _mlService.GetOptimalNotificationOrder(modelStavke);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"ML optimization failed, using fallback sorting: {ex.Message}");
+                    // Fallback to simple priority sorting
+                    optimizovaneStavke = modelStavke
+                        .OrderByDescending(s => s.Prioritet)
+                        .ThenBy(s => s.DatumPrijave)
+                        .ToList();
+                }
+
+                // Ažuriraj prioritete
+                for (int i = 0; i < optimizovaneStavke.Count; i++)
+                {
+                    var dbStavka = aktivneStavke.First(s => s.ListaCekanjaId == optimizovaneStavke[i].ListaCekanjaId);
+                    dbStavka.Prioritet = optimizovaneStavke[i].Prioritet;
+                    dbStavka.MLSkor = optimizovaneStavke[i].MLSkor;
+                }
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation($"Optimizovano {aktivneStavke.Count} stavki liste čekanja");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to optimize waiting list: {ex.Message}");
+            }
         }
+
 
         public async Task<List<Model.NotifikacijaListeCekanja>> GetPendingNotifications(int klijentId)
         {
@@ -376,11 +438,11 @@ namespace eBarbershop.Services
                 query = query.Where(l => l.FrizerId == frizerId.Value);
             }
 
-            var aktivneStavke = await query.CountAsync(l => l.Status == 1);
+            //var aktivneStavke = await query.CountAsync(l => l.Status == 1);
             var ukupnoNotifikacija = await _context.NotifikacijaListeCekanja.CountAsync();
 
             var prosjekCekanja = await query
-                .Where(l => l.Status == 3 || l.Status == 4) // Prihvacene ili istekle
+                //.Where(l => l.Status == 3 || l.Status == 4) // Prihvacene ili istekle
                 .AverageAsync(l => (double?)(l.DatumNotifikacije ?? DateTime.Now).Subtract(l.DatumPrijave).TotalDays) ?? 0;
 
             var stopaPrihvacanja = await _context.NotifikacijaListeCekanja
@@ -394,7 +456,7 @@ namespace eBarbershop.Services
                 {
                     Sat = g.Key,
                     BrojZahtjeva = g.Count(),
-                    PostotakPrihvacanja = g.Average(x => x.Status == 3 ? 1.0 : 0.0)
+                    //PostotakPrihvacanja = g.Average(x => x.Status == 3 ? 1.0 : 0.0)
                 })
                 .OrderByDescending(p => p.BrojZahtjeva)
                 .Take(5)
@@ -402,7 +464,7 @@ namespace eBarbershop.Services
 
             return new WaitingListStats
             {
-                TotalActivneStavke = aktivneStavke,
+                //TotalActivneStavke = aktivneStavke,
                 TotalNotifikacije = ukupnoNotifikacija,
                 ProsjekVrijemeCekanja = prosjekCekanja,
                 StopaPrihvacanja = stopaPrihvacanja,
@@ -428,7 +490,7 @@ namespace eBarbershop.Services
             };
 
             await _context.NotifikacijaListeCekanja.AddAsync(notifikacija);
-            kandidat.Status = 2; // Notificirana
+            //kandidat.Status = 2; // Notificirana
             kandidat.DatumNotifikacije = DateTime.Now;
             kandidat.NotifikacijaPoslana = true;
 
@@ -476,10 +538,10 @@ namespace eBarbershop.Services
                 query = query.Where(l => l.UslugaId == search.UslugaId.Value);
             }
 
-            if (search?.Status.HasValue == true)
-            {
-                query = query.Where(l => l.Status == (int)search.Status.Value);
-            }
+            //if (search?.Status.HasValue == true)
+            //{
+            //    //query = query.Where(l => l.Status == (int)search.Status.Value);
+            //}
 
             if (search?.DatumOd.HasValue == true)
             {

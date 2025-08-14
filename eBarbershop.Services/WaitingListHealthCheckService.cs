@@ -25,7 +25,7 @@ namespace eBarbershop.Services
             try
             {
                 // Provjeri broj aktivnih stavki liste čekanja
-                var activeItems = await _context.ListaCekanja.CountAsync(l => l.Status == 1, cancellationToken);
+                //var activeItems = await _context.ListaCekanja.CountAsync(l => l.Status == 1, cancellationToken);
 
                 // Provjeri broj neodgovorenih notifikacija
                 var pendingNotifications = await _context.NotifikacijaListeCekanja
@@ -33,12 +33,14 @@ namespace eBarbershop.Services
 
                 var data = new Dictionary<string, object>
                 {
-                    { "ActiveWaitingListItems", activeItems },
+                    //{ "ActiveWaitingListItems", activeItems },
                     { "PendingNotifications", pendingNotifications },
                     { "Timestamp", DateTime.UtcNow }
                 };
 
-                if (activeItems > 1000 || pendingNotifications > 100)
+                if (
+                    //activeItems > 1000 ||
+                    pendingNotifications > 100)
                 {
                     return HealthCheckResult.Degraded(
                         "Visok broj aktivnih stavki ili notifikacija",

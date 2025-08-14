@@ -354,7 +354,7 @@ public partial class EBarbershop1Context : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.Property(e => e.Napomena).HasMaxLength(500);
-            entity.Property(e => e.Status).HasDefaultValue(1);
+            //entity.Property(e => e.Status).HasDefaultValue(1);
             entity.Property(e => e.DatumPrijave).HasDefaultValueSql("GETDATE()");
         });
 

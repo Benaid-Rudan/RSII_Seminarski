@@ -1,4 +1,5 @@
-﻿using eBarbershop.Model;
+﻿using System.Security.Claims;
+using eBarbershop.Model;
 using eBarbershop.Model.Requests;
 using eBarbershop.Model.SearchObjects;
 using eBarbershop.Services;
@@ -13,7 +14,7 @@ namespace eBarbershop.Controllers
     public class ListaCekanjaController : BaseCRUDController<ListaCekanja, ListaCekanjaSearchObject, ListaCekanjaInsertRequest, ListaCekanjaUpdateRequest>
     {
         private readonly IListaCekanjaService _service;
-
+        private readonly ICurrentUserService _currentUserService;
         public ListaCekanjaController(IListaCekanjaService service) : base(service)
         {
             _service = service;
@@ -54,7 +55,8 @@ namespace eBarbershop.Controllers
         [HttpGet("my-waiting-list")]
         public async Task<ActionResult<List<ListaCekanja>>> GetMyWaitingList()
         {
-            var klijentId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            // Use NameIdentifier instead of "UserId"
+            var klijentId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             var result = await _service.GetMyWaitingList(klijentId);
             return Ok(result);
         }

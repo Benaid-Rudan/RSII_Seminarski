@@ -113,8 +113,8 @@ class _MyWaitingListScreenState extends State<MyWaitingListScreen> {
           children: [
             Text('Usluga: ${item.usluga?.naziv ?? ''}'),
             Text('Datum: ${dateFormat.format(item.zeljeniDatum!)}'),
-            if (item.zeljeniDatum != null)
-              Text('Vrijeme: ${timeFormat.format(item.zeljeniDatum!)}'),
+            if (item.zeljenoVrijeme != null)
+            Text('Vrijeme: ${item.zeljenoVrijeme!.substring(0, 5)}'),
           ],
         ),
         trailing: IconButton(

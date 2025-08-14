@@ -119,20 +119,20 @@ namespace eBarbershop.Services
 
             var totalEntries = await query.CountAsync();
 
-            var completedEntries = query.Where(w => w.Status != 1); // Ne aktivne
+            //var completedEntries = query.Where(w => w.Status != 1); // Ne aktivne
 
-            var averageWaitTime = await completedEntries
-                .Where(w => w.DatumNotifikacije.HasValue)
-                .AverageAsync(w => (double?)(w.DatumNotifikacije.Value - w.DatumPrijave).TotalDays) ?? 0;
+            //var averageWaitTime = await completedEntries
+            //    .Where(w => w.DatumNotifikacije.HasValue)
+            //    .AverageAsync(w => (double?)(w.DatumNotifikacije.Value - w.DatumPrijave).TotalDays) ?? 0;
 
-            var acceptanceRate = await completedEntries
-                .AverageAsync(w => w.Status == 3 ? 1.0 : 0.0); // Status 3 = Prihvacena
+            //var acceptanceRate = await completedEntries
+            //    .AverageAsync(w => w.Status == 3 ? 1.0 : 0.0); // Status 3 = Prihvacena
 
-            var expiredRate = await completedEntries
-                .AverageAsync(w => w.Status == 4 ? 1.0 : 0.0); // Status 4 = Istekla
+            //var expiredRate = await completedEntries
+            //    .AverageAsync(w => w.Status == 4 ? 1.0 : 0.0); // Status 4 = Istekla
 
-            var cancellationRate = await completedEntries
-                .AverageAsync(w => w.Status == 5 ? 1.0 : 0.0); // Status 5 = Otkazana
+            //var cancellationRate = await completedEntries
+            //    .AverageAsync(w => w.Status == 5 ? 1.0 : 0.0); // Status 5 = Otkazana
 
             // Dnevne statistike
             var dailyStats = await query
@@ -141,9 +141,9 @@ namespace eBarbershop.Services
                 {
                     Date = g.Key,
                     NewEntries = g.Count(),
-                    Notifications = g.Count(w => w.Status >= 2),
-                    Acceptances = g.Count(w => w.Status == 3),
-                    Expirations = g.Count(w => w.Status == 4)
+                    //Notifications = g.Count(w => w.Status >= 2),
+                    //Acceptances = g.Count(w => w.Status == 3),
+                    //Expirations = g.Count(w => w.Status == 4)
                 })
                 .OrderBy(d => d.Date)
                 .ToListAsync();
@@ -157,7 +157,7 @@ namespace eBarbershop.Services
                     UslugaId = g.Key.UslugaId,
                     NazivUsluge = g.Key.Naziv,
                     BrojZahtjeva = g.Count(),
-                    PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
+                    //PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
                     ProsjekVrijemeCekanja = g.Where(w => w.DatumNotifikacije.HasValue)
                         .Average(w => (double?)(w.DatumNotifikacije.Value - w.DatumPrijave).TotalDays) ?? 0
                 })
@@ -174,7 +174,7 @@ namespace eBarbershop.Services
                     FrizerId = g.Key.FrizerId,
                     ImeFrizera = g.Key.Ime + " " + g.Key.Prezime,
                     BrojZahtjeva = g.Count(),
-                    PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
+                    //PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
                     ProsjekVrijemeOdziva = g.Where(w => w.DatumNotifikacije.HasValue)
                         .Average(w => (double?)(w.DatumNotifikacije.Value - w.DatumPrijave).TotalHours) ?? 0,
                     MLSkorTocnost = g.Average(w => w.MLSkor)
@@ -185,10 +185,10 @@ namespace eBarbershop.Services
             return new WaitingListAnalytics
             {
                 TotalWaitingListEntries = totalEntries,
-                AverageWaitTime = averageWaitTime,
-                AcceptanceRate = acceptanceRate,
-                ExpiredRate = expiredRate,
-                CancellationRate = cancellationRate,
+                //AverageWaitTime = averageWaitTime,
+                //AcceptanceRate = acceptanceRate,
+                //ExpiredRate = expiredRate,
+                //CancellationRate = cancellationRate,
                 DailyStats = dailyStats,
                 MostRequestedServices = servicePopularity,
                 BarberEfficiencyStats = barberEfficiency
@@ -213,7 +213,7 @@ namespace eBarbershop.Services
                     Sat = g.Key.Sat,
                     DanUNedelji = g.Key.Dan,
                     BrojZahtjeva = g.Count(),
-                    PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
+                    //PostotakPrihvacanja = g.Average(w => w.Status == 3 ? 1.0 : 0.0),
                     ProsjekVrijemeCekanja = g.Where(w => w.DatumNotifikacije.HasValue)
                         .Average(w => (double?)(w.DatumNotifikacije.Value - w.DatumPrijave).TotalDays) ?? 0
                 })
@@ -237,8 +237,8 @@ namespace eBarbershop.Services
                 .Where(w => w.DatumNotifikacije.HasValue)
                 .Average(w => (w.DatumNotifikacije.Value - w.DatumPrijave).TotalDays);
 
-            var acceptanceRate = customerWaitingList
-                .Average(w => w.Status == 3 ? 1.0 : 0.0);
+            //var acceptanceRate = customerWaitingList
+            //    .Average(w => w.Status == 3 ? 1.0 : 0.0);
 
             var preferredTimes = customerWaitingList
                 .Where(w => w.ZeljenoVrijeme.HasValue)
@@ -268,7 +268,7 @@ namespace eBarbershop.Services
             {
                 KlijentId = klijentId,
                 ProsjekVrijemeCekanja = avgWaitTime,
-                PostotakPrihvacanja = acceptanceRate,
+                //PostotakPrihvacanja = acceptanceRate,
                 OmiljeniTermini = preferredTimes,
                 OmiljeniFrizeri = preferredBarbers,
                 FleksibilnostSkala = flexibility

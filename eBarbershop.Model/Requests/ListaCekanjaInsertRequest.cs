@@ -31,14 +31,14 @@ namespace eBarbershop.Model.Requests
         public string Napomena { get; set; }
 
         // Metoda ili property za parsiranje ZeljenoVrijeme u TimeSpan?
-        public TimeSpan? ParsedZeljenoVrijeme
-        {
-            get
-            {
-                if (TimeSpan.TryParse(ZeljenoVrijeme, out var ts))
-                    return ts;
-                return null;
-            }
-        }
+        //public TimeSpan? ParsedZeljenoVrijeme
+        //{
+        //    get
+        //    {
+        //        if (TimeSpan.TryParse(ZeljenoVrijeme, out var ts))
+        //            return ts;
+        //        return null;
+        //    }
+        //}
     }
 }

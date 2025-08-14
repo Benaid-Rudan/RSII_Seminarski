@@ -19,6 +19,7 @@ ListaCekanja _$ListaCekanjaFromJson(Map<String, dynamic> json) => ListaCekanja(
       json['zeljeniDatum'] == null
           ? null
           : DateTime.parse(json['zeljeniDatum'] as String),
+  zeljenoVrijeme: json['zeljenoVrijeme'] as String?,
   datumIsteka:
       json['datumIsteka'] == null
           ? null
@@ -54,6 +55,7 @@ Map<String, dynamic> _$ListaCekanjaToJson(ListaCekanja instance) =>
       'uslugaId': instance.uslugaId,
       'datumPrijave': instance.datumPrijave?.toIso8601String(),
       'zeljeniDatum': instance.zeljeniDatum?.toIso8601String(),
+      'zeljenoVrijeme': instance.zeljenoVrijeme,
       'datumIsteka': instance.datumIsteka?.toIso8601String(),
       'napomena': instance.napomena,
       'status': _$StatusCekanjaEnumMap[instance.status],
@@ -81,13 +83,9 @@ ListaCekanjaInsertRequest _$ListaCekanjaInsertRequestFromJson(
   klijentId: (json['klijentId'] as num).toInt(),
   uslugaId: (json['uslugaId'] as num).toInt(),
   zeljeniDatum: DateTime.parse(json['zeljeniDatum'] as String),
-  zeljenoVrijeme: const TimeOfDayConverter().fromJson(
-    json['zeljenoVrijeme'] as String?,
-  ),
+  zeljenoVrijeme: json['zeljenoVrijeme'] as String,
   napomena: json['napomena'] as String?,
   daniDoIsteka: (json['daniDoIsteka'] as num?)?.toInt() ?? 7,
-  klijentPrioritet: (json['klijentPrioritet'] as num?)?.toInt(),
-  klijentHistorija: json['klijentHistorija'] as String?,
 );
 
 Map<String, dynamic> _$ListaCekanjaInsertRequestToJson(
@@ -97,9 +95,7 @@ Map<String, dynamic> _$ListaCekanjaInsertRequestToJson(
   'klijentId': instance.klijentId,
   'uslugaId': instance.uslugaId,
   'zeljeniDatum': instance.zeljeniDatum.toIso8601String(),
-  'zeljenoVrijeme': const TimeOfDayConverter().toJson(instance.zeljenoVrijeme),
+  'zeljenoVrijeme': instance.zeljenoVrijeme,
   'napomena': instance.napomena,
   'daniDoIsteka': instance.daniDoIsteka,
-  'klijentPrioritet': instance.klijentPrioritet,
-  'klijentHistorija': instance.klijentHistorija,
 };

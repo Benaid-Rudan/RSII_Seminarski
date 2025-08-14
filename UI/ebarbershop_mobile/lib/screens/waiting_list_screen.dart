@@ -82,15 +82,13 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        leading: Icon(Icons.access_time, color: _getStatusColor(item.status)),
         title: Text('${item.usluga?.naziv ?? 'Usluga'} kod ${item.frizer?.ime ?? 'Frizer'}'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Datum: ${DateFormat('dd.MM.yyyy').format(item.zeljeniDatum!)}'),
             if (item.zeljeniDatum != null)
-              Text('Vrijeme: ${DateFormat('HH:mm').format(item.zeljeniDatum!)}'),
-              Text('Status: ${_getStatusText(item.status)}'),
+              Text('Vrijeme: $item.zeljenoVrijeme'),
             Text('Prioritet: ${item.prioritet}/100'),
           ],
         ),
@@ -102,37 +100,6 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
     );
   }
 
-  Color _getStatusColor(StatusCekanja? status) {
-    switch (status) {
-      case StatusCekanja.Aktivna:
-        return Colors.blue;
-      case StatusCekanja.Notificirana:
-        return Colors.orange;
-      case StatusCekanja.Prihvacena:
-        return Colors.green;
-      case StatusCekanja.Istekla:
-        return Colors.grey;
-      case StatusCekanja.Otkazana:
-        return Colors.red;
-      default:
-        return Colors.black;
-    }
-  }
 
-  String _getStatusText(StatusCekanja? status) {
-    switch (status) {
-      case StatusCekanja.Aktivna:
-        return 'Aktivna';
-      case StatusCekanja.Notificirana:
-        return 'Notificirana';
-      case StatusCekanja.Prihvacena:
-        return 'Prihvaćena';
-      case StatusCekanja.Istekla:
-        return 'Istekla';
-      case StatusCekanja.Otkazana:
-        return 'Otkazana';
-      default:
-        return 'Nepoznat status';
-    }
-  }
+  
 }

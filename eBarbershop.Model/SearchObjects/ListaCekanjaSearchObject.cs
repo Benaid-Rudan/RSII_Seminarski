@@ -7,7 +7,7 @@ namespace eBarbershop.Model.SearchObjects
         public int? KlijentId { get; set; }
         public int? FrizerId { get; set; }
         public int? UslugaId { get; set; }
-        public StatusCekanja? Status { get; set; }
+        //public StatusCekanja? Status { get; set; }
         public DateTime? DatumOd { get; set; }
         public DateTime? DatumDo { get; set; }
         public bool? IncludeKlijent { get; set; }

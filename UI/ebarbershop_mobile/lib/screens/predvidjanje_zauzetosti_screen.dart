@@ -10,12 +10,13 @@ import 'package:provider/provider.dart';
 class PredvidjanjeZauzetostiScreen extends StatefulWidget {
   final Usluga usluga;
   final Korisnik frizer;
-
+  final DateTime selectedDate;
   const PredvidjanjeZauzetostiScreen({
     Key? key,
     required this.usluga,
     required this.frizer,
-  }) : super(key: key);
+    required this.selectedDate
+      }) : super(key: key);
 
   @override
   State<PredvidjanjeZauzetostiScreen> createState() =>
@@ -41,7 +42,8 @@ class _PredvidjanjeZauzetostiScreenState
     try {
       final prediction = await _provider.predvidiZauzetostZaFrizera(
         widget.frizer.korisnikId!,
-        DateTime.now(),
+        widget.selectedDate,
+        
       );
 
       if (mounted) {
@@ -110,7 +112,7 @@ Widget _buildResult() {
           ),
           SizedBox(height: 12),
           Text(
-            'Datum: ${DateFormat('dd.MM.yyyy').format(DateTime.now())}',
+            'Datum: ${DateFormat('dd.MM.yyyy').format(widget.selectedDate)}',
             style: TextStyle(
               color: Colors.grey[300],
             ),

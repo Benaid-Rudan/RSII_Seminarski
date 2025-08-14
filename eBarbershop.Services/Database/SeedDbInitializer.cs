@@ -632,7 +632,7 @@ public static class SeedDbInitializer
                 ZeljenoVrijeme = new TimeSpan(10, 0, 0),
                 Prioritet = 75,
                 DatumPrijave = DateTime.Now.AddHours(-2),
-                Status = 1, // Aktivna
+                //Status = 1, // Aktivna
                 DatumIsteka = DateTime.Now.AddDays(7),
                 MLSkor = 0.85,
                 NotifikacijaPoslana = false

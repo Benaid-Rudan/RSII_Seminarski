@@ -31,6 +31,7 @@ class ListaCekanja {
   int? uslugaId;
   DateTime? datumPrijave;
   DateTime? zeljeniDatum;
+  String? zeljenoVrijeme;
   DateTime? datumIsteka;
   String? napomena;
   StatusCekanja? status;
@@ -49,6 +50,7 @@ class ListaCekanja {
     this.uslugaId,
     this.datumPrijave,
     this.zeljeniDatum,
+    this.zeljenoVrijeme,
     this.datumIsteka,
     this.napomena,
     this.status,
@@ -83,36 +85,52 @@ class TimeOfDayConverter implements JsonConverter<TimeOfDay?, String?> {
     return '${object.hour.toString().padLeft(2, '0')}:${object.minute.toString().padLeft(2, '0')}';
   }
 }
-
 @JsonSerializable()
 class ListaCekanjaInsertRequest {
-  int frizerId;
-  int klijentId;
+  final int frizerId;
+  final int klijentId;
+  final int uslugaId;
+  final DateTime zeljeniDatum;
+  
+  @JsonKey(name: 'zeljenoVrijeme')
+  final String zeljenoVrijeme; // This should be in "HH:mm:ss" format
+  
+  final String? napomena;
+  final int daniDoIsteka;
 
-  int uslugaId;
-  DateTime zeljeniDatum;
-
-  @TimeOfDayConverter()
-  TimeOfDay? zeljenoVrijeme;
-
-  String? napomena;
-  int daniDoIsteka;
- int? klijentPrioritet;
-   String? klijentHistorija;
   ListaCekanjaInsertRequest({
     required this.frizerId,
     required this.klijentId,
     required this.uslugaId,
     required this.zeljeniDatum,
-    this.zeljenoVrijeme,
+    required this.zeljenoVrijeme,
     this.napomena,
     this.daniDoIsteka = 7,
-    this.klijentPrioritet,
-    this.klijentHistorija,
   });
 
   factory ListaCekanjaInsertRequest.fromJson(Map<String, dynamic> json) =>
       _$ListaCekanjaInsertRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$ListaCekanjaInsertRequestToJson(this);
+
+  // Helper method to create from TimeOfDay
+  factory ListaCekanjaInsertRequest.fromTimeOfDay({
+    required int frizerId,
+    required int klijentId,
+    required int uslugaId,
+    required DateTime zeljeniDatum,
+    required TimeOfDay time,
+    String? napomena,
+    int daniDoIsteka = 7,
+  }) {
+    return ListaCekanjaInsertRequest(
+      frizerId: frizerId,
+      klijentId: klijentId,
+      uslugaId: uslugaId,
+      zeljeniDatum: zeljeniDatum,
+      zeljenoVrijeme: '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00',
+      napomena: napomena,
+      daniDoIsteka: daniDoIsteka,
+    );
+  }
 }

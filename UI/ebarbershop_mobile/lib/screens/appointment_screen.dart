@@ -96,7 +96,7 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
       );
     }
   }
-  Future<void> _joinWaitingList() async {
+Future<void> _joinWaitingList() async {
   if (widget.klijent.korisnikId == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Morate biti prijavljeni da biste se pridružili listi čekanja')),
@@ -115,55 +115,32 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
     return;
   }
 
-  // Show time picker if no time slot is selected
-  TimeOfDay? selectedTime;
+  // Get selected time - either from selectedTimeSlot or show time picker
+  TimeOfDay selectedTime;
   if (selectedTimeSlot != null) {
     selectedTime = TimeOfDay.fromDateTime(selectedTimeSlot!.time);
   } else {
-    selectedTime = await showTimePicker(
+    final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (selectedTime == null) return;
+    if (pickedTime == null) return; // User cancelled
+    selectedTime = pickedTime;
   }
 
-  try {
+   try {
     final listaCekanjaProvider = context.read<ListaCekanjaProvider>();
     
-    // 1. First check for existing waiting list entries
-    final existingEntries = await listaCekanjaProvider.getByFrizerAndDate(
+    final request = ListaCekanjaInsertRequest.fromTimeOfDay(
       frizerId: widget.employee.korisnikId!,
-      datum: widget.selectedDate,
-    );
-
-    // 2. Check if user already has an entry for this time
-    final timeString = "${selectedTime.hour.toString().padLeft(2,'0')}:${selectedTime.minute.toString().padLeft(2,'0')}:00";
-    final hasExisting = existingEntries.any((entry) => 
-      entry.klijentId == widget.klijent.korisnikId &&
-      entry.zeljeniDatum == timeString
-    );
-
-    if (hasExisting) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Već ste na listi čekanja za ovaj termin'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    // 3. Create new waiting list entry
-    final request = ListaCekanjaInsertRequest(
-      frizerId: widget.employee.korisnikId!,
-      klijentId: Authorization.userId!,
+      klijentId: widget.klijent.korisnikId!,
       uslugaId: widget.service.uslugaId!,
       zeljeniDatum: DateTime(
         zeljeniDatum.year,
         zeljeniDatum.month,
         zeljeniDatum.day,
       ),
-      zeljenoVrijeme: selectedTime,
+      time: selectedTime, // This is the TimeOfDay object
       napomena: 'Želim termin u ${selectedTime.format(context)}',
       daniDoIsteka: 7,
     );
@@ -182,7 +159,6 @@ class _AppointmentTimeScreenState extends State<AppointmentTimeScreen> {
   } catch (e) {
     debugPrint("Full error: $e");
     
-    // Handle specific API error message
     String errorMessage = 'Greška pri pridruživanju listi čekanja';
     if (e.toString().contains('Već ste na listi čekanja')) {
       errorMessage = 'Već ste na listi čekanja za ovaj termin';
@@ -320,6 +296,7 @@ Widget _buildWaitingListButton() {
         builder: (context) => zauzetost.PredvidjanjeZauzetostiScreen(
           frizer: widget.employee,
           usluga: widget.service,
+          selectedDate: widget.selectedDate
         ),
       ),
     );

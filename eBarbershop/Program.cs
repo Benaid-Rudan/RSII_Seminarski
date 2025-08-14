@@ -31,7 +31,7 @@ builder.Services.AddScoped<IWaitingListMLService, WaitingListMLService>();
 builder.Services.AddScoped<IListaCekanjaService, ListaCekanjaService>();
 builder.Services.AddScoped<IWaitingListAnalyticsService, WaitingListAnalyticsService>();
 builder.Services.AddWaitingListServices(); // Koristiti extension metodu
-builder.Services.AddScoped<IWaitingListNotificationService, WaitingListNotificationService>();
+//builder.Services.AddScoped<IWaitingListNotificationService, WaitingListNotificationService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()

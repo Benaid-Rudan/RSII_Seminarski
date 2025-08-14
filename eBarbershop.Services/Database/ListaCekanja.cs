@@ -21,7 +21,7 @@ namespace eBarbershop.Services.Database
         public TimeSpan? ZeljenoVrijeme { get; set; }
         public int Prioritet { get; set; }
         public DateTime DatumPrijave { get; set; }
-        public int Status { get; set; } // 1=Aktivna, 2=Notificirana, 3=Prihvacena, 4=Istekla, 5=Otkazana
+        //public int Status { get; set; } // 1=Aktivna, 2=Notificirana, 3=Prihvacena, 4=Istekla, 5=Otkazana
         public DateTime? DatumNotifikacije { get; set; }
         public DateTime? DatumIsteka { get; set; }
         public string Napomena { get; set; }
