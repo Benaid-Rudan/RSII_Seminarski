@@ -314,12 +314,12 @@ public partial class EBarbershop1Context : DbContext
             entity.HasOne(e => e.Klijent)
                 .WithMany()
                 .HasForeignKey(e => e.KlijentId)
-                .OnDelete(DeleteBehavior.Restrict); // ❗️ Izbjegni kaskadu
+                .OnDelete(DeleteBehavior.Restrict); 
 
             entity.HasOne(e => e.Korisnik)
                 .WithMany()
                 .HasForeignKey(e => e.KorisnikId)
-                .OnDelete(DeleteBehavior.Cascade); // može ostati kaskadno
+                .OnDelete(DeleteBehavior.Cascade); 
 
             entity.HasOne(e => e.Usluga)
                 .WithMany()
@@ -330,31 +330,25 @@ public partial class EBarbershop1Context : DbContext
         modelBuilder.Entity<ZauzetostPoSatu>(entity =>
         {
                entity.HasOne(z => z.Predvidjanje)
-        .WithMany(p => p.ZauzetostPoSatima)
-        .HasForeignKey(z => z.PredvidjanjeId);
-
+                .WithMany(p => p.ZauzetostPoSatima)
+                .HasForeignKey(z => z.PredvidjanjeId);
         });
         modelBuilder.Entity<ListaCekanja>(entity =>
         {
             entity.HasKey(e => e.ListaCekanjaId);
-
             entity.HasOne(e => e.Klijent)
                 .WithMany()
                 .HasForeignKey(e => e.KlijentId)
                 .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasOne(e => e.Frizer)
                 .WithMany()
                 .HasForeignKey(e => e.FrizerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasOne(e => e.Usluga)
                 .WithMany()
                 .HasForeignKey(e => e.UslugaId)
                 .OnDelete(DeleteBehavior.Restrict);
-
             entity.Property(e => e.Napomena).HasMaxLength(500);
-            //entity.Property(e => e.Status).HasDefaultValue(1);
             entity.Property(e => e.DatumPrijave).HasDefaultValueSql("GETDATE()");
         });
 
@@ -375,6 +369,8 @@ public partial class EBarbershop1Context : DbContext
             entity.Property(e => e.PorukaNofitikacije).HasMaxLength(1000);
             entity.Property(e => e.DatumNotifikacije).HasDefaultValueSql("GETDATE()");
         });
+        DbSeed.Seed(modelBuilder);
+
         OnModelCreatingPartial(modelBuilder);
     }
 

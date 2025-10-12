@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace eBarbershop.Services
 {
-    public interface IListaCekanjaService : ICRUDService<ListaCekanja, ListaCekanjaSearchObject, ListaCekanjaInsertRequest, ListaCekanjaUpdateRequest>
+    public interface IListaCekanjaService : ICRUDService<ListaCekanja,
+        ListaCekanjaSearchObject, ListaCekanjaInsertRequest, 
+        ListaCekanjaUpdateRequest>
     {
         Task<ListaCekanja> JoinWaitingList(ListaCekanjaInsertRequest request);
         Task<bool> RemoveFromWaitingList(int listaCekanjaId);

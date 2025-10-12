@@ -14,11 +14,11 @@ namespace eBarbershop.Services.Database
         public int KlijentId { get; set; }
         public Korisnik Klijent { get; set; }
         public DateTime PreporuceniTermin { get; set; }
-        public int KorisnikId { get; set; } // frizer
+        public int KorisnikId { get; set; } 
         public Korisnik Korisnik { get; set; }
         public int UslugaId { get; set; }
         public Usluga Usluga { get; set; }
-        public double SkorPovjerenja { get; set; } // ML confidence score
+        public double SkorPovjerenja { get; set; } 
         public string RazlogPreporuke { get; set; }
         public bool IsAccepted { get; set; }
     }

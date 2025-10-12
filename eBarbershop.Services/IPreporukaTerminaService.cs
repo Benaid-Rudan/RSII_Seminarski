@@ -9,7 +9,9 @@ using eBarbershop.Model.SearchObjects;
 
 namespace eBarbershop.Services
 {
-    public interface IPreporukaTerminaService : ICRUDService<PreporukaTermina, PreporukaTerminaSearchObject, PreporukaTerminaInsertRequest, PreporukaTerminaUpdateRequest>
+    public interface IPreporukaTerminaService : ICRUDService<PreporukaTermina, 
+        PreporukaTerminaSearchObject, PreporukaTerminaInsertRequest,
+        PreporukaTerminaUpdateRequest>
     {
         Task<List<PreporukaTermina>> GenerirajPreporuke(int klijentId, int uslugaId);
         Task<bool> PrihvatiPreporuku(int preporukaId);

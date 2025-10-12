@@ -132,4 +132,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<EBarbershop1Context>();
+//    DbSeed.Seed(db);
+//}
 app.Run();

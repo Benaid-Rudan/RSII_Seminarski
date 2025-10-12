@@ -9,7 +9,10 @@ using eBarbershop.Model.SearchObjects;
 
 namespace eBarbershop.Services
 {
-    public interface IPredvidjanjeZauzetostiService : ICRUDService<PredvidjanjeZauzetosti, PredvidjanjeZauzetostiSearchObject, PredvidjanjeZauzetostiInsertRequest, PredvidjanjeZauzetostiUpdateRequest>
+    public interface IPredvidjanjeZauzetostiService : ICRUDService<PredvidjanjeZauzetosti,
+        PredvidjanjeZauzetostiSearchObject, 
+        PredvidjanjeZauzetostiInsertRequest, 
+        PredvidjanjeZauzetostiUpdateRequest>
     {
         Task<eBarbershop.Model.PredvidjanjeZauzetosti> PredvidiZauzetost(int korisnikId, DateTime datum);
 
