@@ -47,13 +47,27 @@ class _PreporukeTerminaScreenState extends State<PreporukeTerminaScreen> {
         currentUserId, 
         widget.usluga.uslugaId!
       );
-
-      if (mounted) {
-        setState(() {
-          _preporuke = preporuke;
-          _isLoading = false;
-        });
+      
+      final now = DateTime.now();
+      final filteredPreporuke = preporuke.where((p) {
+        final termin = p.preporuceniTermin;
+        return termin != null &&
+              termin.isAfter(now) &&
+              termin.isBefore(now.add(Duration(days: 10)));
+      }).toList();
+      final uniquePreporuke = <DateTime, PreporukaTermina>{};
+      for (var p in filteredPreporuke) {
+        if (p.preporuceniTermin != null) {
+          uniquePreporuke[p.preporuceniTermin!] = p;
+        }
       }
+final finalPreporuke = uniquePreporuke.values.toList();
+        if (mounted) {
+          setState(() {
+            _preporuke = finalPreporuke;
+            _isLoading = false;
+          });
+        }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -235,11 +249,11 @@ class _PreporukeTerminaScreenState extends State<PreporukeTerminaScreen> {
     final String weekday = _getWeekdayName(date.weekday);
     
     // Confidence score color
-    Color scoreColor = preporuka.skorPovjerenja! > 0.8 
-        ? Colors.green 
-        : preporuka.skorPovjerenja! > 0.6 
-            ? Colors.orange 
-            : Colors.red;
+    // Color scoreColor = preporuka.skorPovjerenja! > 0.8 
+    //     ? Colors.green 
+    //     : preporuka.skorPovjerenja! > 0.6 
+    //         ? Colors.orange 
+    //         : Colors.red;
 
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -278,21 +292,7 @@ class _PreporukeTerminaScreenState extends State<PreporukeTerminaScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: scoreColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: scoreColor),
-                  ),
-                  child: Text(
-                    '${(preporuka.skorPovjerenja! * 100).round()}%',
-                    style: TextStyle(
-                      color: scoreColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                
               ],
             ),
             

@@ -595,29 +595,168 @@ public static class SeedDbInitializer
 
         var appointments = new Rezervacija[]
         {
-            new Rezervacija
+                new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 8, 24),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[0].UslugaId,
+            Termins = new List<Termin>
             {
-                DatumRezervacije = DateTime.Now.AddDays(2),
-                KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
-                KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
-                UslugaId = services.Single(s => s.Naziv == "Šišanje i brijanje").UslugaId,
-                Termins = new List<Termin>
+                new Termin
                 {
-                    new Termin
-                    {
-                        Vrijeme = DateTime.Now.AddDays(2).AddHours(10),
-                        isBooked = true,
-                        KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
-                        KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
-                    }
+                    Vrijeme = new DateTime(2025, 8, 24, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
                 }
             }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 8, 31),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[1 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 8, 31, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 9, 7),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[2 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 9, 7, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 9, 14),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[0].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 9, 14, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 9, 21),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[1 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 9, 21, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 9, 28),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[2 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 9, 28, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 10, 5),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[0].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 10, 5, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 10, 12),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "klijent").KorisnikId,
+            UslugaId = services[1 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 10, 12, 10, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "klijent").KorisnikId
+                }
+            }
+        },
+
+        new Rezervacija
+        {
+            DatumRezervacije = new DateTime(2025, 10, 12),
+            KorisnikId = users.Single(u => u.Username == "frizer").KorisnikId,
+            KlijentId = users.Single(u => u.Username == "admin").KorisnikId,
+            UslugaId = services[1 % services.Length].UslugaId,
+            Termins = new List<Termin>
+            {
+                new Termin
+                {
+                    Vrijeme = new DateTime(2025, 10, 12, 12, 0, 0),
+                    isBooked = true,
+                    KorisnikID = users.Single(u => u.Username == "frizer").KorisnikId,
+                    KlijentId = users.Single(u => u.Username == "admin").KorisnikId
+                }
+            }
+        }
         };
 
         foreach (var a in appointments)
         {
             context.Rezervacija.Add(a);
         }
+
+
 
         if (!context.ListaCekanja.Any())
         {
@@ -643,6 +782,9 @@ public static class SeedDbInitializer
             context.ListaCekanja.AddRange(testWaitingList);
             context.SaveChanges();
         }
+
+
+
         context.SaveChanges();
     }
 

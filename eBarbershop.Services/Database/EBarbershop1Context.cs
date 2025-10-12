@@ -369,7 +369,6 @@ public partial class EBarbershop1Context : DbContext
             entity.Property(e => e.PorukaNofitikacije).HasMaxLength(1000);
             entity.Property(e => e.DatumNotifikacije).HasDefaultValueSql("GETDATE()");
         });
-        DbSeed.Seed(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
     }
